@@ -6,7 +6,7 @@ import time, ctypes
 IDE_LIST=('Visual Studio Code', 'Microsoft Visual Studio')
 IDE_REPR=('VS Code', 'VS')
 
-cur=''
+cur='others'
 
 def wname(s):
     for i in range(len(IDE_LIST)):
@@ -14,18 +14,17 @@ def wname(s):
             return IDE_REPR[i]
     return 'others'
 
-def currentWindow():    #스레드 함수
-    global cur
+def currentWindow(receiver):    #스레드 함수
     lib=ctypes.windll.LoadLibrary('user32.dll')
     while True:
         hwnd = lib.GetForegroundWindow()
         buffer = ctypes.create_unicode_buffer(255)
         lib.GetWindowTextW(hwnd, buffer, ctypes.sizeof(buffer))
         wind = wname(buffer.value)
-        if wind != cur:
-            cur = wind
+        if wind != receiver.activeWindow.text:
+            receiver.activeWindow.setText(wind)
             # print(cur)
-        time.sleep(1)   # 갱신 시간 수
+        time.sleep(0.2)   # 갱신 시간 수
 
 if __name__ == '__main__':
     currentWindow()

@@ -2,12 +2,13 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import sys, os
+import sys, os, threading
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('..'))))
 
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
 from PyQt5 import uic
+import procs.wind as wind
 
 form_class = uic.loadUiType("prototype.ui")[0]
 
@@ -51,6 +52,9 @@ class MyApp(QMainWindow, form_class):
         self.dragging_threshould = 5
         self.__mousePressPos = None
         self.__mouseMovePos = None
+
+        # active window
+        threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
         
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
@@ -85,6 +89,7 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
+        # 확인된 문제: 버튼에서 드래그를 시작하면 크래시
         if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
             globalPos = event.globalPos()
             moved = globalPos - self.__mousePressPos
