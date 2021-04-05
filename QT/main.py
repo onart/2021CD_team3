@@ -11,12 +11,26 @@ from PyQt5 import uic
 import procs.wind as wind
 
 form_class = uic.loadUiType("prototype.ui")[0]
+child_class = uic.loadUiType("child.ui")[0]
+
+
+class AnotherWindow(QMainWindow, child_class):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+
+
 
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
         super().__init__()
+
+        self.window_1 = None
+
         self.setupUi(self)
+        self.button_for_newtab.clicked.connect(self.new_window)
         self.NewWindow.clicked.connect(self.lstadd)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(lambda: QtGui.qApp.exit())
@@ -28,7 +42,7 @@ class MyApp(QMainWindow, form_class):
         # button qss
         self.textButtons=(
             self.NewWindow,
-            # self.voice,
+            # self.voice
             self.termButton,
             )
 
@@ -55,7 +69,11 @@ class MyApp(QMainWindow, form_class):
 
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
-        
+
+    def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
+        if(self.window_1 == None):
+            self.window_1 = AnotherWindow()
+        self.window_1.show()
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
         self.voice.setText(str(self.recording))
