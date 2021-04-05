@@ -9,15 +9,28 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
 from PyQt5 import uic
 import procs.wind as wind
-import traceback
 
 form_class = uic.loadUiType("prototype.ui")[0]
+child_class = uic.loadUiType("child.ui")[0]
+
+
+class AnotherWindow(QMainWindow, child_class):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+
+
 
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
         super().__init__()
+
+        self.window_1 = None
+
         self.setupUi(self)
+        self.button_for_newtab.clicked.connect(self.new_window)
         self.NewWindow.clicked.connect(self.lstadd)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
@@ -29,7 +42,7 @@ class MyApp(QMainWindow, form_class):
         # button qss
         self.textButtons=(
             self.NewWindow,
-            # self.voice,
+            # self.voice
             self.termButton,
             )
 
@@ -56,7 +69,11 @@ class MyApp(QMainWindow, form_class):
 
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
-        
+
+    def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
+        if(self.window_1 == None):
+            self.window_1 = AnotherWindow()
+        self.window_1.show()
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
         self.voice.setText(str(self.recording))
@@ -90,9 +107,7 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self.__mousePressPos is None:
-            super().mouseMoveEvent(event)
-            return
+        # 확인된 문제: 버튼에서 드래그를 시작하면 크래시
         if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
             globalPos = event.globalPos()
             moved = globalPos - self.__mousePressPos
@@ -122,3 +137,4 @@ if __name__ == '__main__':
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 
+>>>>>>> cf263dc8477c564e72d2c830556664debb7e3d67
