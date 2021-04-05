@@ -17,6 +17,7 @@ child_class = uic.loadUiType("child.ui")[0]
 class AnotherWindow(QMainWindow, child_class):
     def __init__(self):
         super().__init__()
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
 
@@ -33,7 +34,7 @@ class MyApp(QMainWindow, form_class):
         self.button_for_newtab.clicked.connect(self.new_window)
         self.NewWindow.clicked.connect(self.lstadd)
         self.voice.clicked.connect(self.record)
-        self.termButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
+        self.termButton.clicked.connect(self.close)
         
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -74,6 +75,7 @@ class MyApp(QMainWindow, form_class):
         if(self.window_1 == None):
             self.window_1 = AnotherWindow()
         self.window_1.show()
+    
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
         self.voice.setText(str(self.recording))
@@ -128,6 +130,12 @@ class MyApp(QMainWindow, form_class):
                 self.__mousePressPos = None
         super().mouseReleaseEvent(event)
 
+    def close(self):
+        # close all children
+        if self.window_1 is not None:
+            self.window_1.close()
+        super().close()
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -137,4 +145,3 @@ if __name__ == '__main__':
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 
->>>>>>> cf263dc8477c564e72d2c830556664debb7e3d67
