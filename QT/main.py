@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
 from PyQt5 import uic
 import procs.wind as wind
+import traceback
 
 form_class = uic.loadUiType("prototype.ui")[0]
 
@@ -19,7 +20,7 @@ class MyApp(QMainWindow, form_class):
         self.setupUi(self)
         self.NewWindow.clicked.connect(self.lstadd)
         self.voice.clicked.connect(self.record)
-        self.termButton.clicked.connect(lambda: QtGui.qApp.exit())
+        self.termButton.clicked.connect(QtCore.QCoreApplication.instance().quit)
         
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -89,7 +90,9 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        # 확인된 문제: 버튼에서 드래그를 시작하면 크래시
+        if self.__mousePressPos is None:
+            super().mouseMoveEvent(event)
+            return
         if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
             globalPos = event.globalPos()
             moved = globalPos - self.__mousePressPos

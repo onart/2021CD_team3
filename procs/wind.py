@@ -18,6 +18,7 @@ def currentWindow(receiver):    #스레드 함수
     lib=ctypes.windll.LoadLibrary('user32.dll')
     while True:
         hwnd = lib.GetForegroundWindow()
+        # SetForegroundWindow(핸들)로 다른 창 활성화 가능
         buffer = ctypes.create_unicode_buffer(255)
         lib.GetWindowTextW(hwnd, buffer, ctypes.sizeof(buffer))
         wind = wname(buffer.value)
