@@ -3,4 +3,6 @@
 
 pip install pyqt5\
 pip install google-cloud-speech\
-pip install pyaudio
+pip install pyaudio(pip install pipwin, pipwin install pyaudio)\
+pip install keyboard\
+pip install pyautogui
