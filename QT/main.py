@@ -1,64 +1,69 @@
-'''
-    window 모양
-'''
+# This is a sample Python script.
+
+# Press Shift+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('..'))))
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-import threading
-import procs.wind as wind
+from PyQt5.QtWidgets import *
+from PyQt5 import QtGui, QtCore
+from PyQt5 import uic
 
-def hex2QColor(c):
-    """Convert Hex color to QColor"""
-    r=int(c[0:2],16)
-    g=int(c[2:4],16)
-    b=int(c[4:6],16)
-    return QtGui.QColor(r,g,b)
+form_class = uic.loadUiType("prototype.ui")[0]
 
-class RoundInvButton(QtWidgets.QPushButton):
-    def __init__(self, parent=None, text='button'):
-        super(RoundInvButton, self).__init__(parent)
-        self.setStyleSheet('QPushButton:hover{background-color: white;} QPushButton{background-color: rgba(0,0,0,0); border-radius: 5px;}')
-        self.setText(text)
+class MyApp(QMainWindow, form_class):
 
-class RoundedWindow(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super(RoundedWindow, self).__init__(parent)
-
-        # make the window frameless
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.NewWindow.clicked.connect(self.lstadd)
+        self.voice.clicked.connect(self.record)
+        self.termButton.clicked.connect(lambda: QtGui.qApp.exit())
+        
+        # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        # fix size
-        self.resize(200,300)
-        self.setMinimumSize(QtCore.QSize(200, 300))
-        self.setMaximumSize(QtCore.QSize(200, 300))
-        self.setObjectName("mainwind")
+        
+        # button qss
+        self.textButtons=(
+            self.NewWindow,
+            # self.voice,
+            self.termButton,
+            )
 
-        self.foregroundColor = hex2QColor("ffffff")
-        self.borderRadius = 15
-        self.draggable = True
-        self.dragging_threshould = 5
-        self.__mousePressPos = None
-        self.__mouseMovePos = None
+        for bu in self.textButtons:
+            bu.setStyleSheet('QPushButton:hover{background-color: white;} QPushButton{background-color: rgba(0,0,0,0); border-radius: 5px;}')
+        self.recording=False
 
         # gradient
         self.backBrush=QtGui.QLinearGradient(0,0,0,400)
         self.backBrush.setColorAt(0.0, QtGui.QColor(240, 240, 240))
         self.backBrush.setColorAt(1.0, QtGui.QColor(200, 200, 200))
+        self.foregroundColor = QtGui.QColor(240,240,240)
+        self.borderRadius=15
         
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self.exitButton = RoundInvButton(self, text='종료하기')
-        self.exitButton.clicked.connect(self.exitB)
+        # drag
+        self.draggable = True
+        self.dragging_threshould = 5
+        self.__mousePressPos = None
+        self.__mouseMovePos = None
+        
+    def record(self): # 음성인식 함수
+        self.recording = not(self.recording)
+        self.voice.setText(str(self.recording))
+        if self.recording:
+            QMessageBox.about(self, "음성인식처리", "음성인식시작")
+        else:
+            QMessageBox.about(self, "음성인식처리", "음성인식종료")
+        
+    def lstadd(self):
+        self.fn_lst.insertItem(0, 'function 1')
+        self.fn_lst.insertItem(1, 'function 2')
 
-        threading.Thread(target=wind.currentWindow).start()
-        self.exitButton.setText(wind.cur)
-
-    def exitB(self):
-        QtGui.qApp.exit()
-    
     def paintEvent(self, event):
         # get current window size
         s = self.size()
@@ -70,14 +75,14 @@ class RoundedWindow(QtWidgets.QWidget):
         qp.drawRoundedRect(0, 0, s.width(), s.height(),
                            self.borderRadius, self.borderRadius)
         qp.end()
-        
+
     def mousePressEvent(self, event):
         if self.draggable and event.button() == QtCore.Qt.LeftButton:
             self.__mousePressPos = event.globalPos()                # global
             self.__mouseMovePos = event.globalPos() - self.pos()    # local
             print(self.__mousePressPos)
             
-        super(RoundedWindow, self).mousePressEvent(event)
+        super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
@@ -88,7 +93,7 @@ class RoundedWindow(QtWidgets.QWidget):
                 diff = globalPos - self.__mouseMovePos
                 self.move(diff)
                 self.__mouseMovePos = globalPos - self.pos()
-        super(RoundedWindow, self).mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
         if self.__mousePressPos is not None:
@@ -98,15 +103,14 @@ class RoundedWindow(QtWidgets.QWidget):
                     # do not call click event or so on
                     event.ignore()
                 self.__mousePressPos = None
-        super(RoundedWindow, self).mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
 
-        # close event
-        if event.button() == QtCore.Qt.RightButton:
-            QtGui.qApp.exit()
-
+# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    main = RoundedWindow()
-    main.show()
-    sys.exit(app.exec_())
+    app = QApplication(sys.argv)
+    myWindow = MyApp()
+    myWindow.show()
+    app.exec_()
+
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
