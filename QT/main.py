@@ -20,9 +20,6 @@ class AnotherWindow(QMainWindow, child_class):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
-
-
-
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
@@ -109,7 +106,9 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        # 확인된 문제: 버튼에서 드래그를 시작하면 크래시
+        if self.__mousePressPos is None:
+            super().mouseMoveEvent(event)
+            return
         if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
             globalPos = event.globalPos()
             moved = globalPos - self.__mousePressPos
