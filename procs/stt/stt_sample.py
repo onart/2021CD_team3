@@ -8,7 +8,6 @@
 # Imports the Google Cloud client library
 from google.cloud import speech
 
-
 # Instantiates a client
 client = speech.SpeechClient()
 
