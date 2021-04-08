@@ -8,6 +8,12 @@
 # Imports the Google Cloud client library
 from google.cloud import speech
 
+import os
+
+# add environment variable
+os.environ['GOOGLE_APPLICATION_CREDENTIALS']=os.path.dirname(os.path.realpath(__file__))+'\\account.json'
+
+
 # Instantiates a client
 client = speech.SpeechClient()
 
