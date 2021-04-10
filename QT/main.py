@@ -3,7 +3,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import sys, os, threading
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname('..'))))
+sys.path.append(os.path.abspath('..'))
 
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
@@ -12,7 +12,6 @@ import procs.wind as wind
 
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
-
 
 class AnotherWindow(QMainWindow, child_class):
     def __init__(self):
@@ -77,9 +76,11 @@ class MyApp(QMainWindow, form_class):
         self.recording = not(self.recording)
         self.voice.setText(str(self.recording))
         if self.recording:
-            QMessageBox.about(self, "음성인식처리", "음성인식시작")
+            #QMessageBox.about(self, "음성인식처리", "음성인식시작")
+            pass
         else:
-            QMessageBox.about(self, "음성인식처리", "음성인식종료")
+            #QMessageBox.about(self, "음성인식처리", "음성인식종료")
+            pass
         
     def lstadd(self):
         self.fn_lst.insertItem(0, 'function 1')
