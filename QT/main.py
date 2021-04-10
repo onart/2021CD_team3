@@ -3,6 +3,8 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import sys, os, threading
+import ctypes
+import keyboard
 sys.path.append(os.path.abspath('..'))
 
 from PyQt5.QtWidgets import *
@@ -19,15 +21,39 @@ class AnotherWindow(QMainWindow, child_class):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
+class PeekerWindow(QMainWindow):
+    def __init__(self, f, h): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
+        super().__init__()
+        self.lib=ctypes.windll.LoadLibrary('user32.dll')
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.hIdeWnd=h
+        keyboard.on_press_key(key='`', callback=self.setToggle)
+
+    def setToggle(self, dummy):
+        keyboard.press('backspace')
+        if self.isActiveWindow():
+            self.lib.SetForegroundWindow(self.hIdeWnd)
+            # 조작 모드 변경
+        else:
+            self.activateWindow()
+            # 조작 모드 변경
+    def closeEvent(self, event):
+        print('ggg')
+        keyboard.on_press_key(key='`', callback=lambda x: [])   # 확인된 문제: on_press_key 취소가 비정상적
+        event.accept()
+
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
         super().__init__()
 
-        self.window_1 = None
+        self.window_1 = None    # Alt+tab-like
+        self.window_2 = None    # peek
+
+        self.hIdeWnd=0          # IDE Window Handle
 
         self.setupUi(self)
-        self.button_for_newtab.clicked.connect(self.new_window)
+        self.button_for_newtab.clicked.connect(self.peeker)
         self.NewWindow.clicked.connect(self.lstadd)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
@@ -130,11 +156,22 @@ class MyApp(QMainWindow, form_class):
                 self.__mousePressPos = None
         super().mouseReleaseEvent(event)
 
-    def close(self):
+    def closeEvent(self, event):
         # close all children
         if self.window_1 is not None:
             self.window_1.close()
+        if self.window_2 is not None:
+            self.window_2.close()
         super().close()
+
+    def peeker(self, f):   # 다른 코드 띄워놓는 것. f: 볼 파일
+        if self.hIdeWnd==0:
+            return
+        elif self.window_2 == None:
+            self.window_2 = PeekerWindow(f, self.hIdeWnd)
+            self.window_2.show()
+            
+        
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

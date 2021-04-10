@@ -47,8 +47,14 @@ def currentWindow(receiver):    #스레드 함수
         wind = wname(buffer.value, pname)
         if wind != receiver.activeWindow.text:
             receiver.activeWindow.setText(wind)
+            if wind=='others':
+                receiver.hIdeWnd=0
+            else:
+                receiver.hIdeWnd=hwnd
             # print(cur)
         time.sleep(0.2)   # 갱신 시간 수
+
+
 
 if __name__ == '__main__':
     currentWindow()
