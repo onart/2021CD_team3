@@ -36,7 +36,7 @@ import re
 import sys
 import time
 
-from google.cloud import speech
+from google.cloud import speech_v1p1beta1 as speech
 import pyaudio
 from six.moves import queue
 
@@ -255,7 +255,7 @@ def main():
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=SAMPLE_RATE,
         language_code="en-US",
-        max_alternatives=1,
+        alternative_language_codes=["ko-KR"],
     )
 
     streaming_config = speech.StreamingRecognitionConfig(
