@@ -29,10 +29,10 @@
    <widget class="QPushButton" name="voice">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>70</x>
       <y>0</y>
-      <width>71</width>
-      <height>71</height>
+      <width>63</width>
+      <height>60</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -45,7 +45,8 @@
         cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
         radius: 1.35, stop: 0 #fff, stop: 1 #888
         );
-    padding: 5px;
+    padding: 5px; 
+	background-position: center;
     }
 
 QPushButton:hover {
