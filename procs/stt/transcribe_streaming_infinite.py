@@ -40,6 +40,7 @@ from google.cloud import speech_v1p1beta1 as speech
 import pyaudio
 from six.moves import queue
 
+import threading
 import os
 
 # add environment variable
@@ -50,9 +51,7 @@ STREAMING_LIMIT = 240000  # 4 minutes
 SAMPLE_RATE = 16000
 CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
 
-RED = "\033[0;31m"
-GREEN = "\033[0;32m"
-YELLOW = "\033[0;33m"
+lock = threading.Lock()
 
 
 def get_current_time():
@@ -171,22 +170,8 @@ class ResumableMicrophoneStream:
             yield b"".join(data)
 
 
-def listen_print_loop(responses, stream):
-    """Iterates through server responses and prints them.
-
-    The responses passed is a generator that will block until a response
-    is provided by the server.
-
-    Each response may contain multiple results, and each result may contain
-    multiple alternatives; for details, see https://goo.gl/tjCPAU.  Here we
-    print only the transcription for the top alternative of the top result.
-
-    In this case, responses are provided for interim results as well. If the
-    response is an interim one, print a line feed at the end of it, to allow
-    the next result to overwrite it, until the response is a final one. For the
-    final one, print a newline to preserve the finalized transcription.
-    """
-
+def get_speech_recognition(responses, stream, result_list):
+    
     for response in responses:
 
         if get_current_time() - stream.start_time > STREAMING_LIMIT:
@@ -224,13 +209,17 @@ def listen_print_loop(responses, stream):
 
         if result.is_final:
 
-            sys.stdout.write(GREEN)
-            sys.stdout.write("\033[K")
-            sys.stdout.write(str(corrected_time) + ": " + transcript + "\n")
+            lock.acquire()
 
             stream.is_final_end_time = stream.result_end_time
-            stream.last_transcript_was_final = True
+            stream.last_transcript_was_final = True            
 
+            result_list[0] = True
+            result_list.append(transcript)
+
+            lock.release()
+
+            '''
             # Exit recognition if any of the transcribed phrases could be
             # one of our keywords.
             if re.search(r"\b(exit|quit)\b", transcript, re.I):
@@ -238,16 +227,15 @@ def listen_print_loop(responses, stream):
                 sys.stdout.write("Exiting...\n")
                 stream.closed = True
                 break
+            '''
 
         else:
-            sys.stdout.write(RED)
-            sys.stdout.write("\033[K")
-            sys.stdout.write(str(corrected_time) + ": " + transcript + "\r")
-
             stream.last_transcript_was_final = False
 
 
-def main():
+# result_list[0] : 갱신될때마다 True로 바뀜, 사용후 False
+# lock.acquire() 후 result_list 접근하고 lock.release()
+def start_recognition(result_list):
     """start bidirectional streaming from microphone input to speech API"""
 
     client = speech.SpeechClient()
@@ -263,19 +251,10 @@ def main():
     )
 
     mic_manager = ResumableMicrophoneStream(SAMPLE_RATE, CHUNK_SIZE)
-    print(mic_manager.chunk_size)
-    sys.stdout.write(YELLOW)
-    sys.stdout.write('\nListening, say "Quit" or "Exit" to stop.\n\n')
-    sys.stdout.write("End (ms)       Transcript Results/Status\n")
-    sys.stdout.write("=====================================================\n")
 
     with mic_manager as stream:
 
         while not stream.closed:
-            sys.stdout.write(YELLOW)
-            sys.stdout.write(
-                "\n" + str(STREAMING_LIMIT * stream.restart_counter) + ": NEW REQUEST\n"
-            )
 
             stream.audio_input = []
             audio_generator = stream.generator()
@@ -288,7 +267,8 @@ def main():
             responses = client.streaming_recognize(streaming_config, requests)
 
             # Now, put the transcription responses to use.
-            listen_print_loop(responses, stream)
+            get_speech_recognition(responses, stream, result_list)
+        
 
             if stream.result_end_time > 0:
                 stream.final_request_end_time = stream.is_final_end_time
@@ -305,6 +285,21 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    result_list = [False]
+    # start_recognition(result_list)
 
+    new_thread = threading.Thread(target=start_recognition, args=(result_list,))
+    new_thread.start()
+    
+    while True:
+        
+        if result_list[0] == True:
+            
+            lock.acquire()
+
+            result_list[0] = False
+            print(result_list[-1])
+            
+            lock.release()
+            
 # [END speech_transcribe_infinite_streaming]
