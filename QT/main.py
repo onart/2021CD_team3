@@ -103,9 +103,21 @@ class MyApp(QMainWindow, form_class):
         self.voice.setText(str(self.recording))
         if self.recording:
             #QMessageBox.about(self, "음성인식처리", "음성인식시작")
+            self.voice.setStyleSheet('''
+        background-image: url(./resources/recon.png);
+        background-repeat: no-repeat;
+        background-position: center;
+        border:0px;
+        ''')
             pass
         else:
             #QMessageBox.about(self, "음성인식처리", "음성인식종료")
+            self.voice.setStyleSheet('''
+        background-image: url(./resources/recoff.png);
+        background-position: center;
+        background-repeat: no-repeat;
+        border:0px;
+        ''')
             pass
         
     def lstadd(self):
