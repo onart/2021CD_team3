@@ -8,13 +8,22 @@ import keyboard
 sys.path.append(os.path.abspath('..'))
 
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5 import uic
 import procs.wind as wind
 
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
 
+class HelpWindow(QDialog):
+    def __init__(self, parent):
+        super(HelpWindow, self).__init__(parent)
+        uic.loadUi("Help.ui", self)
+        self.termButton.clicked.connect(self.close)
+        self.show()
+        
 class AnotherWindow(QMainWindow, child_class):
     def __init__(self):
         super().__init__()
@@ -57,6 +66,9 @@ class MyApp(QMainWindow, form_class):
         self.NewWindow.clicked.connect(self.lstadd)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
+        self.open_File.clicked.connect(self.fileopen)
+        self.help_button.clicked.connect(self.help)
+        self.dialog = QDialog()
         
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -182,8 +194,33 @@ class MyApp(QMainWindow, form_class):
         elif self.window_2 == None:
             self.window_2 = PeekerWindow(f, self.hIdeWnd)
             self.window_2.show()
-            
+
+    def fileopen(self): #새로운 파일 선택
+        option = QFileDialog.Option()
+        option |= QFileDialog.ShowDirsOnly
+        filename = QFileDialog.getExistingDirectory(self,"select Directory")
+
         
+
+    def help(self):
+        HelpWindow(self)
+
+    """ 임시로 만들어 놓은 dialog 추가 코드 입니다
+    def help_detail(self):
+        # 닫기 버튼
+        btnDialog = QPushButton("Close", self.dialog)
+        btnDialog.move(83, 330)
+        btnDialog.clicked.connect(self.dialog_close)
+
+        self.dialog.setWindowTitle('Dialog')
+        self.dialog.move(1300, 300) #dialog 시작위치
+        self.dialog.setWindowModality(Qt.ApplicationModal)
+        self.dialog.resize(250, 400)
+        self.dialog.show()
+    
+    def dialog_close(self):
+        self.dialog.close()
+    """
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
