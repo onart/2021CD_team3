@@ -44,8 +44,11 @@ class PeekerWindow(QMainWindow):
             # 조작 모드 변경
     def closeEvent(self, event):
         print('ggg')
-        keyboard.unhook_key(self.funct)
-        event.accept()  # 확인된 문제: 부모 window가 닫힐 때도 이 함수가 호출됨
+        try:
+            keyboard.unhook_key(self.funct)
+            event.accept()  # 확인된 문제: 부모 window가 닫힐 때도 이 함수가 호출됨
+        except KeyError:
+            print('already closed')
 
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self):
@@ -139,8 +142,11 @@ class MyApp(QMainWindow, form_class):
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog()
         dlg.exec_()
-        _fn = dlg.select_fn.text()
-        print("Selected function is {}".format(_fn))
+        try:
+            _fn = dlg.select_fn.text()
+            print("Selected function is {}".format(_fn))
+        except AttributeError:
+            print("Selected Nothing.")
     
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
