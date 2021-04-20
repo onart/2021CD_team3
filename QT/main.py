@@ -23,12 +23,7 @@ class HelpWindow(QDialog):
         uic.loadUi("Help.ui", self)
         self.termButton.clicked.connect(self.close)
         self.show()
-        
-class AnotherWindow(QMainWindow, child_class):
-    def __init__(self):
-        super().__init__()
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setupUi(self)
+
 
 class PeekerWindow(QMainWindow):
     def __init__(self, f, h): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
@@ -63,13 +58,14 @@ class MyApp(QMainWindow, form_class):
 
         self.setupUi(self)
         self.button_for_newtab.clicked.connect(self.peeker)
-        self.NewWindow.clicked.connect(self.lstadd)
+        self.NewWindow.clicked.connect(self.new_window)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
         self.open_File.clicked.connect(self.fileopen)
         self.help_button.clicked.connect(self.help)
         self.dialog = QDialog()
-        
+        self.dialog_for_new_window = QDialog()
+        self.select_fn = None
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
@@ -106,9 +102,30 @@ class MyApp(QMainWindow, form_class):
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        if(self.window_1 == None):
-            self.window_1 = AnotherWindow()
-        self.window_1.show()
+        # 버튼 추가
+        btnDialog = QPushButton("OK", self.dialog_for_new_window)
+        btnDialog.move(110, 140)
+        btnDialog.clicked.connect(self.close_window)
+
+        #함수들 박스
+        fn_lst_wiget = QListWidget(self.dialog_for_new_window)
+        fn_lst_wiget.move(110,20)
+        fn_lst_wiget.insertItem(0, 'fn1')
+        fn_lst_wiget.insertItem(1, 'fn2')
+        fn_lst_wiget.insertItem(2, 'fn3')
+
+        # QDialog 세팅
+        self.dialog_for_new_window.setWindowTitle('Dialog')
+        self.dialog_for_new_window.setWindowModality(Qt.ApplicationModal)
+        self.dialog_for_new_window.resize(700, 500)
+        self.dialog_for_new_window.move(self.voice.rect().topRight())
+        self.dialog_for_new_window.show()
+
+
+
+    def close_window(self):
+        self.select_fn = self.dialog_for_new_window.fn_lst_widget.currentItem() #dialog 내에 있는 Qlistwidget에서 현재 선택된 아이템을 가져오기...(가져오는 방법 연구)
+        self.dialog_for_new_window.close()
     
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
