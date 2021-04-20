@@ -14,17 +14,25 @@ EXC='aehiouwy'
 ALPHA=(0,1,2,3,0,1,2,0,0,2,2,4,5,5,0,1,2,6,2,3,0,1,0,2,0,2)
 smallA=ord('a')
 
-TEST=('arrange', 'soundex', 'spell', 'lcs', 'standardize', 'pyfilltree', 'cfilltree', 'cppfilltree', 'gc', 'scandir')
+TEST=(
+    'arrange', 'soundex', 'spell', 'lcs', 'standardize',
+    'pyfilltree', 'cfilltree', 'cppfilltree', 'gc', 'scandir',
+    'startrecognition', 'getspeechrecognition', 'generator',
+    'init', 'getcurrenttime', 'phonetic','macro', 'maketree', 'wind',
+    'helpwindow', 'anotherwindow', 'peekerwindow'
+      )
 
 def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 함수/클래스 풀
     ar=[]
     basis=soundEx(inp)
     for w in words:
         val=lcs(soundEx(w),basis)
+        val2=lcs(inp, w)
         if val != 0:
-            ar.append((w, val))
+            ar.append((w, val+val2/10))
     ar.sort(key=lambda x: x[1])
-    return ar
+    ar.reverse()
+    return [x[0] for x in ar]
     
 def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words는 함수/클래스 풀
     ar=[]
