@@ -94,7 +94,7 @@ QPushButton:pressed {
    <widget class="QPushButton" name="termButton">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>120</x>
       <y>270</y>
       <width>75</width>
       <height>23</height>
@@ -128,6 +128,32 @@ QPushButton:pressed {
     </property>
     <property name="text">
      <string>button_for_newtab</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="open_File">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>270</y>
+      <width>21</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="help_button">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>10</y>
+      <width>20</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>?</string>
     </property>
    </widget>
   </widget>
