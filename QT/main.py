@@ -32,7 +32,7 @@ class PeekerWindow(QMainWindow):
         self.lib=ctypes.windll.LoadLibrary('user32.dll')
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=h
-        keyboard.on_press_key(key='`', callback=self.setToggle)
+        self.funct=keyboard.on_press_key(key='`', callback=self.setToggle)
 
     def setToggle(self, dummy):
         keyboard.press('backspace')
@@ -44,8 +44,8 @@ class PeekerWindow(QMainWindow):
             # 조작 모드 변경
     def closeEvent(self, event):
         print('ggg')
-        keyboard.on_press_key(key='`', callback=lambda x: [])   # 확인된 문제: on_press_key 취소가 비정상적
-        event.accept()
+        keyboard.unhook_key(self.funct)
+        event.accept()  # 확인된 문제: 부모 window가 닫힐 때도 이 함수가 호출됨
 
 class MyApp(QMainWindow, form_class):
 
@@ -209,6 +209,7 @@ class MyApp(QMainWindow, form_class):
 
     def closeEvent(self, event):
         # close all children
+        # 여기에서 해결이 필요함
         if self.window_1 is not None:
             self.window_1.close()
         if self.window_2 is not None:
