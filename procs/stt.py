@@ -178,12 +178,12 @@ class RecognitionManager:
         self.stop_thread = False
         self.list_changed = False
 
-    def reset():
+    def reset(self):
         self.record_list = [False]
         self.stop_thread = False
         self.list_changed = False
 
-    def stop():
+    def stop(self):
         self.stop_thread = True
 
 

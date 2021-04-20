@@ -13,7 +13,7 @@ from PyQt5.QtGui import *
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5 import uic
 import procs.wind as wind
-from stt import start_recognition, get_recognition, RecognitionManager
+from procs.stt import start_recognition, get_recognition, RecognitionManager
 
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
