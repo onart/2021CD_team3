@@ -13,6 +13,7 @@ from PyQt5.QtGui import *
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5 import uic
 import procs.wind as wind
+from stt import start_recognition, get_recognition, RecognitionManager
 
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
@@ -138,6 +139,12 @@ class MyApp(QMainWindow, form_class):
         background-position: center;
         border:0px;
         ''')
+            
+            self.rec_manager = RecognitionManager()
+            self.record_thread = threading.Thread(target=start_recognition, args=(self.rec_manager,))
+            self.record_thread.setDaemon(True)
+            self.record_thread.start()
+            
             pass
         else:
             #QMessageBox.about(self, "음성인식처리", "음성인식종료")
@@ -147,6 +154,9 @@ class MyApp(QMainWindow, form_class):
         background-repeat: no-repeat;
         border:0px;
         ''')
+            
+            self.rec_manager.stop()
+            
             pass
         
     def lstadd(self):
