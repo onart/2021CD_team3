@@ -47,6 +47,41 @@ class PeekerWindow(QMainWindow):
         keyboard.unhook_key(self.funct)
         event.accept()  # 확인된 문제: 부모 window가 닫힐 때도 이 함수가 호출됨
 
+class fn_dialog(QDialog):  #새로운 창 for new_window
+    def __init__(self):
+        super().__init__()
+        self.setupUI()
+        self.select_fn = None
+
+    def setupUI(self):
+        self.setGeometry(1100, 200, 300, 100)
+        self.setWindowTitle("Seleck Ur function")
+
+        label1 = QLabel("Function lst")
+
+        self.fn_lst = QListWidget()
+
+        self.pushButton1 = QPushButton("Select")
+        self.pushButton1.clicked.connect(self.pushButtonClicked)
+
+        self.fn_lst.insertItem(0, 'fn1')
+        self.fn_lst.insertItem(1, 'fn2')
+        self.fn_lst.insertItem(2, 'fn3')
+
+        layout = QGridLayout()
+        layout.addWidget(label1, 0, 0)
+        layout.addWidget(self.fn_lst, 0, 1)
+        layout.addWidget(self.pushButton1, 0, 2)
+
+        self.setLayout(layout)
+
+    def pushButtonClicked(self):
+        self.select_fn = self.fn_lst.currentItem()
+        self.close()
+
+
+
+
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
@@ -65,8 +100,7 @@ class MyApp(QMainWindow, form_class):
         self.open_File.clicked.connect(self.fileopen)
         self.help_button.clicked.connect(self.help)
         self.dialog = QDialog()
-        self.dialog_for_new_window = QDialog()
-        self.select_fn = None
+
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
@@ -103,30 +137,10 @@ class MyApp(QMainWindow, form_class):
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        # 버튼 추가
-        btnDialog = QPushButton("OK", self.dialog_for_new_window)
-        btnDialog.move(110, 140)
-        btnDialog.clicked.connect(self.close_window)
-
-        #함수들 박스
-        fn_lst_wiget = QListWidget(self.dialog_for_new_window)
-        fn_lst_wiget.move(110,20)
-        fn_lst_wiget.insertItem(0, 'fn1')
-        fn_lst_wiget.insertItem(1, 'fn2')
-        fn_lst_wiget.insertItem(2, 'fn3')
-
-        # QDialog 세팅
-        self.dialog_for_new_window.setWindowTitle('Dialog')
-        self.dialog_for_new_window.setWindowModality(Qt.ApplicationModal)
-        self.dialog_for_new_window.resize(700, 500)
-        self.dialog_for_new_window.move(self.voice.rect().topRight())
-        self.dialog_for_new_window.show()
-
-
-
-    def close_window(self):
-        self.select_fn = self.dialog_for_new_window.fn_lst_widget.currentItem() #dialog 내에 있는 Qlistwidget에서 현재 선택된 아이템을 가져오기...(가져오는 방법 연구)
-        self.dialog_for_new_window.close()
+        dlg = fn_dialog()
+        dlg.exec_()
+        _fn = dlg.select_fn.text()
+        print("Selected function is {}".format(_fn))
     
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
