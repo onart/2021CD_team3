@@ -46,9 +46,10 @@ class PeekerWindow(QMainWindow):
         print('ggg')
         try:
             keyboard.unhook_key(self.funct)
-            event.accept()  # 확인된 문제: 부모 window가 닫힐 때도 이 함수가 호출됨
         except KeyError:
             print('already closed')
+        finally:
+            event.accept()
 
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self):
@@ -126,9 +127,9 @@ class MyApp(QMainWindow, form_class):
         self.foregroundColor = QtGui.QColor(240,240,240)
         self.borderRadius=15
         
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        #layout = QVBoxLayout(self)
+        #layout.setContentsMargins(0, 0, 0, 0)
+        #layout.setSpacing(0)
 
         # drag
         self.draggable = True
