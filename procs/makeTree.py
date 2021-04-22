@@ -29,10 +29,6 @@ def javaFillTree(fname):
     prog=open(fname, 'r')
     prog.close()
 
-def hFillTree(fname):
-    prog=open(fname, 'r')
-    prog.close()
-
 def gc():   # 파일이 제거된 경우에 대비하여 modTimes와 struct에서 해당 내용을 없애는 함수. struct에서 먼저 제거하고 modTimes에서 제거
     for f in modTimes:
         if modTimes[f][1]!=STAMP:
@@ -72,4 +68,5 @@ ext.update({
     'c': cFillTree,
     'cpp': cppFillTree,
     'java': javaFillTree,
+    'h': cppFillTree,
 })
