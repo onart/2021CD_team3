@@ -29,7 +29,7 @@ def javaFillTree(fname):
     prog=open(fname, 'r')
     prog.close()
 
-def gc():   # 파일이 제거된 경우에 대비하여 modTimes와 struct에서 해당 내용을 없애는 함수. struct에서 먼저 제거하고 modTimes에서 제거
+def gc():   # 제거된 파일에 대하여 기존 정보를 제거
     global classes, functs, modTimes
     rmm=[] # 데이터에서 제거할 파일
     for f in modTimes:
@@ -38,8 +38,15 @@ def gc():   # 파일이 제거된 경우에 대비하여 modTimes와 struct에�
             classes=[x for x in classes if x[1] != f]
             for fu in functs:
                 functs[fu]=[x for x in functs if x[0] != f]
+            functs={x:functs[x] for x in functs if len(functs[x]) != 0}
     for f in rmm:
         modTimes.pop(f)
+
+def forMod(fname):  # 수정된 파일에 대하여 기존 정보를 제거
+    global classes, functs
+    classes=[x for x in classes if x[1] != fname]
+    for fu in functs:
+        functs[fu]=[x for x in functs if x[0] != fname]
 
 def poolUP():
     global POOL, classes, modTimes, functs
@@ -63,12 +70,13 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
             if fext in ext: # 정해진 확장자 검사
                 try:
                     mtime=os.path.getmtime(f)
-                    if modTimes[f][0]!=mtime:
+                    if modTimes[f][0]!=mtime:   # 기존 파일이 수정됨
                         modTimes[f][0]=mtime
                         # 해당 파일에 대하여 구조 업데이트하는 코드(ext[fext]가 해당 함수)
+                        forMod(f)
                         ext[fext](f)
                     modTimes[f][1]=STAMP                        
-                except KeyError:
+                except KeyError:                # 새 파일이 생성됨
                     modTimes[f][0]=mtime
                     modTimes[f][1]=STAMP
                     ext[fext](f)
