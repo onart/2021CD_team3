@@ -40,7 +40,9 @@ from google.cloud import speech_v1p1beta1 as speech
 import pyaudio
 from six.moves import queue
 
-import threading
+import multiprocessing
+from multiprocessing import Process, Manager
+from multiprocessing.managers import BaseManager, NamespaceProxy
 import os
 
 # add environment variable
@@ -51,8 +53,7 @@ STREAMING_LIMIT = 240000  # 4 minutes
 SAMPLE_RATE = 16000
 CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
 
-lock = threading.Lock()
-
+lock = multiprocessing.Lock()
 
 def get_current_time():
     """Return Current Time in MS."""
@@ -170,9 +171,43 @@ class ResumableMicrophoneStream:
             yield b"".join(data)
 
 
-def get_speech_recognition(responses, stream, result_list):
+# list_changed : 갱신될때마다 True로 바뀜, 사용후 False
+# lock.acquire() 후 record_list 접근하고 lock.release()
+# 음성인식 종료시 stop()
+class RecognitionManager:
+    def __init__(self):
+        self.record_list = []
+        self.stop_thread = False
+        self.list_changed = False
+
+    def reset(self):
+        self.record_list = []
+        self.stop_thread = False
+        self.list_changed = False
+
+    def stop(self):
+        self.stop_thread = True
+
+class MyProxy(NamespaceProxy):
+    _exposed_ = ('__getattribute__', '__setattr__', '__delattr__', '__getitem__', 'reset', 'stop')
+
+    def reset(self):
+        callmethod = object.__getattribute__(self, '_callmethod')
+        return callmethod('reset')
+
+    def stop(self):
+        callmethod = object.__getattribute__(self, '_callmethod')
+        return callmethod('reset')
+    
+
+
+# 실질적인 음성인식을 담당하는 함수
+def get_speech_recognition(responses, stream, rec_manager):
     
     for response in responses:
+
+        if rec_manager.stop_thread:
+            break
 
         if get_current_time() - stream.start_time > STREAMING_LIMIT:
             stream.start_time = get_current_time()
@@ -207,15 +242,17 @@ def get_speech_recognition(responses, stream, result_list):
         # Display interim results, but with a carriage return at the end of the
         # line, so subsequent lines will overwrite them.
 
-        if result.is_final:
-
-            lock.acquire()
+        if result.is_final:            
 
             stream.is_final_end_time = stream.result_end_time
-            stream.last_transcript_was_final = True            
+            stream.last_transcript_was_final = True
 
-            result_list[0] = True
-            result_list.append(transcript)
+            lock.acquire()
+            
+            rec_manager.list_changed = True
+            tmp_list = rec_manager.record_list
+            tmp_list.append(transcript)
+            rec_manager.record_list = tmp_list
 
             lock.release()
 
@@ -233,9 +270,9 @@ def get_speech_recognition(responses, stream, result_list):
             stream.last_transcript_was_final = False
 
 
-# result_list[0] : 갱신될때마다 True로 바뀜, 사용후 False
-# lock.acquire() 후 result_list 접근하고 lock.release()
-def start_recognition(result_list):
+# 음성인식 처리하는 함수
+def start_recognition(rec_manager):
+
     """start bidirectional streaming from microphone input to speech API"""
 
     client = speech.SpeechClient()
@@ -267,8 +304,10 @@ def start_recognition(result_list):
             responses = client.streaming_recognize(streaming_config, requests)
 
             # Now, put the transcription responses to use.
-            get_speech_recognition(responses, stream, result_list)
-        
+            get_speech_recognition(responses, stream, rec_manager)
+
+            if rec_manager.stop_thread:
+                break
 
             if stream.result_end_time > 0:
                 stream.final_request_end_time = stream.is_final_end_time
@@ -282,24 +321,51 @@ def start_recognition(result_list):
                 sys.stdout.write("\n")
             stream.new_stream = True
 
+    print("th1 end")
+
+
+# 음성인식 결과 리스트가 변한 경우 갱신하는 함수
+def get_recognition(rec_manager):
+
+    while not rec_manager.stop_thread:
+        
+        if rec_manager.list_changed:
+            
+            lock.acquire()
+            rec_manager.list_changed  = False
+            print(rec_manager.record_list)
+            
+            lock.release()
+
+    print("th2 end")
+
+            
 
 if __name__ == "__main__":
 
-    result_list = [False]
-    # start_recognition(result_list)
-
-    new_thread = threading.Thread(target=start_recognition, args=(result_list,))
-    new_thread.start()
+    BaseManager.register('RecognitionManager',RecognitionManager, MyProxy)
+    manager = BaseManager()
+    manager.start()
+    rec_manager = manager.RecognitionManager()
     
-    while True:
-        
-        if result_list[0] == True:
-            
-            lock.acquire()
+    th1 = multiprocessing.Process(target=start_recognition, args=(rec_manager,))
+    th1.start()
+    
+    th2 = multiprocessing.Process(target=get_recognition, args=(rec_manager,))
+    th2.start()
+    
 
-            result_list[0] = False
-            print(result_list[-1])
-            
-            lock.release()
+    try:
+        while True:
+            if len(rec_manager.record_list) > 0:
+                if re.search(r"\b(exit|quit)\b", rec_manager.record_list[-1], re.I):
+                    print("got exit")
+                    rec_manager.stop_thread = True
+                    th1.join()
+                    th2.join()
+            time.sleep(1)
+    except:
+        th1.terminate()
+        th2.terminate()
             
 # [END speech_transcribe_infinite_streaming]
