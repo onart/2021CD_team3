@@ -76,7 +76,7 @@ def lcs(a, b):
 def standardize(keyword):   # snake, camel/pascal 표기법 지원하여 단어 분리, 숫자 분리
     length=len(keyword)
     # snake (first_second_third)
-    ls=snake.split(keyword,'_')
+    ls=keyword.split('_')
     if len(ls) >= 2:
         for i in range(len(ls)):
             ls[i]=ls[i].lower()
@@ -84,4 +84,3 @@ def standardize(keyword):   # snake, camel/pascal 표기법 지원하여 단어 
     # camel/pascal (firstSecondThird/FirstSecondThird)
     for i in range(length):
         keyword('next')
-    

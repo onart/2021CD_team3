@@ -1,4 +1,5 @@
 import os, time
+import phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
@@ -9,7 +10,6 @@ STAMP=0
 classes=[]
 # 함수 {'이름': [[파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수], [파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수]]}
 functs=dict()
-
 # 단어풀(set)
 POOL=set()
 
@@ -30,11 +30,26 @@ def javaFillTree(fname):
     prog.close()
 
 def gc():   # 파일이 제거된 경우에 대비하여 modTimes와 struct에서 해당 내용을 없애는 함수. struct에서 먼저 제거하고 modTimes에서 제거
+    global classes, functs, modTimes
+    rmm=[] # 데이터에서 제거할 파일
     for f in modTimes:
         if modTimes[f][1]!=STAMP:
-            # struct에서 제거
-            # modTimes에서 제거
-            pass
+            rmm.append(f)
+            classes=[x for x in classes if x[1] != f]
+            for fu in functs:
+                functs[fu]=[x for x in functs if x[0] != f]
+    for f in rmm:
+        modTimes.pop(f)
+
+def poolUP():
+    global POOL, classes, modTimes, functs
+    POOL.clear()
+    for fi in modTimes:
+        POOL.add(fi)
+    for cl in classes:
+        POOL.add(cl[0])
+    for fu in functs:
+        POOL.add(fu)
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
     STAMP=time.time()
@@ -57,11 +72,14 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                     modTimes[f][0]=mtime
                     modTimes[f][1]=STAMP
                     ext[fext](f)
-    gc()
-    '''재귀호출이 있으므로 이런 코드 넣으면 안 됨!!
-    time.sleep(10)
-    scanDir(top)
-    '''
+
+def scanNgc(top):   # 음성 입력 시 스레드 중지 후 재시작
+    while True:
+        scanDir(top)
+        gc()
+        poolUP()
+        # 업데이트 완료 신호
+        time.sleep(10)
 
 ext.update({
     'py': pyFillTree,
