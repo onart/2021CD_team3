@@ -5,7 +5,13 @@ modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
 
 STAMP=0
 
-struct=[]
+# 클래스 ('이름', 파일, 시작 위치(행/열), 끝 위치(행/열), )
+classes=[]
+# 함수 {'이름': [[파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수], [파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수]]}
+functs=dict()
+
+# 단어풀(set)
+POOL=set()
 
 def pyFillTree(fname):
     prog=open(fname, 'r')
@@ -20,6 +26,10 @@ def cppFillTree(fname):
     prog.close()
 
 def javaFillTree(fname):
+    prog=open(fname, 'r')
+    prog.close()
+
+def hFillTree(fname):
     prog=open(fname, 'r')
     prog.close()
 

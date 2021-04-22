@@ -249,8 +249,6 @@ class MyApp(QMainWindow, form_class):
         option |= QFileDialog.ShowDirsOnly
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
 
-        
-
     def help(self):
         HelpWindow(self)
 
