@@ -1,6 +1,8 @@
 # 
 # The file is from https://github.com/googleapis/python-speech/blob/master/samples/microphone/transcribe_streaming_infinite.py
-# 
+# account.json should be in the same folder with this file
+#
+
 
 #!/usr/bin/env python
 
@@ -275,6 +277,8 @@ def start_recognition(rec_manager, language_korean=True):
 
     """start bidirectional streaming from microphone input to speech API"""
 
+    print("th1 start")
+
     client = speech.SpeechClient()
     if language_korean:
         config = speech.RecognitionConfig(
@@ -289,7 +293,7 @@ def start_recognition(rec_manager, language_korean=True):
             language_code="en-US",
             alternative_language_codes=["ko-KR"],
         )
-
+    
     streaming_config = speech.StreamingRecognitionConfig(
         config=config, interim_results=True
     )
@@ -333,6 +337,8 @@ def start_recognition(rec_manager, language_korean=True):
 
 # 음성인식 결과 리스트가 변한 경우 갱신하는 함수
 def get_recognition(rec_manager):
+
+    print("th2 start")
 
     while not rec_manager.stop_thread:
         

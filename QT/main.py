@@ -163,12 +163,17 @@ class MyApp(QMainWindow, form_class):
         background-position: center;
         border:0px;
         ''')
-            
+
+            # start start_recognition thread
             self.record_thread = threading.Thread(target=start_recognition, args=(self.rec_manager,))
             self.record_thread.setDaemon(True)
             self.record_thread.start()
+
+            # start get_recognition thread
+            self.getter_thread = threading.Thread(target=get_recognition, args=(self.rec_manager,))
+            self.getter_thread.setDaemon(True)
+            self.getter_thread.start()
             
-            pass
         else:
             #QMessageBox.about(self, "음성인식처리", "음성인식종료")
             self.voice.setStyleSheet('''
@@ -179,8 +184,6 @@ class MyApp(QMainWindow, form_class):
         ''')
             
             self.rec_manager.stop()
-            
-            pass
         
     def lstadd(self):
         self.fn_lst.insertItem(0, 'function 1')
