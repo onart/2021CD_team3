@@ -140,6 +140,9 @@ class MyApp(QMainWindow, form_class):
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
+        # stt recognition manager
+        self.rec_manager = RecognitionManager()
+
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog()
         dlg.exec_()
@@ -161,7 +164,6 @@ class MyApp(QMainWindow, form_class):
         border:0px;
         ''')
             
-            self.rec_manager = RecognitionManager()
             self.record_thread = threading.Thread(target=start_recognition, args=(self.rec_manager,))
             self.record_thread.setDaemon(True)
             self.record_thread.start()

@@ -271,17 +271,24 @@ def get_speech_recognition(responses, stream, rec_manager):
 
 
 # 음성인식 처리하는 함수
-def start_recognition(rec_manager):
+def start_recognition(rec_manager, language_korean=True):
 
     """start bidirectional streaming from microphone input to speech API"""
 
     client = speech.SpeechClient()
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=SAMPLE_RATE,
-        language_code="en-US",
-        alternative_language_codes=["ko-KR"],
-    )
+    if language_korean:
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+            sample_rate_hertz=SAMPLE_RATE,
+            language_code="ko-KR"
+        )
+    else:
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+            sample_rate_hertz=SAMPLE_RATE,
+            language_code="en-US",
+            alternative_language_codes=["ko-KR"],
+        )
 
     streaming_config = speech.StreamingRecognitionConfig(
         config=config, interim_results=True
