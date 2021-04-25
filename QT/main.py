@@ -140,6 +140,9 @@ class MyApp(QMainWindow, form_class):
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
+        # stt recognition manager
+        self.rec_manager = RecognitionManager()
+
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog()
         dlg.exec_()
@@ -160,13 +163,17 @@ class MyApp(QMainWindow, form_class):
         background-position: center;
         border:0px;
         ''')
-            
-            self.rec_manager = RecognitionManager()
+
+            # start start_recognition thread
             self.record_thread = threading.Thread(target=start_recognition, args=(self.rec_manager,))
             self.record_thread.setDaemon(True)
             self.record_thread.start()
+
+            # start get_recognition thread
+            self.getter_thread = threading.Thread(target=get_recognition, args=(self.rec_manager,))
+            self.getter_thread.setDaemon(True)
+            self.getter_thread.start()
             
-            pass
         else:
             #QMessageBox.about(self, "음성인식처리", "음성인식종료")
             self.voice.setStyleSheet('''
@@ -177,8 +184,6 @@ class MyApp(QMainWindow, form_class):
         ''')
             
             self.rec_manager.stop()
-            
-            pass
         
     def lstadd(self):
         self.fn_lst.insertItem(0, 'function 1')
