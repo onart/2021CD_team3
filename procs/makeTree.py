@@ -181,7 +181,39 @@ def cFillTree(fname):
     prog.close()
 
 def cppFillTree(fname):
-    prog=open(fname, 'r')
+    prog=open(fname, 'r', encoding='UTF8')
+
+    lines = prog.readlines()
+
+    # 주석 제거 및 공백 제거
+    for line in lines:
+        
+        indexes = [i + len(line) + 1 if i == -1 else i for i in (line.find('//'), line.find('/*'), line.find('"'))]
+        index = min(indexes)
+
+        # 3가지 모두 없으면
+        if index == len(line) + 1:
+            continue
+
+        case = indexes.index(index)
+        
+
+        # case '//'
+        if case == 0:
+            line = line[:index]
+            
+        # case '/*'
+        elif case == 1:
+            pass
+            
+        # case '"'
+        elif case == 2:
+            pass
+
+    for line in lines:
+        print(line)
+        
+    
     prog.close()
 
 def javaFillTree(fname):
