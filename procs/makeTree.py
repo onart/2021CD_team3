@@ -16,7 +16,46 @@ functs=dict()
 POOL=set()
 
 def pyFillTree(fname):
-    prog=open(fname, 'r')
+    prog=open(fname, 'r', encoding = 'UTF-8')
+    code = prog.readlines()
+
+    for row, line in enumerate(code):  # 행번호 0부터 시작
+
+        line = line.rstrip()
+        line_split = line.split()
+
+        if (line and line[-1] == ':' and line_split[0] == 'class'):
+
+            if (line_split[1][-1] == ':'):
+                class_name = line_split[1][:-1]
+            else:
+                class_name = line_split[1]
+            class_start_r = row
+            class_start_c = 0
+            class_end_r = None
+            class_end_c = -1
+            for new_row, next in enumerate(code[row + 1:], start=row + 1):
+                next_split = next.split()
+                if (next_split and next[0] != ' '):
+                    class_end_r = new_row - 1
+                    break
+            classes.append([class_name, fname, [class_start_r, class_end_c], [class_end_r, class_end_c]])
+
+        elif (line and line[-1] == ':' and line_split[0] == 'def'):
+            if (line_split[1][-1] == ':'):
+                fn_name = line_split[1][:-1]
+            else:
+                fn_name = line_split[1]
+            fn_start_r = row
+            fn_start_c = line.find('def')
+            fn_end_r = None
+            fn_end_c = -1
+            for new_row, next in enumerate(code[row + 1:], start=row + 1):
+                next_split = next.split()
+                print(next_split)
+                if (next_split and next.find(next_split[0]) != fn_start_c):
+                    fn_end_r = new_row - 1
+                    break
     prog.close()
 
 def cFillTree(fname):
