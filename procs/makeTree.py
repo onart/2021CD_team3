@@ -224,7 +224,7 @@ def cFillTree(fname):
                     tok2=targc+tok2
                     stp=(lineNo, colNo)
                 
-    print(classes)
+    # print(classes)
     # 현재 sloc 20000 가량의 파일 대상으로, 0.2초 가량 소모
     prog.close()
 
@@ -291,11 +291,11 @@ def poolUP():
     global POOL, classes, modTimes, functs
     POOL.clear()
     for fi in modTimes:
-        POOL.add(fi)
+        POOL.add(fi.lower())
     for cl in classes:
-        POOL.add(cl[0])
+        POOL.add(cl[0].lower())
     for fu in functs:
-        POOL.add(fu)
+        POOL.add(fu.lower())
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
     STAMP=time.time()
