@@ -18,7 +18,7 @@ POOL=set()
 def pyFillTree(fname):
     prog=open(fname, 'r', encoding = 'UTF-8')
     code = prog.readlines()
-
+    class_indent_for_scope = {}
     for row, line in enumerate(code):  # 행번호 0부터 시작
 
         line = line.rstrip()
@@ -40,22 +40,38 @@ def pyFillTree(fname):
                     class_end_r = new_row - 1
                     break
             classes.append([class_name, fname, [class_start_r, class_end_c], [class_end_r, class_end_c]])
-
+            class_indent_for_scope[line.find('class')] = class_name
         elif (line and line[-1] == ':' and line_split[0] == 'def'):
-            if (line_split[1][-1] == ':'):
-                fn_name = line_split[1][:-1]
-            else:
-                fn_name = line_split[1]
+            fn_name = ''
+            fn_para = ''
+            check = False
+            for i in range(line.find('def') + 3, len(line)):
+                if (line[i] != ' ' and line[i] != '(' and check == False):
+                    fn_name += line[i]
+                elif (line[i] == '('):
+                    check = True
+                elif (check and line[i] != ')'):
+                    fn_para += line[i]
+                elif (line[i] == ')'):
+                    break
             fn_start_r = row
             fn_start_c = line.find('def')
             fn_end_r = None
             fn_end_c = -1
+
             for new_row, next in enumerate(code[row + 1:], start=row + 1):
                 next_split = next.split()
-                print(next_split)
-                if (next_split and next.find(next_split[0]) != fn_start_c):
+                if (next_split and next.find(next_split[0]) != fn_start_c + 4):
                     fn_end_r = new_row - 1
                     break
+            if (line.find('def') == 0):
+                fn_scope = 'global'
+            else:
+                fn_scope = class_indent_for_scope[line.find('def') - 4]
+            functs[fn_name] = functs.get(fn_name, [])
+            functs[fn_name].append(
+                [fname, [fn_start_r, fn_start_c], [fn_end_r, fn_end_c], fn_scope, fn_para.rstrip().split(',')])
+
     prog.close()
 
 def cFillTree(fname):
