@@ -286,35 +286,129 @@ def cFillTree(fname):
 def cppFillTree(fname):
     prog=open(fname, 'r', encoding='UTF8')
 
-    lines = prog.readlines()
+    lines = prog.read()
 
-    # 주석 제거 및 공백 제거
-    for line in lines:
+    ignore_list = []
+
+    
+    # 인덱스 리스트
+    indexes = []
+    for match in re.finditer('//',lines):
+        indexes.append(match.span()[0])
+    for match in re.finditer('"',lines):
+        indexes.append(match.span()[0])
+    for match in re.finditer('/\*',lines):
+        indexes.append(match.span()[0])
+
+    indexes.sort()
+
+
+    # '//', '/*', '"' 찾아서 ignore_list에 추가
+    for index in indexes:
         
-        indexes = [i + len(line) + 1 if i == -1 else i for i in (line.find('//'), line.find('/*'), line.find('"'))]
-        index = min(indexes)
+        if index > len(lines) - 2:
+            break
 
-        # 3가지 모두 없으면
-        if index == len(line) + 1:
+        # ignore_list에 있다면 패스
+        do_continue = False
+        
+        for start, end in ignore_list:
+            
+            if index >= start and index <= end:
+                do_continue = True
+                break
+
+        if do_continue:
             continue
 
-        case = indexes.index(index)
+        # ignore_list append
         
-
-        # case '//'
-        if case == 0:
-            line = line[:index]
+        if lines[index:index+2] == '//':
+            end = lines[index:].find('\n') + index + 1
+            ignore_list.append((index, end))
+        
+        elif lines[index:index+2] == '/*':
+            end = lines[index:].find('*/') + index + 2
+            ignore_list.append((index, end))
             
-        # case '/*'
-        elif case == 1:
-            pass
-            
-        # case '"'
-        elif case == 2:
-            pass
+        else:
+            end = lines[index+1:].find('"') + index + 2
+            ignore_list.append((index, end))
 
-    for line in lines:
-        print(line)
+    # for debug
+    '''
+    for start, end in ignore_list:
+        print(lines[start:end])
+
+    print("end of ignore")
+    print(len(ignore_list))
+
+    input()
+    '''
+    
+    # class 찾기
+    for class_index in re.finditer('class', lines):
+
+        index = class_index.span()[0]
+
+        # ignore_list에 있으면 제거
+        do_continue = False
+        
+        for ignore_index, tup in enumerate(ignore_list):
+            
+            start, end = tup
+            
+            if start >= index:
+
+                start, end = ignore_list[ignore_index-1]
+                
+                # ignore_list 안에 있으면
+                if index >= start and index < end:
+                    do_continue = True
+                break
+
+        if do_continue:
+            continue
+                
+
+        # 이름 찾기    
+        br_index = lines[index:].find('{')     
+        name = lines[index+6:index+br_index-1]
+
+        # 시작 행, 열 찾기
+        row = lines[:index].count('\n') + 1
+        rindex = lines[:index].rfind('\n')
+        column = index - rindex - 1
+
+        # 끝 행, 열 찾기
+        br_indexes = []
+        
+        for match in re.finditer('{', lines[index:]):
+            br_indexes.append(match.span()[0])
+        for match in re.finditer('}', lines[index:]):
+            br_indexes.append(match.span()[0])
+
+        br_indexes.sort()
+
+        open_count = 0        
+        for br_index in br_indexes:
+            
+            if lines[index+br_index] == '{':
+                open_count += 1
+            elif lines[index+br_index] == '}':
+                open_count -= 1
+
+            if open_count == 0:
+                close_pos = br_index + index
+                break
+        
+        end_row = lines[:close_pos].count('\n') + 1
+        rindex = lines[:close_pos].rfind('\n')
+        end_column = close_pos - rindex - 1
+            
+        
+        # 클래스 ('이름', 파일, 시작 위치(행/열), 끝 위치(행/열), )
+        classes.append((name, fname, (row, column), (end_row, end_column)))
         
     
     prog.close()
