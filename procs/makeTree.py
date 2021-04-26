@@ -128,11 +128,21 @@ def cFillTree(fname):
         # {의 위치
         lineNo=curly[i][0]
         colNo=curly[i][1]
-        det=0   # 0: 초기, 1: ) 만남, 2: ( 만남, 3: ( 앞 토큰 만남, 4: ( 앞 토큰 완료, 5: ( 앞앞 토큰 만남, 6: ) 만나지 않고 다른 걸 만남, 
+        det=0   # 0: 초기, 1: ) 만남, 2: ( 만남, 3: ( 앞 토큰 만남, 4: ( 앞 토큰 완료, 5: ( 앞앞 토큰 만남, 6: ) 만나지 않고 다른 걸 만남(일반 이름, enum, union, struct 중 하나), 
         while True:
             colNo-=1
             if colNo<0:
                 lineNo-=1
+                if lineNo==0:   # 파일의 처음을 만난 경우, } 또는 ;를 만난 것과 동일 취급
+                    if det==4 or det==5:
+                        try:
+                            functs[tok1].append([fname, stp, curly[i+1], '', ' '.join(param.split())])
+                        except KeyError:
+                            functs[tok1]=[[fname, stp, curly[i+1], '', ' '.join(param.split())]]
+                        finally:
+                            break
+                    elif det==7:
+                        classes.append([tok1, fname, stp, curly[i+1]])
                 colNo=len(lines[lineNo-1])
             targc=lines[lineNo-1][colNo-1]
             if det==0:
@@ -140,16 +150,14 @@ def cFillTree(fname):
                     if targc==')':
                         det=1
                         param=''
+                    elif targc=='=':    # 전역배열
+                        break
                     else:
                         det=6
                         tok1=targc
             elif det==1:
                 if targc != '(':
-                    if targc != '\n':
-                        if targc=='\t':
-                            param=' '+param
-                        else:
-                            param=targc+param
+                    param=targc+param
                 else:
                     det=2
             elif det==2:
@@ -167,16 +175,56 @@ def cFillTree(fname):
                     tok2=targc
             elif det==5:
                 if targc not in '\n\t ':
+                    if targc in '};':   # 확인된 문제: 주석 내의 ;를 만나도 종료되므로 의미가 잘림
+                        try:
+                            functs[tok1].append([fname, stp, curly[i+1], '', ' '.join(param.split())])
+                        except KeyError:
+                            functs[tok1]=[[fname, stp, curly[i+1], '', ' '.join(param.split())]]
+                        finally:
+                            break
                     tok2=targc+tok2
-                else:
-                    try:
-                        functs[tok1].append([fname, curly[i], curly[i+1], '', param])   # curly[i+1]는 끝 위치가 맞지만 curly[i]는 시작 위치가 아니니 수정 예정
-                    except KeyError:
-                        functs[tok1]=[[fname, curly[i], curly[i+1], '', param]]
-                    break
+                    stp=(lineNo, colNo)
             elif det==6:
-                break
-    print(functs)
+                if targc not in '\n\t ':
+                    tok1=targc+tok1
+                else:
+                    tok2=''
+                    if tok1 in ('struct', 'enum', 'union'): # 중괄호 이후로 이동해서 이름 찾기, 없을 리는 없지만 없으면 classes에 저장하지 않음
+                        det=8
+                    else:
+                        det=7
+            elif det==7:
+                if targc not in '\n\t ':
+                    if targc in '};': # 
+                        classes.append([tok1, fname, stp, curly[i+1]])  # 끝점은 curly[i+1]이 아니니 고칠 것
+                        break
+                    tok2=targc+tok2
+                    stp=(lineNo, colNo)
+            elif det==8:
+                if targc not in '\n\t ':
+                    if targc in '};':
+                        lineNo = -curly[i+1][0]
+                        colNo = curly[i+1][1]
+                        while True:
+                            colNo+=1
+                            if colNo > len(lines[lineNo-1]):
+                                colNo=1
+                                lineNo+=1
+                                if lineNo > len(lines):
+                                    break
+                            targc=lines[lineNo-1][colNo-1]
+                            if targc != ';':
+                                tok2 += targc
+                            else:
+                                tok2=tok2.strip()
+                                if len(tok2)>0:
+                                    classes.append([tok2, fname, stp, (lineNo, colNo)])
+                                break
+                        break
+                    tok2=targc+tok2
+                    stp=(lineNo, colNo)
+                
+    print(classes)
     # 현재 sloc 20000 가량의 파일 대상으로, 0.2초 가량 소모
     prog.close()
 

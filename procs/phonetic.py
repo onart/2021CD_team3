@@ -5,9 +5,13 @@
 0.1. 숫자를 중심으로 끊을 것.
 0.1.1. 끊어진 숫자가 '123'이라고 하면 one two three, 백이십삼, 일이삼, one hundred twenty three를 인정
 
-1. 음절수 컷(+1~+2까지)
-2. 모음유사도
-3. 
+영어
+1. soundex LCS
+2. lcs
+
+한국어
+1. 모음끼리
+2. 자음끼리
 '''
 
 EXC='aehiouwy'
