@@ -283,7 +283,7 @@ def cFillTree(fname):
     # 현재 sloc 20000 가량의 파일 대상으로, 0.2초 가량 소모
     prog.close()
 
-def cppFillTree(fname):
+ddef cppFillTree(fname):
     prog=open(fname, 'r', encoding='UTF8')
 
     lines = prog.read()
@@ -302,7 +302,7 @@ def cppFillTree(fname):
 
     indexes.sort()
 
-
+    # '"'인 경우 미포함
     # '//', '/*', '"' 찾아서 ignore_list에 추가
     for index in indexes:
         
@@ -409,7 +409,61 @@ def cppFillTree(fname):
         
         # 클래스 ('이름', 파일, 시작 위치(행/열), 끝 위치(행/열), )
         classes.append((name, fname, (row, column), (end_row, end_column)))
+
+
+    # 함수 찾기
+    for func_index in re.finditer(' .*\(.*\)[ \n\t]*{',lines):
+
+        index = func_index.span()[0]
+        br_index = lines[index:].find('(') + index
+
+        name = lines[index:br_index].strip()
+        if name in reserved_word_cpp or name in reserved_word_c:
+            continue
+
+        # 시작 행, 열 찾기
+        row = lines[:index].count('\n') + 1
+        rindex = lines[:index].rfind('\n')
+        column = index - rindex - 1
+
+        # 끝 행, 열 찾기
+        br_indexes = []
         
+        for match in re.finditer('{', lines[index:]):
+            br_indexes.append(match.span()[0])
+        for match in re.finditer('}', lines[index:]):
+            br_indexes.append(match.span()[0])
+
+        br_indexes.sort()
+
+        open_count = 0        
+        for br_index in br_indexes:
+            
+            if lines[index+br_index] == '{':
+                open_count += 1
+            elif lines[index+br_index] == '}':
+                open_count -= 1
+
+            if open_count == 0:
+                close_pos = br_index + index
+                break
+        
+        end_row = lines[:close_pos].count('\n') + 1
+        rindex = lines[:close_pos].rfind('\n')
+        end_column = close_pos - rindex - 1
+
+        # 스코프 찾기, 미완료
+        scope = None
+
+        # 매개변수 찾기
+        start = lines[index].find('(')
+        end = lines[index].find(')')
+        args = lines[start:end]
+        
+        
+
+        # 함수 {'이름': [[파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수], [파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수]]}
+        functs[name].append((fname, (row, column), (end_row, end_colmun), scope, args))
     
     prog.close()
 
