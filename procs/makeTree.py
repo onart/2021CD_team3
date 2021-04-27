@@ -1,10 +1,9 @@
 import os, time, re
 import phonetic
 
-#뚜루루루~
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
-# 이건 내 주석
+
 STAMP=0
 
 # 템플릿: <...>까지 이름에 포함, 타입이 T 같이 돼 있는 것은 그대로 적음
@@ -35,6 +34,9 @@ def pyFillTree(fname):
     prog=open(fname, 'r', encoding = 'UTF-8')
     code = prog.readlines()
     class_indent_for_scope = {}
+    a=1
+    b=a+1
+    c=a+2+b
     for row, line in enumerate(code):  # 행번호 0부터 시작
 
         line = line.rstrip()
