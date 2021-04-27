@@ -34,9 +34,6 @@ def pyFillTree(fname):
     prog=open(fname, 'r', encoding = 'UTF-8')
     code = prog.readlines()
     class_indent_for_scope = {}
-    a=1
-    b=a+1
-    c=a+2+b
     for row, line in enumerate(code):  # 행번호 0부터 시작
 
         line = line.rstrip()
