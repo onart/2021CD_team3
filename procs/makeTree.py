@@ -478,7 +478,11 @@ def cppFillTree(fname):
         
 
         # 함수 {'이름': [[파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수], [파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수]]}
-        functs[name].append((fname, (row, column), (end_row, end_colmun), scope, args))
+        if functs.get(name) == None:
+            functs[name] = []
+            functs[name].append((fname, (row, column), (end_row, end_column), scope, args))
+        else:
+            functs[name].append((fname, (row, column), (end_row, end_column), scope, args))            
     
     prog.close()
 
