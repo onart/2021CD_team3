@@ -3,7 +3,7 @@ import phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
-
+# 이건 내 주석
 STAMP=0
 
 # 템플릿: <...>까지 이름에 포함, 타입이 T 같이 돼 있는 것은 그대로 적음
