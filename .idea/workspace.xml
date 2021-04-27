@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="edb6a392-0d2d-499f-a56d-19cd70892f48" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/procs/makeTree.py" beforeDir="false" afterPath="$PROJECT_DIR$/procs/makeTree.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
