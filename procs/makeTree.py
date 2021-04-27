@@ -705,7 +705,10 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                 except KeyError:                # 새 파일이 생성됨
                     modTimes[f][0]=mtime
                     modTimes[f][1]=STAMP
-                    ext[fext](f)
+                    try:
+                        ext[fext](f)
+                    except:
+                        print('error:',f)
 
 def scanNgc(top):   # 음성 입력 시 스레드 중지 후 재시작
     while True:
