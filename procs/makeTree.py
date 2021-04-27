@@ -487,7 +487,172 @@ def cppFillTree(fname):
     prog.close()
 
 def javaFillTree(fname):
-    prog=open(fname, 'r')
+
+    prog=open(fname, 'r', encoding='UTF-8')
+
+    func_range = ['public','protected','private']
+    func_form = ['void','boolean','short','int','long','float','double']
+
+    row = 0
+    
+    split_line = []
+    
+    save_line = []
+    
+    class_info = []
+    class_start_locate1 = []
+    class_start_locate2 = []
+    class_end_locate = []
+    
+    func_info = []
+    func_start_locate1 = []
+    func_start_locate2 = []
+    func_end_locate = []
+    func_scope = []
+    func_loc_para = []
+    func_para = []
+    
+    ignore_index = []
+    
+    while True:
+        row = row+1
+        line = prog.readline()
+
+        if line.find('//') != -1:
+            line = line.split('//')[0]    
+
+        if line.find('/*') != -1:
+            ignore_index.append([row,line.find('/*'),'-1'])
+
+        if line.find('*/') != -1:
+            ignore_index.append([row,line.find('*/'),'1'])
+                
+        save_line.append(line)
+        
+        if not line: break #주석처리한 부분 저장
+
+    
+    for lines in save_line:
+        split_line.append(lines.split())
+
+
+    num_i = 0
+        
+    for i in split_line:
+        num_i = num_i+1
+        for j in i:
+
+            if j == 'class':
+                class_info.append(i[i.index(j)+1].split('{')[0])
+                class_start_locate1.append([num_i,0])
+                
+                                               
+            if j in func_range:
+                if i[i.index(j)+1] in func_form:
+
+                    if i[i.index(j)+2].split('(')[0][-1] != ';':
+                        func_info.append(i[i.index(j)+2].split('(')[0])
+                        func_start_locate1.append([num_i,0])
+
+            # function (), function( ), function() 고려해서 이름, 시작 행 가공
+                    
+
+
+    class_index = 0
+    func_index = 0
+
+    
+    for class_name in class_info:
+        class_index = class_index+1
+        num_k = 0
+        for k in save_line:
+            num_k = num_k+1
+            if num_k >= class_start_locate1[class_index-1][0]:
+                if k.find('{') != -1:
+                    class_start_locate2.append([num_k,k.find('{')]) # class 시작위치 찾음
+                    break
+
+    
+    for func_name in func_info:
+        func_index = func_index+1
+        num_k = 0
+        for k in save_line:
+            num_k = num_k+1
+            if num_k >= func_start_locate1[func_index-1][0]:
+                if k.find('{') != -1:
+                    func_start_locate2.append([num_k,k.find('{')]) # function 시작위치 찾음
+                    break
+
+
+
+    class_index = 0
+    func_index = 0
+
+    
+    for class_name in class_info:
+        class_index = class_index+1
+        num_k = 0
+        check_num = 0
+        for k in save_line:
+            num_k = num_k+1
+            if num_k >= class_start_locate2[class_index-1][0]:
+               
+                if k.find('{') != -1:
+                    check_num = check_num + 1
+                    
+                if k.find('}') != -1:
+                    check_num = check_num - 1
+
+                if check_num == 0:
+                    class_end_locate.append([num_k,k.find('}')]) # class 끝위치 찾음
+                    break
+
+    
+    for func_name in func_info:
+        func_index = func_index+1
+        num_k = 0
+        check_num = 0
+        for k in save_line:
+            num_k = num_k+1
+            if num_k >= func_start_locate2[func_index-1][0]:
+                if k.find('{') != -1:
+                    check_num = check_num + 1
+                    
+                if k.find('}') != -1:
+                    check_num = check_num - 1
+
+                if check_num == 0:
+                    func_end_locate.append([num_k,k.find('}')]) # function 끝위치 찾음
+                    break
+
+
+    for locate_fn in range(0,len(func_start_locate2)):
+        func_scope.append('')
+        for locate_ca in range(0,len(class_start_locate2)):
+            if func_start_locate2[locate_fn][0] >= class_start_locate2[locate_ca][0]:
+                if func_end_locate[locate_fn][0] <= class_end_locate[locate_ca][0]:
+                    func_scope[locate_fn] = class_info[locate_ca]
+                    break #function scope 찾음
+
+
+    func_index = 0
+    for func_name in func_info:
+        func_index = func_index+1
+        num_k = 0
+        check_num = 0
+        for k in save_line:
+            num_k = num_k+1
+            if num_k == func_start_locate1[func_index-1][0]:
+                func_loc_para.append([k.find('('),k.find(')')])
+                func_para.append(k[k.find('(')+1:k.find(')')])
+
+
+    for len_class in range(0,len(class_info)):
+        classes.append([class_info[len_class],fname,class_start_locate2[len_class],class_end_locate[len_class]])
+
+    for len_func in range(0,len(func_info)):
+        functs[func_info[len_func]]=[fname,func_start_locate2[len_func],func_end_locate[len_func],func_scope[len_func],func_para[len_func]]
+
     prog.close()
 
 def gc():   # 제거된 파일에 대하여 기존 정보를 제거
