@@ -1,6 +1,7 @@
 import os, time, re
 import phonetic
 
+#뚜루루루~
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
 # 이건 내 주석
