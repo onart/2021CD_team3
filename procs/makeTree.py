@@ -1,4 +1,4 @@
-import os, time, re
+ import os, time, re
 import phonetic
 
 ext=dict()
@@ -14,6 +14,21 @@ classes=[]
 functs=dict()
 # 단어풀(set)
 POOL=set()
+
+# cpp 예약어
+reserved_word_cpp = ["__multiple_inheritance", "__single_inheritance", "__virtual_inheritance",
+                 "catch", "class", "const_cast", "delete", "dynamic_cast", "explicit", "export", "false", "friend", "inline", "mutable",
+                 "namespace", "new", "operator", "private", "protected", "public", "reinterpret_cast", "static_cast", "template",
+                 "this", "throw", "true", "try", "typeid", "typename", "using", "virtual", "wchar_t"
+                     ]
+# c 예약어
+reserved_word_c = ["__asm", "__based", "__cdecl", "__declspec", "__except", "__far", "__fastcall", "__finally", "__fortran",
+                   "__huge", "__inline", "__int16", "__int32", "__int64" "__int8", "__interrupt", "__leave", "__loadds"," __near",
+                   "__pascal", "__saveregs", "__segment", "__segname", "__self", "__stdcall", "__try", "__uuidof",
+                   "auto", "bool", "break", "case", "char", "const", "continue", "default", "defined", "do", "double",
+                   "else", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return",
+                   "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"
+                   ]
 
 def pyFillTree(fname):
     prog=open(fname, 'r', encoding = 'UTF-8')
@@ -283,7 +298,7 @@ def cFillTree(fname):
     # 현재 sloc 20000 가량의 파일 대상으로, 0.2초 가량 소모
     prog.close()
 
-ddef cppFillTree(fname):
+def cppFillTree(fname):
     prog=open(fname, 'r', encoding='UTF8')
 
     lines = prog.read()
