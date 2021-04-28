@@ -733,6 +733,7 @@ def poolUP():
         POOL.add(fu.lower())
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
+    global STAMP
     STAMP=time.time()
     cont=os.listdir(top)
     for c in cont:
@@ -748,9 +749,13 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                         modTimes[f][0]=mtime
                         # 해당 파일에 대하여 구조 업데이트하는 코드(ext[fext]가 해당 함수)
                         forMod(f)
-                        ext[fext](f)
+                        try:
+                            ext[fext](f)
+                        except:
+                            print('error:',f)
                     modTimes[f][1]=STAMP                        
                 except KeyError:                # 새 파일이 생성됨
+                    modTimes[f]=[0,0]
                     modTimes[f][0]=mtime
                     modTimes[f][1]=STAMP
                     try:
@@ -767,9 +772,9 @@ def scanNgc(top):   # 음성 입력 시 스레드 중지 후 재시작
         time.sleep(10)
 
 ext.update({
-    'py': pyFillTree,
-    'c': cFillTree,
-    'cpp': cppFillTree,
-    'java': javaFillTree,
-    'h': cppFillTree,
+    '.py': pyFillTree,
+    '.c': cFillTree,
+    '.cpp': cppFillTree,
+    '.java': javaFillTree,
+    '.h': cppFillTree,
 })
