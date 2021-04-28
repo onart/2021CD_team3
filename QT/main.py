@@ -139,13 +139,30 @@ class MyApp(QMainWindow, form_class):
         self.dragging_threshould = 5
         self.__mousePressPos = None
         self.__mouseMovePos = None
-
+        self.language_change = False #shif 눌릴 때마다 바뀜
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
         # stt recognition manager
         self.rec_manager = RecognitionManager()
 
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Shift:
+            self.language_change = not(self.language_change)
+            if(self.language_change):
+                self.voice.setStyleSheet('''
+                        background-image: url(./resources/recon_kor.png);
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        border:0px;
+                        ''')
+            else:
+                self.voice.setStyleSheet('''
+                                    background-image: url(./resources/recon.png);
+                                    background-repeat: no-repeat;
+                                    background-position: center;
+                                    border:0px;
+                                    ''')
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog()
         dlg.exec_()
@@ -158,10 +175,10 @@ class MyApp(QMainWindow, form_class):
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
         self.voice.setText(str(self.recording))
-        if self.recording:
+        if self.recording and self.language_change:   #한국어 음성인식
             #QMessageBox.about(self, "음성인식처리", "음성인식시작")
             self.voice.setStyleSheet('''
-        background-image: url(./resources/recon.png);
+        background-image: url(./resources/recon_kor.png);
         background-repeat: no-repeat;
         background-position: center;
         border:0px;
@@ -176,7 +193,26 @@ class MyApp(QMainWindow, form_class):
             self.getter_thread = threading.Thread(target=get_recognition, args=(self.rec_manager,))
             self.getter_thread.setDaemon(True)
             self.getter_thread.start()
-            
+
+        elif self.recording and not self.language_change: #영어 음성인식
+            # QMessageBox.about(self, "음성인식처리", "음성인식시작")
+            self.voice.setStyleSheet('''
+                    background-image: url(./resources/recon.png);
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    border:0px;
+                    ''')
+
+            # start start_recognition thread
+            self.record_thread = threading.Thread(target=start_recognition, args=(self.rec_manager,))
+            self.record_thread.setDaemon(True)
+            self.record_thread.start()
+
+            # start get_recognition thread
+            self.getter_thread = threading.Thread(target=get_recognition, args=(self.rec_manager,))
+            self.getter_thread.setDaemon(True)
+            self.getter_thread.start()
+
         else:
             #QMessageBox.about(self, "음성인식처리", "음성인식종료")
             self.voice.setStyleSheet('''
