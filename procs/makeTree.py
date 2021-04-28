@@ -521,8 +521,7 @@ def cppFillTree(fname):
         end = lines[index:].find(')') + index
         args = lines[start:end]
 
-        args = args.replace('\t', ' ')
-        args = args.replace('\n', ' ')
+        args=' '.join(args.split())
         
         
 
