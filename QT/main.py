@@ -14,6 +14,7 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5 import uic
 import procs.wind as wind
 from procs.stt import start_recognition, get_recognition, RecognitionManager
+import procs.makeTree as makeTree
 
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
@@ -95,6 +96,8 @@ class MyApp(QMainWindow, form_class):
         self.window_2 = None    # peek
 
         self.hIdeWnd=0          # IDE Window Handle
+
+        self.ctx=threading.Thread(target=makeTree.scanTH, daemon=True)
 
         self.setupUi(self)
         self.button_for_newtab.clicked.connect(self.peeker)
@@ -255,6 +258,9 @@ class MyApp(QMainWindow, form_class):
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
         if len(filename)>0:
             self.topDirectory.setText(filename)
+            makeTree.TOPDIR=filename
+            if not self.ctx.is_alive():
+                self.ctx.start()
 
     def help(self):
         HelpWindow(self)

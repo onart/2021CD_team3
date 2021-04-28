@@ -1,10 +1,13 @@
-import os, time, re
+import os, time, re, threading
 import phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
 
 STAMP=0
+TOPDIR=''
+
+scannerLock=threading.Lock()
 
 # 템플릿: <...>까지 이름에 포함, 타입이 T 같이 돼 있는 것은 그대로 적음
 
@@ -739,7 +742,8 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
     for c in cont:
         f=os.path.join(top, c)
         if os.path.isdir(f):
-            scanDir(f)
+            if c != '.git':
+                scanDir(f)
         elif os.path.isfile(f):
             fext=os.path.splitext(f)[1]
             if fext in ext: # 정해진 확장자 검사
@@ -747,7 +751,6 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                     mtime=os.path.getmtime(f)
                     if modTimes[f][0]!=mtime:   # 기존 파일이 수정됨
                         modTimes[f][0]=mtime
-                        # 해당 파일에 대하여 구조 업데이트하는 코드(ext[fext]가 해당 함수)
                         forMod(f)
                         try:
                             ext[fext](f)
@@ -755,21 +758,26 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                             print('error:',f)
                     modTimes[f][1]=STAMP                        
                 except KeyError:                # 새 파일이 생성됨
-                    modTimes[f]=[0,0]
-                    modTimes[f][0]=mtime
-                    modTimes[f][1]=STAMP
+                    modTimes[f]=[mtime,STAMP]
                     try:
                         ext[fext](f)
                     except:
                         print('error:',f)
 
-def scanNgc(top):   # 음성 입력 시 스레드 중지 후 재시작
+
+def scanTH():
     while True:
-        scanDir(top)
-        gc()
-        poolUP()
+        scanNgc()
         # 업데이트 완료 신호
         time.sleep(10)
+
+def scanNgc():
+    scannerLock.acquire()
+    scanDir(TOPDIR)
+    gc()
+    poolUP()
+    scannerLock.release()
+
 
 ext.update({
     '.py': pyFillTree,
