@@ -6,17 +6,40 @@ modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
 
 STAMP=0
 TOPDIR=''
+# 사용자에게 보여줄/IDE에서 탐색할 파일 이름: [len(TOPDIR)+1:]로 슬라이싱해야 함
 
 scannerLock=threading.Lock()
 
 # 템플릿: <...>까지 이름에 포함, 타입이 T 같이 돼 있는 것은 그대로 적음
 
-# 클래스 ('이름', 파일, 시작 위치(행/열), 끝 위치(행/열), )
-classes=[]
+# 클래스 {'이름': [파일, 시작 위치(행/열), 끝 위치(행/열)] }
+classes=dict()
 # 함수 {'이름': [[파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수], [파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수]]}
 functs=dict()
-# 단어풀(set)
-POOL=set()
+# 단어풀(dict)
+POOL=dict()
+class Pool:
+    def __init__(self):
+        self.fu=dict()
+        self.cl=dict()
+        self.fi=dict()
+
+    def __getitem__(self, index):
+        kfu=[]
+        kcl=[]
+        kfi=[]
+        if index in self.fu:
+            kfu=self.fu[index]
+        if index in self.cl:
+            kcl=self.cl[index]
+        if index in self.fi:
+            kfi=self.fi[index]
+        return [kfu, kcl, kfi]
+    
+    def clear(self):
+        self.fu.clear()
+        self.cl.clear()
+        self.fi.clear()
 
 # cpp 예약어
 reserved_word_cpp = ["__multiple_inheritance", "__single_inheritance", "__virtual_inheritance",
@@ -57,7 +80,7 @@ def pyFillTree(fname):
                 if (next_split and next[0] != ' '):
                     class_end_r = new_row - 1
                     break
-            classes.append([class_name, fname, [class_start_r, class_end_c], [class_end_r, class_end_c]])
+            classes[class_name]=[fname, (class_start_r, class_start_c), (class_end_r, class_end_c)]
             class_indent_for_scope[line.find('class')] = class_name
         elif (line and line[-1] == ':' and line_split[0] == 'def'):
             fn_name = ''
@@ -215,7 +238,7 @@ def cFillTree(fname):
                         finally:
                             break
                     elif det==7:
-                        classes.append([tok1, fname, stp, curly[i+1]])
+                        classes[tok1]=[fname, stp, curly[i+1]]
                 colNo=len(lines[lineNo-1])
             targc=lines[lineNo-1][colNo-1]
             if det==0:
@@ -269,7 +292,7 @@ def cFillTree(fname):
             elif det==7:
                 if targc not in '\n\t ':
                     if targc in '};': # 
-                        classes.append([tok1, fname, stp, curly[i+1]])  # 끝점은 curly[i+1]이 아니니 고칠 것
+                        classes[tok1]=[fname, stp, curly[i+1]]  # 끝점은 curly[i+1]이 아니니 고칠 것
                         break
                     tok2=targc+tok2
                     stp=(lineNo, colNo)
@@ -291,14 +314,12 @@ def cFillTree(fname):
                             else:
                                 tok2=tok2.strip()
                                 if len(tok2)>0:
-                                    classes.append([tok2, fname, stp, (lineNo, colNo)])
+                                    classes[tok2]=[fname, stp, (lineNo, colNo)]
                                 break
                         break
                     tok2=targc+tok2
                     stp=(lineNo, colNo)
-                
-    # print(classes)
-    # 현재 sloc 20000 가량의 파일 대상으로, 0.2초 가량 소모
+
     prog.close()
 
 def cpp_classes_renew(re_str, name_length, lines, ignore_list, fname):
@@ -358,7 +379,7 @@ def cpp_classes_renew(re_str, name_length, lines, ignore_list, fname):
             
         
         # 클래스 ('이름', 파일, 시작 위치(행/열), 끝 위치(행/열), )
-        classes.append((name, fname, (row, column), (end_row, end_column)))
+        classes[name]=[fname, (row, column), (end_row, end_column)]
 
 def cppFillTree(fname):
     prog=open(fname, 'r', encoding='UTF8')
@@ -699,7 +720,7 @@ def javaFillTree(fname):
 
 
     for len_class in range(0,len(class_info)):
-        classes.append([class_info[len_class],fname,class_start_locate2[len_class],class_end_locate[len_class]])
+        classes[class_info[len_class]]=[fname,class_start_locate2[len_class],class_end_locate[len_class]]
 
     for len_func in range(0,len(func_info)):
         functs[func_info[len_func]]=[fname,func_start_locate2[len_func],func_end_locate[len_func],func_scope[len_func],func_para[len_func]]
@@ -712,7 +733,7 @@ def gc():   # 제거된 파일에 대하여 기존 정보를 제거
     for f in modTimes:
         if modTimes[f][1]!=STAMP:
             rmm.append(f)
-            classes=[x for x in classes if x[1] != f]
+            classes={x:classes[x] for x in classes if classes[x][0] != f}
             for fu in functs:
                 functs[fu]=[x for x in functs if x[0] != f]
             functs={x:functs[x] for x in functs if len(functs[x]) != 0}
@@ -721,19 +742,15 @@ def gc():   # 제거된 파일에 대하여 기존 정보를 제거
 
 def forMod(fname):  # 수정된 파일에 대하여 기존 정보를 제거
     global classes, functs
-    classes=[x for x in classes if x[1] != fname]
+    classes={x:classes[x] for x in classes if classes[x][0] != fname}
     for fu in functs:
         functs[fu]=[x for x in functs if x[0] != fname]
 
+def normalize(name):    # 포네틱에 보내기 전 표준화
+    return name
+
 def poolUP():
-    global POOL, classes, modTimes, functs
-    POOL.clear()
-    for fi in modTimes:
-        POOL.add(fi.lower())
-    for cl in classes:
-        POOL.add(cl[0].lower())
-    for fu in functs:
-        POOL.add(fu.lower())
+    pass
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
     cont=[x for x in os.scandir(top) if x.is_dir() or os.path.splitext(x.name)[1] in ext]
