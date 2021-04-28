@@ -56,6 +56,10 @@ reserved_word_c = ["__asm", "__based", "__cdecl", "__declspec", "__except", "__f
                    "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"
                    ]
 
+# 파이썬 magic function
+python_magic_func = ["__new__", "__init__", "__add__", "__doc__", "__bool__", "__mul__", "__sub__", "__le__", "__ge__", "__del__",
+                     "__bytes__", "__format__", "__len__", "__iter__", "__reversed__", "__contains__", "__iter__" ]
+
 def pyFillTree(fname):
     prog=open(fname, 'r', encoding = 'UTF-8')
     code = prog.readlines()
@@ -75,12 +79,15 @@ def pyFillTree(fname):
             class_start_c = 0
             class_end_r = None
             class_end_c = -1
+            if ('(' in class_name):  # 클래스 이름에서 파라미터 삭제
+                idx = class_name.find('(')
+                class_name = class_name[:idx]
             for new_row, next in enumerate(code[row + 1:], start=row + 1):
                 next_split = next.split()
                 if (next_split and next[0] != ' '):
                     class_end_r = new_row - 1
                     break
-            classes[class_name]=[fname, (class_start_r, class_start_c), (class_end_r, class_end_c)]
+            classes[class_name] = [fname, (class_start_r + 1, class_start_c), (class_end_r + 1, class_end_c)]
             class_indent_for_scope[line.find('class')] = class_name
         elif (line and line[-1] == ':' and line_split[0] == 'def'):
             fn_name = ''
@@ -99,19 +106,25 @@ def pyFillTree(fname):
             fn_start_c = line.find('def')
             fn_end_r = None
             fn_end_c = -1
+            if ('(' in fn_name):  # 함수 이름에서 파라미터 삭제
+                idx = fn_name.find('(')
+                fn_name = fn_name[:idx]
 
-            for new_row, next in enumerate(code[row + 1:], start=row + 1):
+            if(fn_name in python_magic_func): # 매직 function 인 경우, 아예 집어넣지 않음
+                continue
+            for new_row, next in enumerate(code[row + 1:], start=row):  # 함수가 같은 줄에서 끝나는 경우 생각
                 next_split = next.split()
-                if (next_split and next.find(next_split[0]) != fn_start_c + 4):
+
+                if (next_split and next.find(next_split[0]) < fn_start_c + 4 and new_row > row):
                     fn_end_r = new_row - 1
                     break
             if (line.find('def') == 0):
-                fn_scope = 'global'
+                fn_scope = ''  # scope 전역일 때는 빈문자열로
             else:
                 fn_scope = class_indent_for_scope[line.find('def') - 4]
             functs[fn_name] = functs.get(fn_name, [])
             functs[fn_name].append(
-                [fname, [fn_start_r, fn_start_c], [fn_end_r, fn_end_c], fn_scope, fn_para.rstrip().split(',')])
+                [fname, [fn_start_r + 1, fn_start_c], [fn_end_r + 1, fn_end_c], fn_scope, fn_para.rstrip().split(',')])
 
     prog.close()
 
