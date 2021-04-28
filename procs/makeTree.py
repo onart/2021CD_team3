@@ -320,6 +320,7 @@ def cpp_classes_renew(re_str, name_length, lines, ignore_list, fname):
         # 이름 찾기    
         br_index = lines[index:].find('{')     
         name = lines[index+name_length+1:index+br_index-1]
+        name = name.strip(' \n\t')
 
         # 시작 행, 열 찾기
         row = lines[:index].count('\n') + 1
@@ -432,30 +433,52 @@ def cppFillTree(fname):
 
     # 공용체 찾기
     cpp_classes_renew('union[ \n\t]+\w+?[ \n\t]*{', len('union'), lines, ignore_list, fname)
-    
 
     # 함수 찾기
-    # for func_index in re.finditer('[ \n\t]\w+?[ \n\t]*\(.*?\)[ \n\t]*{', lines, re.DOTALL):
-    for func_index in re.finditer('[ \n\t]\w+?[ \n\t]*\(.*\n*.*\)[ \n\t]*{', lines):
+    for func_index in re.finditer('\)[ \n\t]*{', lines, re.S):
 
         index = func_index.span()[0]
 
-        # ignore_list에 있으면 제거
-        do_continue = False
+        # 앞 괄호 찾기
+        br_count = 0
+        index -= 1
         
-        for start, end in ignore_list:
-            
-            if index >= start and index <= end:
-                do_continue = True
-                break
+        while index >= 0:
 
-        if do_continue:
+            if lines[index] == '(':
+                
+                if br_count == 0:
+                    break
+                else:
+                    br_count -= 1
+
+            elif lines[index] == ')':
+                
+                br_count += 1
+
+            index -= 1
+
+        index -= 1
+
+        # 앞 token 찾기
+        while index >= 0 and lines[index] in ('\n', '\t', ' '):
+            index -= 1
+
+        if index < 0:
             continue
-        
-        br_index = lines[index:].find('(') + index
 
-        # 이름 찾기
-        name = lines[index:br_index].strip()
+        end = index + 1
+
+        while index >= 0 and lines[index] not in ('\n', '\t', ' '):
+            index -= 1
+
+        if index < 0:
+            continue
+
+        start = index + 1
+            
+        name = lines[start:end]
+        
         if name in reserved_word_cpp or name in reserved_word_c:
             continue
 
@@ -494,9 +517,12 @@ def cppFillTree(fname):
         scope = ''
 
         # 매개변수 찾기
-        start = lines[index:].find('(') + index
-        end = lines[index:].find(')') + index + 1
+        start = lines[index:].find('(') + index + 1
+        end = lines[index:].find(')') + index
         args = lines[start:end]
+
+        args = args.replace('\t', ' ')
+        args = args.replace('\n', ' ')
         
         
 
