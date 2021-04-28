@@ -129,7 +129,7 @@ def pyFillTree(fname):
         line = line.rstrip()
         line_split = line.split()
 
-        if (line and line[-1] == ':' and line_split[0] == 'class'):
+        if (line and ':' in line and line_split[0] == 'class'):
 
             if (line_split[1][-1] == ':'):
                 class_name = line_split[1][:-1]
@@ -149,7 +149,7 @@ def pyFillTree(fname):
                     break
             classes[class_name] = [fname, (class_start_r + 1, class_start_c), (class_end_r + 1, class_end_c)]
             class_indent_for_scope[line.find('class')] = class_name
-        elif (line and line[-1] == ':' and line_split[0] == 'def'):
+        elif (line and ':' in line and line_split[0] == 'def'):
             fn_name = ''
             fn_para = ''
             check = False
