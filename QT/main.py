@@ -253,6 +253,8 @@ class MyApp(QMainWindow, form_class):
         option = QFileDialog.Option()
         option |= QFileDialog.ShowDirsOnly
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
+        if len(filename)>0:
+            self.topDirectory.setText(filename)
 
     def help(self):
         HelpWindow(self)

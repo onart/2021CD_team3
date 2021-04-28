@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>300</height>
+    <width>250</width>
+    <height>120</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>200</width>
-    <height>300</height>
+    <width>250</width>
+    <height>120</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>200</width>
-    <height>300</height>
+    <width>250</width>
+    <height>120</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -29,8 +29,8 @@
    <widget class="QPushButton" name="voice">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>0</y>
+      <x>95</x>
+      <y>40</y>
       <width>63</width>
       <height>60</height>
      </rect>
@@ -71,46 +71,46 @@ QPushButton:pressed {
    <widget class="QPushButton" name="NewWindow">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>70</y>
-      <width>75</width>
+      <x>190</x>
+      <y>60</y>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>NewWindow</string>
+     <string>seek</string>
     </property>
    </widget>
    <widget class="QListWidget" name="fn_lst">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>100</y>
-      <width>150</width>
-      <height>150</height>
+      <x>210</x>
+      <y>90</y>
+      <width>21</width>
+      <height>21</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="termButton">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>270</y>
-      <width>75</width>
+      <x>220</x>
+      <y>10</y>
+      <width>21</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>종료</string>
+     <string>x</string>
     </property>
    </widget>
    <widget class="QLabel" name="activeWindow">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>280</y>
-      <width>56</width>
-      <height>12</height>
+      <y>100</y>
+      <width>181</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="text">
@@ -121,32 +121,32 @@ QPushButton:pressed {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
-      <width>75</width>
+      <y>60</y>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>button_for_newtab</string>
+     <string>peek</string>
     </property>
    </widget>
    <widget class="QPushButton" name="open_File">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>270</y>
+      <x>10</x>
+      <y>10</y>
       <width>21</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>File</string>
+     <string>top</string>
     </property>
    </widget>
    <widget class="QPushButton" name="help_button">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>200</x>
       <y>10</y>
       <width>20</width>
       <height>23</height>
@@ -154,6 +154,22 @@ QPushButton:pressed {
     </property>
     <property name="text">
      <string>?</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="topDirectory">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>13</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>top 디렉토리를 선택하세요</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>
