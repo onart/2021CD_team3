@@ -18,13 +18,13 @@ EXC='aehiouwy'
 ALPHA=(0,1,2,3,0,1,2,0,0,2,2,4,5,5,0,1,2,6,2,3,0,1,0,2,0,2)
 smallA=ord('a')
 
-TEST=(
-    'arrange', 'soundex', 'spell', 'lcs', 'standardize',
-    'pyfilltree', 'cfilltree', 'cppfilltree', 'gc', 'scandir',
-    'startrecognition', 'getspeechrecognition', 'generator',
-    'init', 'getcurrenttime', 'phonetic','macro', 'maketree', 'wind',
-    'helpwindow', 'anotherwindow', 'peekerwindow'
-      )
+def subHead(inp, word): # arrange에 사용하게 될 수 있음
+    length=min(len(inp), len(word))
+    for i in range(length):
+        if inp[i] != word[i]:
+            return i
+    return i
+
 
 def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 함수/클래스 풀
     ar=[]
@@ -47,13 +47,13 @@ def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words�
     return ar
 
 def soundEx(keyword):   # 일반 케이스
-    ret=keyword[0]
+    ret=str(ALPHA[ord(keyword[0])-smallA])
     cur='?'
     for c in keyword[1:]:
         i=ALPHA[ord(c)-smallA]
-        if i != 0 and 'c != cur':
+        cur=i
+        if i != 0 and c != cur:
             ret+=str(i)
-            cur=i
             '''
             if len(ret)==4:
                 return ret
