@@ -16,15 +16,20 @@ scannerLock=threading.Lock()
 classes=dict()
 # 함수 {'이름': [[파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수], [파일, 시작 위치(행/열), 끝 위치(행/열), 스코프(전역 or 클래스이름), 매개변수]]}
 functs=dict()
-# 단어풀(dict)
-POOL=dict()
+
 class Pool:
+    '''
+    호출 순서: update(자동) -> soundIn(음성 입력 시) -> __getitem__(선택 시)
+    '''
     def __init__(self):
         self.fu=dict()
         self.cl=dict()
         self.fi=dict()
+        self.candid=set()
 
     def __getitem__(self, index):
+        if index not in self.candid:
+            return None
         kfu=[]
         kcl=[]
         kfi=[]
@@ -37,9 +42,64 @@ class Pool:
         return [kfu, kcl, kfi]
     
     def clear(self):
+        self.candid.clear()
         self.fu.clear()
         self.cl.clear()
         self.fi.clear()
+
+    def normalize(self, name):  # 현재 단계: 로마자만 소문자로 남기고 나머지 제거(숫자도 제거)
+        ret=''
+        for i in name:
+            if ord(i)>=ord('a') and ord(i)<=ord('z'):
+                ret+=i
+            elif ord(i)>=ord('A') and ord(i)<=ord('Z'):
+                ret+=i.lower()
+            elif i=='_':
+                pass
+            else:
+                pass
+
+        return ret
+
+    def update(self):
+        self.clear()
+        for fi in modTimes:
+            nfi=self.normalize(fi)
+            self.candid.add(nfi)
+            if nfi in self.fi:
+                self.fi[nfi].append(fi)
+            else:
+                self.fi[nfi]=[fi]
+        for fu in functs:
+            nfu=self.normalize(fu)
+            self.candid.add(nfu)
+            if nfu in self.fu:
+                self.fu[nfu].append(fu)
+            else:
+                self.fu[nfu]=[fu]
+        for cl in classes:
+            ncl=self.normalize(cl)
+            self.candid.add(ncl)
+            if ncl in self.cl:
+                self.cl[ncl].append(cl)
+            else:
+                self.cl[ncl]=[cl]
+    
+    def soundIn(self, input):   # 인수: 구글 STT에서 받은 결과물(str, 영어), 리턴: 풀 내 후보
+        ret=phonetic.arrange_s(input, self.candid)
+        if len(ret)<3:
+            ret.extend(phonetic.arrange(input, self.candid)[:3])
+        elif len(ret)>10:
+            # 너무 많아서 잘렸다고 안내
+            ret=ret[:10]
+        ret2=[]
+        for r in ret:
+            if r not in ret2:
+                ret2.append(r)
+        return ret2
+
+
+POOL=Pool()
 
 # cpp 예약어
 reserved_word_cpp = ["__multiple_inheritance", "__single_inheritance", "__virtual_inheritance",
@@ -804,7 +864,7 @@ def scanNgc():
     STAMP=time.time()
     scanDir(TOPDIR)
     gc()
-    poolUP()
+    POOL.update()
     scannerLock.release()
 
 
