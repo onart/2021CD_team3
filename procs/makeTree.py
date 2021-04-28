@@ -736,33 +736,30 @@ def poolUP():
         POOL.add(fu.lower())
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
-    global STAMP
-    STAMP=time.time()
-    cont=os.listdir(top)
+    cont=[x for x in os.scandir(top) if x.is_dir() or os.path.splitext(x.name)[1] in ext]
     for c in cont:
-        f=os.path.join(top, c)
-        if os.path.isdir(f):
-            if c != '.git':
-                scanDir(f)
-        elif os.path.isfile(f):
+        f=c.path
+        if c.is_dir():
+            scanDir(f)
+        elif c.is_file:
             fext=os.path.splitext(f)[1]
-            if fext in ext: # 정해진 확장자 검사
-                try:
-                    mtime=os.path.getmtime(f)
-                    if modTimes[f][0]!=mtime:   # 기존 파일이 수정됨
-                        modTimes[f][0]=mtime
-                        forMod(f)
-                        try:
-                            ext[fext](f)
-                        except:
-                            print('error:',f)
-                    modTimes[f][1]=STAMP                        
-                except KeyError:                # 새 파일이 생성됨
-                    modTimes[f]=[mtime,STAMP]
+            try:
+                mtime=c.stat().st_mtime
+                if modTimes[f][0]!=mtime:
+                    modTimes[f][0]=mtime
+                    forMod(f)
                     try:
                         ext[fext](f)
                     except:
                         print('error:',f)
+                modTimes[f][1]=STAMP
+            except KeyError:
+                modTimes[f]=[mtime, STAMP]
+                try:
+                    ext[fext](f)
+                except:
+                    print('error:',f)
+
 
 
 def scanTH():
@@ -773,6 +770,8 @@ def scanTH():
 
 def scanNgc():
     scannerLock.acquire()
+    global STAMP
+    STAMP=time.time()
     scanDir(TOPDIR)
     gc()
     poolUP()
