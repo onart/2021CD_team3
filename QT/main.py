@@ -68,6 +68,12 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
+
+        qr=self.frameGeometry()
+        cp=QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
         self.setWindowTitle("Seleck Ur function")
 
         label1 = QLabel("Function lst")
@@ -219,7 +225,7 @@ class MyApp(QMainWindow, form_class):
                     border:0px;
                     ''')
 
-            self.rec_manager.start()
+            self.rec_manager.start(self.soundIn)
             
         else:
             #QMessageBox.about(self, "음성인식처리", "음성인식종료")

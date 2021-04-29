@@ -187,8 +187,9 @@ class RecognitionManager:
         self.stop_thread = False
         self.list_changed = False
 
-    def start(self):
+    def start(self, soundIn):
         self.reset()
+        self.soundIn=soundIn
         '''
             # start start_recognition thread
             self.record_thread = threading.Thread(target=start_recognition, args=(self,))

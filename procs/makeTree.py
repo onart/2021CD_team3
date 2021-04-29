@@ -1,8 +1,8 @@
-import os, time, re, threading, sys
+import os, time, re, threading, sys, traceback
 
 sys.path.append(os.path.abspath('..'))
 
-import procs.phonetic
+import procs.phonetic as phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
@@ -839,6 +839,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                         ext[fext](f)
                     except:
                         print('error:',f)
+                        traceback.print_exc()
                 modTimes[f][1]=STAMP
             except KeyError:
                 modTimes[f]=[mtime, STAMP]
@@ -846,6 +847,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                     ext[fext](f)
                 except:
                     print('error:',f)
+                    traceback.print_exc()
 
 
 

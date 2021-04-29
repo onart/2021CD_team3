@@ -66,7 +66,7 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
     for w in words:
         val=lcs(soundEx(w),basis)
         val2=lcs(inp, w)
-        if val != 0:
+        if val > len(basis)/2:
             ar.append((w, val+val2/10))
     ar.sort(key=lambda x: x[1])
     ar.reverse()
@@ -98,7 +98,7 @@ def soundEx(keyword):   # 일반 케이스
 def spell(inp, keyword):    # 스펠을 부른 케이스
     return (keyword.find(inp) == 0)
 
-def lcs(a, b):
+def lcs(a, b):  # LCS에서 거리가 3 이상 되면 쳐내도록 수정 예정
     prev = [0]*len(a)
     for i,r in enumerate(a):
         current = []
