@@ -124,9 +124,15 @@ python_magic_func = ["__new__", "__init__", "__add__", "__doc__", "__bool__", "_
                      "__bytes__", "__format__", "__len__", "__iter__", "__reversed__", "__contains__", "__iter__" ]
 
 def pyFillTree(fname):
-    prog=open(fname, 'r', encoding = 'UTF-8')
+    try:
+        prog=open(fname, 'r', encoding = 'UTF-8')
+        code = prog.readlines()
+    except UnicodeDecodeError:
+        prog.close()
+        prog=open(fname, 'r', encoding='cp949')
+        code = prog.readlines()
+
     fname=fname[len(TOPDIR)+1:]
-    code = prog.readlines()
     class_indent_for_scope = {}
     for row, line in enumerate(code):  # 행번호 0부터 시작
 
@@ -197,9 +203,14 @@ def pyFillTree(fname):
     prog.close()
 
 def cFillTree(fname):
-    prog=open(fname, 'r')
+    try:
+        prog=open(fname, 'r', encoding = 'UTF-8')
+        lines = prog.readlines()
+    except UnicodeDecodeError:
+        prog.close()
+        prog=open(fname, 'r', encoding='cp949')
+        lines = prog.readlines()
     fname=fname[len(TOPDIR)+1:]
-    lines = prog.readlines()
     ign=[]  # 무시해야 할 것: 문자/문자열 리터럴 내, 주석 내. "", //, /**/ 은 먼저 나오는 쪽이 이김
     lineNo=0
     cur=0   # 0: 보통, 1: 일반주석, 2: 문자열리터럴
@@ -464,9 +475,14 @@ def cpp_classes_renew(re_str, name_length, lines, ignore_list, fname):
         classes[name]=[fname, (row, column), (end_row, end_column)]
 
 def cppFillTree(fname):
-    prog=open(fname, 'r', encoding='UTF8')
+    try:
+        prog=open(fname, 'r', encoding='UTF8')
+        lines=prog.read()
+    except UnicodeDecodeError:
+        prog.close()
+        prog=open(fname, 'r', encoding='cp949')
+        lines.prog.read()
     fname=fname[len(TOPDIR)+1:]
-    lines = prog.read()
 
     ignore_list = []
 
