@@ -28,11 +28,11 @@ class HelpWindow(QDialog):
 
 
 class PeekerWindow(QMainWindow):
-    def __init__(self, f, h): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
+    def __init__(self, f, parent): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
         super().__init__()
-        self.lib=ctypes.windll.LoadLibrary('user32.dll')
+        self.lib=parent.lib
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.hIdeWnd=h
+        self.hIdeWnd=parent.hIdeWnd
         self.funct1=keyboard.on_press_key(key='`', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
 
@@ -92,6 +92,8 @@ class MyApp(QMainWindow, form_class):
 
     def __init__(self):
         super().__init__()
+
+        self.lib=ctypes.windll.LoadLibrary('user32.dll')
 
         QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
         self.setFont(QtGui.QFont('티머니 둥근바람 Regular', 10))
@@ -290,10 +292,14 @@ class MyApp(QMainWindow, form_class):
         if self.hIdeWnd==0:
             return
         elif self.window_2 == None:
-            self.window_2 = PeekerWindow(f, self.hIdeWnd)
+            self.window_2 = PeekerWindow(f, self)
             self.window_2.show()
 
     def soundIn(self, word):
+        if self.activeWindow.text == 'others':
+            if self.lib.SetForegroundWindow(self.hIdeWnd)==0:
+                QMessageBox.about(self, "오류", "IDE가 감지되지 않았습니다.")
+                return
         if self.language_change:    # 일반 명령어
             pass
         else:   # peek or seek

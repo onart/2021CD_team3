@@ -48,7 +48,7 @@ def currentWindow(receiver):    #스레드 함수
         if wind != receiver.activeWindow.text:
             receiver.activeWindow.setText(wind)
             if wind=='others':
-                receiver.hIdeWnd=0
+                pass
             else:
                 receiver.hIdeWnd=hwnd
             # print(cur)
