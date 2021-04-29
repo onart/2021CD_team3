@@ -151,6 +151,8 @@ def pyFillTree(fname):
                 if (next_split and next[0] != ' '):
                     class_end_r = new_row - 1
                     break
+            else:
+                class_end_r = len(code)
             classes[class_name] = [fname, (class_start_r + 1, class_start_c), (class_end_r + 1, class_end_c)]
             class_indent_for_scope[line.find('class')] = class_name
         elif (line and ':' in line and line_split[0] == 'def'):
@@ -182,6 +184,8 @@ def pyFillTree(fname):
                 if (next_split and next.find(next_split[0]) < fn_start_c + 4 and new_row > row):
                     fn_end_r = new_row - 1
                     break
+            else:
+                fn_end_r = len(code)
             if (line.find('def') == 0):
                 fn_scope = ''  # scope 전역일 때는 빈문자열로
             else:
@@ -703,6 +707,11 @@ def javaFillTree(fname):
                     if i[i.index(j)+2].split('(')[0][-1] != ';':
                         func_info.append(i[i.index(j)+2].split('(')[0])
                         func_start_locate1.append([num_i,0])
+
+            if j == 'void':
+                if i[i.index(j)+1].split('(')[0][-1] != ';':
+                    func_info.append(i[i.index(j)+1].split('(')[0])
+                    func_start_locate1.append([num_i,0])
 
             # function (), function( ), function() 고려해서 이름, 시작 행 가공
                     
