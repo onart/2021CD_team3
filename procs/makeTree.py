@@ -842,6 +842,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                     except:
                         print('error:',f)
                         traceback.print_exc()
+                        modTimes[f]=[mtime, 0]
                 modTimes[f][1]=STAMP
             except KeyError:
                 modTimes[f]=[mtime, STAMP]
@@ -850,8 +851,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                 except:
                     print('error:',f)
                     traceback.print_exc()
-
-
+                    modTimes[f]=[mtime, 0]
 
 def scanTH():
     while True:
