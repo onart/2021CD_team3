@@ -1,8 +1,8 @@
-import os, time, re, threading, sys
+import os, time, re, threading, sys, traceback
 
 sys.path.append(os.path.abspath('..'))
 
-import procs.phonetic
+import procs.phonetic as phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
@@ -125,6 +125,7 @@ python_magic_func = ["__new__", "__init__", "__add__", "__doc__", "__bool__", "_
 
 def pyFillTree(fname):
     prog=open(fname, 'r', encoding = 'UTF-8')
+    fname=fname[len(TOPDIR)+1:]
     code = prog.readlines()
     class_indent_for_scope = {}
     for row, line in enumerate(code):  # 행번호 0부터 시작
@@ -193,6 +194,7 @@ def pyFillTree(fname):
 
 def cFillTree(fname):
     prog=open(fname, 'r')
+    fname=fname[len(TOPDIR)+1:]
     lines = prog.readlines()
     ign=[]  # 무시해야 할 것: 문자/문자열 리터럴 내, 주석 내. "", //, /**/ 은 먼저 나오는 쪽이 이김
     lineNo=0
@@ -459,7 +461,7 @@ def cpp_classes_renew(re_str, name_length, lines, ignore_list, fname):
 
 def cppFillTree(fname):
     prog=open(fname, 'r', encoding='UTF8')
-
+    fname=fname[len(TOPDIR)+1:]
     lines = prog.read()
 
     ignore_list = []
@@ -637,7 +639,7 @@ def cppFillTree(fname):
 def javaFillTree(fname):
 
     prog=open(fname, 'r', encoding='UTF-8')
-
+    fname=fname[len(TOPDIR)+1:]
     func_range = ['public','protected','private']
     func_form = ['void','boolean','short','int','long','float','double']
 
@@ -844,6 +846,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                         ext[fext](f)
                     except:
                         print('error:',f)
+                        traceback.print_exc()
                 modTimes[f][1]=STAMP
             except KeyError:
                 modTimes[f]=[mtime, STAMP]
@@ -851,6 +854,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                     ext[fext](f)
                 except:
                     print('error:',f)
+                    traceback.print_exc()
 
 
 

@@ -54,7 +54,3 @@ def currentWindow(receiver):    #스레드 함수
             # print(cur)
         time.sleep(0.2)   # 갱신 시간 수
 
-
-
-if __name__ == '__main__':
-    currentWindow()
