@@ -59,9 +59,11 @@ class PeekerWindow(QMainWindow):
             event.accept()
 
 class fn_dialog(QDialog):  #새로운 창 for new_window
-    def __init__(self):
+    def __init__(self, content):
         super().__init__()
         self.setupUI()
+        for i in range(len(content)):
+            self.fn_lst.insertItem(i, content[i])
         self.select_fn = None
 
     def setupUI(self):
@@ -74,11 +76,11 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
         self.pushButton1 = QPushButton("Select")
         self.pushButton1.clicked.connect(self.pushButtonClicked)
-
+'''
         self.fn_lst.insertItem(0, 'fn1')
         self.fn_lst.insertItem(1, 'fn2')
         self.fn_lst.insertItem(2, 'fn3')
-
+'''
         layout = QGridLayout()
         layout.addWidget(label1, 0, 0)
         layout.addWidget(self.fn_lst, 0, 1)
@@ -185,7 +187,7 @@ class MyApp(QMainWindow, form_class):
             )
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        dlg = fn_dialog()
+        dlg = fn_dialog([1,2,3])
         dlg.exec_()
         try:
             _fn = dlg.select_fn.text()
@@ -290,8 +292,19 @@ class MyApp(QMainWindow, form_class):
             makeTree.scanNgc()
             sel1=makeTree.POOL.soundIn(word)
             # sel1 중 하나를 선택하는 대화상자 띄우고 결과 sel2에 저장
+            if len(sel1)==0:
+                QMessageBox.about(self, "오류", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
+                return
+            if len(sel1)==1:
+                sel2=sel1[0]
+            else:
+                ch1=fn_dialog(sel1)
+                ch1.exec_()
+                try:
+                    sel2=ch1.select_fn.text()
+                except AttributeError:  # 선택하지 않음
+                    return
             # 단 sel1의 결과가 1개라면 생략
-            sel2=''
             sel3=makeTree.POOL[sel2]
             if len(sel3[0])+len(sel3[1])+len(sel3[2])==1:
                 if len(sel3[0])==1:
