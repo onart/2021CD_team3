@@ -76,11 +76,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
         self.pushButton1 = QPushButton("Select")
         self.pushButton1.clicked.connect(self.pushButtonClicked)
-'''
-        self.fn_lst.insertItem(0, 'fn1')
-        self.fn_lst.insertItem(1, 'fn2')
-        self.fn_lst.insertItem(2, 'fn3')
-'''
+
         layout = QGridLayout()
         layout.addWidget(label1, 0, 0)
         layout.addWidget(self.fn_lst, 0, 1)
@@ -96,6 +92,9 @@ class MyApp(QMainWindow, form_class):
 
     def __init__(self):
         super().__init__()
+
+        QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
+        self.setFont(QtGui.QFont('티머니 둥근바람 Regular', 10))
 
         self.window_1 = None    # Alt+tab-like
         self.window_2 = None    # peek
@@ -121,16 +120,18 @@ class MyApp(QMainWindow, form_class):
         self.textButtons=(
             self.NewWindow,
             self.termButton,
+            self.help_button,
             )
 
         for bu in self.textButtons:
-            bu.setStyleSheet('QPushButton:hover{background-color: white;} QPushButton{background-color: rgba(0,0,0,0); border-radius: 5px;}')
+            bu.setStyleSheet('QPushButton:hover{ color: Red; } QPushButton{background-color: rgba(0,0,0,0); border-radius: 5px;}')
         self.recording=False
 
         self.voice.setStyleSheet('''
         background-image: url(./resources/recoff.png);
         background-position: center;
         background-repeat: no-repeat;
+        color: White;
         border:0px;
         ''')
 
@@ -139,8 +140,8 @@ class MyApp(QMainWindow, form_class):
 
         # gradient
         self.backBrush=QtGui.QLinearGradient(0,0,0,400)
-        self.backBrush.setColorAt(0.0, QtGui.QColor(240, 240, 240))
-        self.backBrush.setColorAt(1.0, QtGui.QColor(200, 200, 200))
+        self.backBrush.setColorAt(0.0, QtGui.QColor(255, 255, 160))
+        self.backBrush.setColorAt(1.0, QtGui.QColor(240, 200, 120))
         self.foregroundColor = QtGui.QColor(240,240,240)
         self.borderRadius=15
         
@@ -153,7 +154,7 @@ class MyApp(QMainWindow, form_class):
         self.dragging_threshould = 5
         self.__mousePressPos = None
         self.__mouseMovePos = None
-        self.language_change = False #shif 눌릴 때마다 바뀜
+        self.language_change = False #shift 눌려 있으면 ON
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
@@ -169,6 +170,8 @@ class MyApp(QMainWindow, form_class):
                         background-image: url(./resources/recon_kor.png);
                         background-repeat: no-repeat;
                         background-position: center;
+                        font-family: 티머니 둥근바람 Regular;
+                        color: White;
                         border:0px;
             '''
         )
@@ -182,12 +185,14 @@ class MyApp(QMainWindow, form_class):
                     background-image: url(./resources/recon.png);
                     background-repeat: no-repeat;
                     background-position: center;
+                    font-family: 티머니 둥근바람 Regular;
+                    color: White;
                     border:0px;
                 '''
             )
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        dlg = fn_dialog([1,2,3])
+        dlg = fn_dialog(['1','2','3'])
         dlg.exec_()
         try:
             _fn = dlg.select_fn.text()
@@ -197,13 +202,14 @@ class MyApp(QMainWindow, form_class):
     
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
-        self.voice.setText(str(self.recording))
         if self.recording:
             # QMessageBox.about(self, "음성인식처리", "음성인식시작")
             self.voice.setStyleSheet('''
                     background-image: url(./resources/recon.png);
                     background-repeat: no-repeat;
                     background-position: center;
+                    font-family: 티머니 둥근바람 Regular;
+                    color: White;
                     border:0px;
                     ''')
 
@@ -215,15 +221,13 @@ class MyApp(QMainWindow, form_class):
         background-image: url(./resources/recoff.png);
         background-position: center;
         background-repeat: no-repeat;
+        font-family: 티머니 둥근바람 Regular;
+        color: White;
         border:0px;
         ''')
             self.language_change=False
             
             self.rec_manager.stop()
-        
-    def lstadd(self):
-        self.fn_lst.insertItem(0, 'function 1')
-        self.fn_lst.insertItem(1, 'function 2')
 
     def paintEvent(self, event):
         # get current window size

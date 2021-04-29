@@ -101,7 +101,7 @@ QPushButton:pressed {
      </rect>
     </property>
     <property name="text">
-     <string>x</string>
+     <string>X</string>
     </property>
    </widget>
    <widget class="QLabel" name="activeWindow">
