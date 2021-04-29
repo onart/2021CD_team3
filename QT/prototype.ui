@@ -81,16 +81,6 @@ QPushButton:pressed {
      <string>seek</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="fn_lst">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>90</y>
-      <width>21</width>
-      <height>21</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="termButton">
     <property name="geometry">
      <rect>
@@ -140,7 +130,7 @@ QPushButton:pressed {
      </rect>
     </property>
     <property name="text">
-     <string>top</string>
+     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="help_button">

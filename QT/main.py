@@ -115,7 +115,11 @@ class MyApp(QMainWindow, form_class):
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        
+        self.open_File.setStyleSheet('''
+        background-image: url(./resources/folder.png); background-position: center;
+        background-repeat: no-repeat;
+        background-position: center;
+        ''')
         # button qss
         self.textButtons=(
             self.NewWindow,
