@@ -18,6 +18,40 @@ EXC='aehiouwy'
 ALPHA=(0,1,2,3,0,1,2,0,0,2,2,4,5,5,0,1,2,6,2,3,0,1,0,2,0,2)
 smallA=ord('a')
 
+BASEORDER=ord('가')
+HD=( 'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ',
+       'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' )
+MD=('ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
+     'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ' )
+ED=( '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ',
+      'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ',
+      'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ')
+
+DM={
+    'ㅑ': 'ㅣㅏ',
+    'ㅒ': 'ㅣㅐ',
+    'ㅕ': 'ㅣㅓ',
+    'ㅖ': 'ㅣㅔ',
+    'ㅘ': 'ㅗㅏ',
+    'ㅙ': 'ㅗㅐ',
+    'ㅚ': 'ㅗㅔ',
+    'ㅛ': 'ㅣㅗ',
+    'ㅝ': 'ㅜㅓ',
+    'ㅟ': 'ㅜㅣ',
+    'ㅠ': 'ㅣㅜ',
+    'ㅢ': 'ㅡㅣ',
+    'ㄳ': 'ㄱㅅ',
+    'ㄵ': 'ㄴㅈ',
+    'ㄶ': 'ㄴㅎ',
+    'ㄺ': 'ㄹㄱ',
+    'ㄻ': 'ㄹㅁ',
+    'ㄼ': 'ㄹㅂ',
+    'ㄽ': 'ㄹㅅ',
+    'ㄾ': 'ㄹㅌ',
+    'ㄿ': 'ㄹㅍ',
+    'ㅄ': 'ㅂㅅ',
+    }
+
 def subHead(inp, word): # arrange에 사용하게 될 수 있음
     length=min(len(inp), len(word))
     for i in range(length):
@@ -88,3 +122,16 @@ def standardize(keyword):   # snake, camel/pascal 표기법 지원하여 단어 
     # camel/pascal (firstSecondThird/FirstSecondThird)
     for i in range(length):
         keyword('next')
+
+def hme(letter):    # 리턴 (초, 중, 종성)
+    letter=ord(letter)-BASEORDER
+    ed=ED[letter % 28]
+    letter //= 28
+    md=MD[letter % 21]
+    letter //= 21
+    hd=HD[letter]
+    if md in DM:
+        md=DM[md]
+    if ED[ed] in DM:
+        ed=DM[ed]
+    return hd+md+ed
