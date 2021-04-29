@@ -1,5 +1,8 @@
-import os, time, re, threading
-import phonetic
+import os, time, re, threading, sys
+
+sys.path.append(os.path.abspath('..'))
+
+import procs.phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
@@ -818,12 +821,6 @@ def forMod(fname):  # 수정된 파일에 대하여 기존 정보를 제거
     classes={x:classes[x] for x in classes if classes[x][0] != fname}
     for fu in functs:
         functs[fu]=[x for x in functs if x[0] != fname]
-
-def normalize(name):    # 포네틱에 보내기 전 표준화
-    return name
-
-def poolUP():
-    pass
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
     cont=[x for x in os.scandir(top) if x.is_dir() or os.path.splitext(x.name)[1] in ext]

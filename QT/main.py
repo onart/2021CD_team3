@@ -34,19 +34,25 @@ class PeekerWindow(QMainWindow):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=h
         self.funct=keyboard.on_press_key(key='`', callback=self.setToggle)
+        self.funct=keyboard.on_press_key(key='Escape', callback=self.escape)
 
     def setToggle(self, dummy):
         keyboard.press('backspace')
         if self.isActiveWindow():
             self.lib.SetForegroundWindow(self.hIdeWnd)
-            # 조작 모드 변경
+            # 조작 모드 변경 
         else:
             self.activateWindow()
             # 조작 모드 변경
+    
+    def escape(self, dummy):
+        self.close()
+
     def closeEvent(self, event):
         print('ggg')
         try:
             keyboard.unhook_key(self.funct)
+            keyboard.unhook_key(self.escape)
         except KeyError:
             print('already closed')
         finally:
@@ -123,6 +129,13 @@ class MyApp(QMainWindow, form_class):
             bu.setStyleSheet('QPushButton:hover{background-color: white;} QPushButton{background-color: rgba(0,0,0,0); border-radius: 5px;}')
         self.recording=False
 
+        self.voice.setStyleSheet('''
+        background-image: url(./resources/recoff.png);
+        background-position: center;
+        background-repeat: no-repeat;
+        border:0px;
+        ''')
+
         # gradient
         self.backBrush=QtGui.QLinearGradient(0,0,0,400)
         self.backBrush.setColorAt(0.0, QtGui.QColor(240, 240, 240))
@@ -148,21 +161,31 @@ class MyApp(QMainWindow, form_class):
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Shift:
-            self.language_change = not(self.language_change)
-            if(self.language_change):
-                self.voice.setStyleSheet('''
+            if not self.recording:
+                return
+            self.language_change = True
+            self.voice.setStyleSheet(
+                '''
                         background-image: url(./resources/recon_kor.png);
                         background-repeat: no-repeat;
                         background-position: center;
                         border:0px;
-                        ''')
-            else:
-                self.voice.setStyleSheet('''
-                                    background-image: url(./resources/recon.png);
-                                    background-repeat: no-repeat;
-                                    background-position: center;
-                                    border:0px;
-                                    ''')
+                ''')
+
+    def keyReleaseEvent(self, e):
+        if e.key()==Qt.Key_Shift:
+            if not self.recording:
+                return
+            self.language_change = False
+            self.voice.setStyleSheet(
+                '''
+                    background-image: url(./resources/recon.png);
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    border:0px;
+                '''
+            )
+
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog()
         dlg.exec_()
@@ -221,6 +244,7 @@ class MyApp(QMainWindow, form_class):
         background-repeat: no-repeat;
         border:0px;
         ''')
+            self.language_change=False
             
             self.rec_manager.stop()
         
