@@ -856,6 +856,8 @@ def scanTH():
         time.sleep(10)
 
 def scanNgc():
+    if len(TOPDIR)==0:
+        return
     scannerLock.acquire()
     global STAMP
     STAMP=time.time()

@@ -283,6 +283,30 @@ class MyApp(QMainWindow, form_class):
             self.window_2 = PeekerWindow(f, self.hIdeWnd)
             self.window_2.show()
 
+    def soundIn(self, word):
+        if self.language_change:    # 일반 명령어
+            pass
+        else:   # peek or seek
+            makeTree.scanNgc()
+            sel1=makeTree.POOL.soundIn(word)
+            # sel1 중 하나를 선택하는 대화상자 띄우고 결과 sel2에 저장
+            # 단 sel1의 결과가 1개라면 생략
+            sel2=''
+            sel3=makeTree.POOL[sel2]
+            if len(sel3[0])+len(sel3[1])+len(sel3[2])==1:
+                if len(sel3[0])==1:
+                    sel4=makeTree.functs[sel3[0][0]]
+                    state='fu'
+                elif len(sel3[1])==1:
+                    sel4=makeTree.classes[sel3[1][0]]
+                    state='cl'
+                else:
+                    sel4=sel3[2][0]
+                    state='fi'
+            else:   # 파일, 클래스, 함수 중 있는 선택지 보여줌
+                pass
+            # peek 모드인지 seek 모드인지에 따라 구분 처리
+
     def fileopen(self): #새로운 파일 선택
         option = QFileDialog.Option()
         option |= QFileDialog.ShowDirsOnly
