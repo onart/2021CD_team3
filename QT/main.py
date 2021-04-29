@@ -33,8 +33,8 @@ class PeekerWindow(QMainWindow):
         self.lib=ctypes.windll.LoadLibrary('user32.dll')
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=h
-        self.funct=keyboard.on_press_key(key='`', callback=self.setToggle)
-        self.funct=keyboard.on_press_key(key='Escape', callback=self.escape)
+        self.funct1=keyboard.on_press_key(key='`', callback=self.setToggle)
+        self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
 
     def setToggle(self, dummy):
         keyboard.press('backspace')
@@ -51,8 +51,8 @@ class PeekerWindow(QMainWindow):
     def closeEvent(self, event):
         print('ggg')
         try:
-            keyboard.unhook_key(self.funct)
-            keyboard.unhook_key(self.escape)
+            keyboard.unhook_key(self.funct1)
+            keyboard.unhook_key(self.funct2)
         except KeyError:
             print('already closed')
         finally:
@@ -90,9 +90,6 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.select_fn = self.fn_lst.currentItem()
         self.close()
 
-
-
-
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
@@ -121,7 +118,6 @@ class MyApp(QMainWindow, form_class):
         # button qss
         self.textButtons=(
             self.NewWindow,
-            # self.voice
             self.termButton,
             )
 
@@ -135,6 +131,9 @@ class MyApp(QMainWindow, form_class):
         background-repeat: no-repeat;
         border:0px;
         ''')
+
+        self.funct1=keyboard.on_press_key(key='shift', callback=self.korOn)
+        self.funct2=keyboard.on_release_key(key='shift', callback=self.korOff)
 
         # gradient
         self.backBrush=QtGui.QLinearGradient(0,0,0,400)
@@ -159,25 +158,24 @@ class MyApp(QMainWindow, form_class):
         # stt recognition manager
         self.rec_manager = RecognitionManager()
 
-    def keyPressEvent(self, e):
-        if e.key() == Qt.Key_Shift:
-            if not self.recording:
-                return
-            self.language_change = True
-            self.voice.setStyleSheet(
-                '''
+    def korOn(self, dummy):
+        if not self.recording:
+            return
+        self.language_change=True
+        self.voice.setStyleSheet(
+            '''
                         background-image: url(./resources/recon_kor.png);
                         background-repeat: no-repeat;
                         background-position: center;
                         border:0px;
-                ''')
+            '''
+        )
 
-    def keyReleaseEvent(self, e):
-        if e.key()==Qt.Key_Shift:
-            if not self.recording:
-                return
-            self.language_change = False
-            self.voice.setStyleSheet(
+    def korOff(self, dummy):
+        if not self.recording:
+            return
+        self.language_change=False
+        self.voice.setStyleSheet(
                 '''
                     background-image: url(./resources/recon.png);
                     background-repeat: no-repeat;
@@ -198,26 +196,7 @@ class MyApp(QMainWindow, form_class):
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
         self.voice.setText(str(self.recording))
-        if self.recording and self.language_change:   #한국어 음성인식
-            #QMessageBox.about(self, "음성인식처리", "음성인식시작")
-            self.voice.setStyleSheet('''
-        background-image: url(./resources/recon_kor.png);
-        background-repeat: no-repeat;
-        background-position: center;
-        border:0px;
-        ''')
-
-            # start start_recognition thread
-            self.record_thread = threading.Thread(target=start_recognition, args=(self.rec_manager,))
-            self.record_thread.setDaemon(True)
-            self.record_thread.start()
-
-            # start get_recognition thread
-            self.getter_thread = threading.Thread(target=get_recognition, args=(self.rec_manager,))
-            self.getter_thread.setDaemon(True)
-            self.getter_thread.start()
-
-        elif self.recording and not self.language_change: #영어 음성인식
+        if self.recording:
             # QMessageBox.about(self, "음성인식처리", "음성인식시작")
             self.voice.setStyleSheet('''
                     background-image: url(./resources/recon.png);
