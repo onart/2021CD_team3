@@ -187,6 +187,20 @@ class RecognitionManager:
         self.stop_thread = False
         self.list_changed = False
 
+    def start(self):
+        self.reset()
+        '''
+            # start start_recognition thread
+            self.record_thread = threading.Thread(target=start_recognition, args=(self,))
+            self.record_thread.setDaemon(True)
+            self.record_thread.start()
+
+            # start get_recognition thread
+            self.getter_thread = threading.Thread(target=get_recognition, args=(self,))
+            self.getter_thread.setDaemon(True)
+            self.getter_thread.start()
+        '''
+
     def stop(self):
         self.stop_thread = True
 
