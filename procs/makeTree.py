@@ -702,6 +702,11 @@ def javaFillTree(fname):
                         func_info.append(i[i.index(j)+2].split('(')[0])
                         func_start_locate1.append([num_i,0])
 
+            if j == 'void':
+                if i[i.index(j)+1].split('(')[0][-1] != ';':
+                    func_info.append(i[i.index(j)+1].split('(')[0])
+                    func_start_locate1.append([num_i,0])
+
             # function (), function( ), function() 고려해서 이름, 시작 행 가공
                     
 
