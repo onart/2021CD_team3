@@ -101,7 +101,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
-
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         qr=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
@@ -146,6 +146,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 class Roundener: # 상속 전용 클래스
     def __init__(self, window, brush=None, borderRadius=15):
         self.window=window
+        self.window.setFont(QtGui.QFont('티머니 둥근바람 Regular', 10))
         if brush==None:
             self.backBrush=QtGui.QLinearGradient(0,0,0,400)
             self.backBrush.setColorAt(0.0, QtGui.QColor(255, 255, 160))
