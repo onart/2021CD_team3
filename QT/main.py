@@ -24,7 +24,24 @@ class HelpWindow(QDialog):
         super(HelpWindow, self).__init__(parent)
         uic.loadUi("Help.ui", self)
         self.termButton.clicked.connect(self.close)
+        self.roundener=Roundener(self)
         self.show()
+
+    def paintEvent(self, event):
+        # get current window size
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
 
 class PeekerWindow(QMainWindow):
     def __init__(self, f, parent): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
@@ -34,6 +51,7 @@ class PeekerWindow(QMainWindow):
         self.hIdeWnd=parent.hIdeWnd
         self.funct1=keyboard.on_press_key(key='`', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
+        self.roundener=Roundener(self)
 
     def setToggle(self, dummy):
         keyboard.press('backspace')
@@ -56,6 +74,21 @@ class PeekerWindow(QMainWindow):
             print('already closed')
         finally:
             event.accept()
+    def paintEvent(self, event):
+        # get current window size
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
 
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self, content):
@@ -64,6 +97,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         for i in range(len(content)):
             self.fn_lst.insertItem(i, content[i])
         self.select_fn = None
+        self.roundener=Roundener(self)
 
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
@@ -93,6 +127,76 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.select_fn = self.fn_lst.currentItem()
         self.close()
 
+    def paintEvent(self, event):
+        # get current window size
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
+
+class Roundener: # 상속 전용 클래스
+    def __init__(self, window, brush=None, borderRadius=15):
+        self.window=window
+        if brush==None:
+            self.backBrush=QtGui.QLinearGradient(0,0,0,400)
+            self.backBrush.setColorAt(0.0, QtGui.QColor(255, 255, 160))
+            self.backBrush.setColorAt(1.0, QtGui.QColor(240, 200, 120))
+            self.foregroundColor = QtGui.QColor(240,240,240)
+            # drag
+            self.draggable = True
+            self.dragging_threshould = 5
+            self.__mousePressPos = None
+            self.__mouseMovePos = None
+            self.borderRadius=borderRadius
+        else:
+            self.backBrush=brush
+
+    def paintEvent(self, event):
+        s=self.window.size()
+        qp=QtGui.QPainter()
+        qp.begin(self.window)
+        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        qp.setBrush(self.backBrush)
+        qp.drawRoundedRect(0, 0, s.width(), s.height(), self.borderRadius, self.borderRadius)
+        qp.end()
+    
+    def mousePressEvent(self, event):
+        if self.draggable and event.button() == QtCore.Qt.LeftButton:
+            self.__mousePressPos = event.globalPos()                # global
+            self.__mouseMovePos = event.globalPos() - self.window.pos()    # local
+            print(self.__mousePressPos)
+
+    def mouseMoveEvent(self, event):
+        if self.__mousePressPos is None:
+            return
+        if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
+            globalPos = event.globalPos()
+            moved = globalPos - self.__mousePressPos
+            if moved.manhattanLength() > self.dragging_threshould:
+                # move when user drag window more than dragging_threshould
+                diff = globalPos - self.__mouseMovePos
+                self.window.move(diff)
+                self.__mouseMovePos = globalPos - self.window.pos()
+
+    def mouseReleaseEvent(self, event):
+        if self.__mousePressPos is not None:
+            if event.button() == QtCore.Qt.LeftButton:
+                moved = event.globalPos() - self.__mousePressPos
+                if moved.manhattanLength() > self.dragging_threshould:
+                    # do not call click event or so on
+                    event.ignore()
+                self.__mousePressPos = None
+
+
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
@@ -109,6 +213,7 @@ class MyApp(QMainWindow, form_class):
         self.hIdeWnd=0          # IDE Window Handle
 
         self.ctx=threading.Thread(target=makeTree.scanTH, daemon=True)
+        self.roundener=Roundener(self)
 
         self.setupUi(self)
         self.button_for_newtab.clicked.connect(self.peeker)
@@ -149,22 +254,6 @@ class MyApp(QMainWindow, form_class):
         self.funct1=keyboard.on_press_key(key='shift', callback=self.korOn)
         self.funct2=keyboard.on_release_key(key='shift', callback=self.korOff)
 
-        # gradient
-        self.backBrush=QtGui.QLinearGradient(0,0,0,400)
-        self.backBrush.setColorAt(0.0, QtGui.QColor(255, 255, 160))
-        self.backBrush.setColorAt(1.0, QtGui.QColor(240, 200, 120))
-        self.foregroundColor = QtGui.QColor(240,240,240)
-        self.borderRadius=15
-        
-        #layout = QVBoxLayout(self)
-        #layout.setContentsMargins(0, 0, 0, 0)
-        #layout.setSpacing(0)
-
-        # drag
-        self.draggable = True
-        self.dragging_threshould = 5
-        self.__mousePressPos = None
-        self.__mouseMovePos = None
         self.language_change = False #shift 눌려 있으면 ON
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
@@ -242,46 +331,18 @@ class MyApp(QMainWindow, form_class):
 
     def paintEvent(self, event):
         # get current window size
-        s = self.size()
-        qp = QtGui.QPainter()
-        qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setPen(self.foregroundColor)
-        qp.setBrush(self.backBrush)
-        qp.drawRoundedRect(0, 0, s.width(), s.height(),
-                           self.borderRadius, self.borderRadius)
-        qp.end()
+        self.roundener.paintEvent(event)
 
     def mousePressEvent(self, event):
-        if self.draggable and event.button() == QtCore.Qt.LeftButton:
-            self.__mousePressPos = event.globalPos()                # global
-            self.__mouseMovePos = event.globalPos() - self.pos()    # local
-            print(self.__mousePressPos)
-            
+        self.roundener.mousePressEvent(event)   
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self.__mousePressPos is None:
-            super().mouseMoveEvent(event)
-            return
-        if self.draggable and event.buttons() & QtCore.Qt.LeftButton:
-            globalPos = event.globalPos()
-            moved = globalPos - self.__mousePressPos
-            if moved.manhattanLength() > self.dragging_threshould:
-                # move when user drag window more than dragging_threshould
-                diff = globalPos - self.__mouseMovePos
-                self.move(diff)
-                self.__mouseMovePos = globalPos - self.pos()
+        self.roundener.mouseMoveEvent(event)
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if self.__mousePressPos is not None:
-            if event.button() == QtCore.Qt.LeftButton:
-                moved = event.globalPos() - self.__mousePressPos
-                if moved.manhattanLength() > self.dragging_threshould:
-                    # do not call click event or so on
-                    event.ignore()
-                self.__mousePressPos = None
+        self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
     def closeEvent(self, event):
