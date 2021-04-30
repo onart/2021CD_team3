@@ -15,6 +15,7 @@ from PyQt5 import uic
 import procs.wind as wind
 from procs.stt import start_recognition, get_recognition, RecognitionManager
 import procs.makeTree as makeTree
+import html
 
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
@@ -90,12 +91,53 @@ class PeekerWindow(QMainWindow):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
+#html 사용을 위한 클래스
+class HTMLDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, parent=None):
+        super(HTMLDelegate, self).__init__(parent)
+        self.doc = QtGui.QTextDocument(self)
+
+    def paint(self, painter, option, index):
+        painter.save()
+        options = QtWidgets.QStyleOptionViewItem(option)
+        self.initStyleOption(options, index)
+        self.doc.setHtml(options.text)
+        options.text = ""
+        style = QtWidgets.QApplication.style() if options.widget is None \
+            else options.widget.style()
+        style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter)
+
+        ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
+        if option.state & QtWidgets.QStyle.State_Selected:
+            ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(
+                QtGui.QPalette.Active, QtGui.QPalette.HighlightedText))
+        else:
+            ctx.palette.setColor(QtGui.QPalette.Text, option.palette.color(
+                QtGui.QPalette.Active, QtGui.QPalette.Text))
+        textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options, None)
+        if index.column() != 0:
+            textRect.adjust(5, 0, 0, 0)
+        constant = 4
+        margin = (option.rect.height() - options.fontMetrics.height()) // 2
+        margin = margin - constant
+        textRect.setTop(textRect.top() + margin)
+
+        painter.translate(textRect.topLeft())
+        painter.setClipRect(textRect.translated(-textRect.topLeft()))
+        self.doc.documentLayout().draw(painter, ctx)
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        return QtCore.QSize(self.doc.idealWidth(), self.doc.size().height())
+
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self, content):
         super().__init__()
         self.setupUI()
-        for i in range(len(content)):
-            self.fn_lst.insertItem(i, content[i])
+        delegate = HTMLDelegate(self.fn_lst)
+        self.fn_lst.setItemDelegate(delegate)
+        for i, _key in enumerate(content.keys()):
+            self.fn_lst.insertItem(i, '{}<b>{}</b> <span style="color:red">{}</span>'.format(_key, content[_key][0][0], content[_key][0][4]) )
         self.select_fn = None
         self.roundener=Roundener(self)
 
@@ -291,7 +333,9 @@ class MyApp(QMainWindow, form_class):
             )
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        dlg = fn_dialog(['1','2','3'])
+        dlg = fn_dialog({'wname': [['wind.py', [26, 0], [34, -1], '', 's, pname']],
+ 'currentWindow': [['wind.py', [36, 0], [57, -1], '', 'receiver']],
+ 'subHead': [['phonetic.py', [55, 0], [61, -1], '', 'inp, word']]}) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
         try:
             _fn = dlg.select_fn.text()
