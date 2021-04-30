@@ -26,7 +26,6 @@ class HelpWindow(QDialog):
         self.termButton.clicked.connect(self.close)
         self.show()
 
-
 class PeekerWindow(QMainWindow):
     def __init__(self, f, parent): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
         super().__init__()

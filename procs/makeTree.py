@@ -198,7 +198,7 @@ def pyFillTree(fname):
                 fn_scope = class_indent_for_scope[line.find('def') - 4]
             functs[fn_name] = functs.get(fn_name, [])
             functs[fn_name].append(
-                [fname, [fn_start_r + 1, fn_start_c], [fn_end_r + 1, fn_end_c], fn_scope, fn_para.rstrip().split(',')])
+                [fname, [fn_start_r + 1, fn_start_c], [fn_end_r + 1, fn_end_c], fn_scope, fn_para.rstrip()])
 
     prog.close()
 
