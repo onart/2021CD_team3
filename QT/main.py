@@ -23,6 +23,7 @@ class HelpWindow(QDialog):
     def __init__(self, parent):
         super(HelpWindow, self).__init__(parent)
         uic.loadUi("Help.ui", self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.termButton.clicked.connect(self.close)
         self.roundener=Roundener(self)
         self.show()
@@ -75,7 +76,6 @@ class PeekerWindow(QMainWindow):
         finally:
             event.accept()
     def paintEvent(self, event):
-        # get current window size
         self.roundener.paintEvent(event)
 
     def mousePressEvent(self, event):
@@ -128,7 +128,6 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.close()
 
     def paintEvent(self, event):
-        # get current window size
         self.roundener.paintEvent(event)
 
     def mousePressEvent(self, event):
@@ -147,6 +146,7 @@ class Roundener: # 상속 전용 클래스
     def __init__(self, window, brush=None, borderRadius=15):
         self.window=window
         self.window.setFont(QtGui.QFont('티머니 둥근바람 Regular', 10))
+        self.window.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         if brush==None:
             self.backBrush=QtGui.QLinearGradient(0,0,0,400)
             self.backBrush.setColorAt(0.0, QtGui.QColor(255, 255, 160))
@@ -206,7 +206,6 @@ class MyApp(QMainWindow, form_class):
         self.lib=ctypes.windll.LoadLibrary('user32.dll')
 
         QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
-        self.setFont(QtGui.QFont('티머니 둥근바람 Regular', 10))
 
         self.window_1 = None    # Alt+tab-like
         self.window_2 = None    # peek
@@ -227,7 +226,6 @@ class MyApp(QMainWindow, form_class):
 
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.open_File.setStyleSheet('''
         background-image: url(./resources/folder.png); background-position: center;
         background-repeat: no-repeat;
@@ -331,7 +329,6 @@ class MyApp(QMainWindow, form_class):
             self.rec_manager.stop()
 
     def paintEvent(self, event):
-        # get current window size
         self.roundener.paintEvent(event)
 
     def mousePressEvent(self, event):
