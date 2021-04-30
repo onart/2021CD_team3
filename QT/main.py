@@ -136,8 +136,9 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.setupUI()
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
+        self.fn_lst.setMinimumHeight(400)
         for i, _key in enumerate(content.keys()):
-            self.fn_lst.insertItem(i, '{}<b>{}</b> <span style="color:red">{}</span>'.format(_key, content[_key][0][0], content[_key][0][4]) )
+            self.fn_lst.insertItem(i, '{}<br/><b>{}</b> <span style="color:red">{}</span>'.format(_key, content[_key][0][0], content[_key][0][4]) )
         self.select_fn = None
         self.roundener=Roundener(self)
 
@@ -154,7 +155,6 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         label1 = QLabel("Function lst")
 
         self.fn_lst = QListWidget()
-
         self.pushButton1 = QPushButton("Select")
         self.pushButton1.clicked.connect(self.pushButtonClicked)
 
