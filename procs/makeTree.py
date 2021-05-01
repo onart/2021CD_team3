@@ -32,16 +32,34 @@ class Pool:
 
     def __getitem__(self, index):
         if index not in self.candid:
-            return None
+            return [[]]
         kfu=[]
         kcl=[]
         kfi=[]
+        itm=0
+        recent=None
         if index in self.fu:
-            kfu=self.fu[index]
+            for fun in self.fu[index]:
+                for func in functs[fun]:
+                    ts=[fun]
+                    ts.extend(func)
+                    kfu.append(ts)
+                    itm+=1
+                    recent=ts
         if index in self.cl:
-            kcl=self.cl[index]
+            for cla in self.cl[index]:
+                ts=[cla]
+                ts.extend(classes[cla])
+                kcl.append(ts)
+                itm+=1
+                recent=ts
         if index in self.fi:
             kfi=self.fi[index]
+            itm+=len(self.fi[index])
+            if itm==1:
+                recent=[self.fi[index][0]]
+        if itm==1:
+            return recent
         return [kfu, kcl, kfi]
     
     def clear(self):
@@ -52,6 +70,7 @@ class Pool:
 
     def normalize(self, name):  # 현재 단계: 로마자만 소문자로 남기고 나머지 제거(숫자도 제거)
         ret=''
+        name=name.split('\\')[-1]
         for i in name:
             if ord(i)>=ord('a') and ord(i)<=ord('z'):
                 ret+=i
@@ -132,7 +151,6 @@ def pyFillTree(fname):
         prog=open(fname, 'r', encoding='cp949')
         code = prog.readlines()
 
-    fname=fname[len(TOPDIR)+1:]
     class_indent_for_scope = {}
     for row, line in enumerate(code):  # 행번호 0부터 시작
 
@@ -210,7 +228,7 @@ def cFillTree(fname):
         prog.close()
         prog=open(fname, 'r', encoding='cp949')
         lines = prog.readlines()
-    fname=fname[len(TOPDIR)+1:]
+
     ign=[]  # 무시해야 할 것: 문자/문자열 리터럴 내, 주석 내. "", //, /**/ 은 먼저 나오는 쪽이 이김
     lineNo=0
     cur=0   # 0: 보통, 1: 일반주석, 2: 문자열리터럴
@@ -482,7 +500,6 @@ def cppFillTree(fname):
         prog.close()
         prog=open(fname, 'r', encoding='cp949')
         lines.prog.read()
-    fname=fname[len(TOPDIR)+1:]
 
     ignore_list = []
 
@@ -659,7 +676,6 @@ def cppFillTree(fname):
 def javaFillTree(fname):
 
     prog=open(fname, 'r', encoding='UTF-8')
-    fname=fname[len(TOPDIR)+1:]
     func_range = ['public','protected','private']
     func_form = ['void','boolean','short','int','long','float','double']
 
@@ -853,6 +869,8 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
     cont=[x for x in os.scandir(top) if x.is_dir() or os.path.splitext(x.name)[1] in ext]
     for c in cont:
         f=c.path
+        if top==TOPDIR:
+            f=c.path[len(TOPDIR)+1:]
         if c.is_dir():
             scanDir(f)
         elif c.is_file:
