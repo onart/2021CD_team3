@@ -133,12 +133,13 @@ class HTMLDelegate(QtWidgets.QStyledItemDelegate):
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self, content):
         super().__init__()
+        self.select_dict = content
         self.setupUI()
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
-        self.fn_lst.setMinimumHeight(400)
-        for i, _key in enumerate(content.keys()):
-            self.fn_lst.insertItem(i, '{}<br/><b>{}</b> <span style="color:red">{}</span>'.format(_key, content[_key][0][0], content[_key][0][4]) )
+        only_key = list(content)[0]
+        for i, value in enumerate(content[only_key]):
+            self.fn_lst.insertItem(i, '<b>{}</b> <span style="color:red">{}</span>'.format(value[0], value[4]) )
         self.select_fn = None
         self.roundener=Roundener(self)
 
@@ -148,11 +149,12 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         qr=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
+        self.setMinimumWidth(400)
         self.move(qr.topLeft())
 
         self.setWindowTitle("Seleck Ur function")
 
-        label1 = QLabel("Function lst")
+        label1 = QLabel("Selected\nFunction\n< {} >".format(list(self.select_dict)[0]))
 
         self.fn_lst = QListWidget()
         self.pushButton1 = QPushButton("Select")
@@ -333,9 +335,7 @@ class MyApp(QMainWindow, form_class):
             )
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        dlg = fn_dialog({'wname': [['wind.py', [26, 0], [34, -1], '', 's, pname']],
- 'currentWindow': [['wind.py', [36, 0], [57, -1], '', 'receiver']],
- 'subHead': [['phonetic.py', [55, 0], [61, -1], '', 'inp, word']]}) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
+        dlg = fn_dialog({'wname': [['wind.py', [26, 0], [34, -1], '', 's, pname'], ['wind.py', [36, 0], [57, -1], '', 'receiver'], ['phonetic.py', [55, 0], [61, -1], '', 'inp, word']]}) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
         try:
             _fn = dlg.select_fn.text()
