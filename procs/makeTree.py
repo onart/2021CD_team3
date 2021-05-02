@@ -164,7 +164,7 @@ def pyFillTree(fname):
         line_split = line.split()
 
         if (line and ':' in line and line_split[0] == 'class'):
-
+            def_indent_for_nested_function = {}
             if (line_split[1][-1] == ':'):
                 class_name = line_split[1][:-1]
             else:
@@ -188,6 +188,7 @@ def pyFillTree(fname):
         elif (line and ':' in line and line_split[0] == 'def'):
             fn_name = ''
             fn_para = ''
+            fn_scope = ''
             check = False
             for i in range(line.find('def') + 3, len(line)):
                 if (line[i] != ' ' and line[i] != '(' and check == False):
@@ -219,10 +220,17 @@ def pyFillTree(fname):
             if (line.find('def') == 0):
                 fn_scope = ''  # scope 전역일 때는 빈문자열로
             else:
+                _i = 1
+                while True: #가장 가까운 감싼 클래스 찾기
+                    try:
+                        fn_scope += class_indent_for_scope[line.find('def') - 4*_i]
+                        break
+                    except:
+                        _i += 1
                 try:
-                    fn_scope = class_indent_for_scope[line.find('def') - 4]
+                    fn_scope += '.{}'.format(def_indent_for_nested_function[line.find('def') -4])
                 except:
-                    fn_scope = def_indent_for_nested_function[line.find('def') -4]
+                    pass
             functs[fn_name] = functs.get(fn_name, [])
             functs[fn_name].append(
                 [fname, [fn_start_r + 1, fn_start_c], [fn_end_r + 1, fn_end_c], fn_scope, fn_para.rstrip()])
