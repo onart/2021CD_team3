@@ -157,6 +157,7 @@ def pyFillTree(fname):
         code = prog.readlines()
 
     class_indent_for_scope = {}
+    def_indent_for_nested_function = {}
     for row, line in enumerate(code):  # 행번호 0부터 시작
 
         line = line.rstrip()
@@ -218,10 +219,14 @@ def pyFillTree(fname):
             if (line.find('def') == 0):
                 fn_scope = ''  # scope 전역일 때는 빈문자열로
             else:
-                fn_scope = class_indent_for_scope[line.find('def') - 4]
+                try:
+                    fn_scope = class_indent_for_scope[line.find('def') - 4]
+                except:
+                    fn_scope = def_indent_for_nested_function[line.find('def') -4]
             functs[fn_name] = functs.get(fn_name, [])
             functs[fn_name].append(
                 [fname, [fn_start_r + 1, fn_start_c], [fn_end_r + 1, fn_end_c], fn_scope, fn_para.rstrip()])
+            def_indent_for_nested_function[line.find('def')] = fn_name
 
     prog.close()
 
