@@ -135,13 +135,36 @@ class HTMLDelegate(QtWidgets.QStyledItemDelegate):
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self, content):
         super().__init__()
-        self.select_dict = content
+
         self.setupUI()
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
-        only_key = list(content)[0]
-        for i, value in enumerate(content[only_key]):
-            self.fn_lst.insertItem(i, '<b>{}</b> <span style="color:red">{}</span>'.format(value[0], value[4]) )
+
+        idx_for_listWidget = 0
+        for id_type, type_line in enumerate(content):
+            if(type_line):
+                if(id_type == 0): # 함수의 경우  [이름, 파일, 시작, 끝, 스코프, 매개변수]
+                    for each_fun in type_line:
+                        self.fn_lst.insertItem(idx_for_listWidget,
+                                               '<span style="color:red">Function</span>:&nbsp;{}&nbsp;<span style="color:red">in</span>&nbsp;{}&nbsp;with&nbsp;<span style="color:red">scope</span>:&nbsp;{}&nbsp;<span style="color:red">prameter</span>:&nbsp;{}'.format(
+                                                   each_fun[0], each_fun[1], each_fun[4], each_fun[5]))
+                        idx_for_listWidget += 1
+
+                elif(id_type == 1): # 클래스의 경우 [이름 , 파일, 시작, 끝]
+                    for each_class in type_line:
+                        self.fn_lst.insertItem(idx_for_listWidget,
+                                               '<span style="color:blue">Class</span>:&nbsp;{}&nbsp;<span style="color:blue">in</span>&nbsp;{}'.format(each_class[0], each_class[1]))
+                        idx_for_listWidget += 1
+
+                else: # 파일의 경우 [이름]
+                    for each_file in type_line:
+                        self.fn_lst.insertItem(idx_for_listWidget, '<span style="color:green">File</span>:&nbsp;{}'.format(each_file))
+                        idx_for_listWidget += 1
+
+
+            else:
+                pass
+
         self.select_fn = None
         self.roundener=Roundener(self)
 
@@ -151,12 +174,13 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         qr=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(800)
+        self.setMinimumHeight(400)
         self.move(qr.topLeft())
 
         self.setWindowTitle("Seleck Ur function")
 
-        label1 = QLabel("Selected\nFunction\n< {} >".format(list(self.select_dict)[0]))
+        label1 = QLabel("Select Item<br>You want<br>Function : Red<br>Class : Blue<br>File : Green")
 
         self.fn_lst = QListWidget()
         self.pushButton1 = QPushButton("Select")
@@ -413,7 +437,7 @@ class MyApp(QMainWindow, form_class):
             return
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        dlg = fn_dialog({'wname': [['wind.py', [26, 0], [34, -1], '', 's, pname'], ['wind.py', [36, 0], [57, -1], '', 'receiver'], ['phonetic.py', [55, 0], [61, -1], '', 'inp, word']]}) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
+        dlg = fn_dialog([[['aBc', 'main.py', (8, 12), (10, 9),'test1','self, dong'], ['ABc', 'test.py', (8, 12), (10, 9),'class1.fun2','self']], [['aBc', 'main.py', (8, 12), (10, 9)], ['aBC', 'wind.py', (8, 12), (10, 9)]], ['abc.py', 'abe.cpp']]) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
         try:
             _fn = dlg.select_fn.text()
