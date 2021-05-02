@@ -142,6 +142,11 @@ reserved_word_c = ["__asm", "__based", "__cdecl", "__declspec", "__except", "__f
 python_magic_func = ["__new__", "__init__", "__add__", "__doc__", "__bool__", "__mul__", "__sub__", "__le__", "__ge__", "__del__",
                      "__bytes__", "__format__", "__len__", "__iter__", "__reversed__", "__contains__", "__iter__" ]
 
+def setTop(dname):
+    global TOPDIR
+    TOPDIR=dname
+    os.chdir(dname)
+
 def pyFillTree(fname):
     try:
         prog=open(fname, 'r', encoding = 'UTF-8')

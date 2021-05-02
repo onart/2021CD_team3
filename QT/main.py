@@ -272,7 +272,7 @@ class MyApp(QMainWindow, form_class):
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
         self.voice.setText('시작')  # 꺼진 상태
-
+        
         def setVmode(m):
             self.vMode=m
             return
@@ -463,7 +463,7 @@ class MyApp(QMainWindow, form_class):
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
         if len(filename)>0:
             self.topDirectory.setText(filename)
-            makeTree.TOPDIR=filename
+            makeTree.setTop(filename)
             if not self.ctx.is_alive():
                 self.ctx.start()
 
