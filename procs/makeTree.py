@@ -859,7 +859,7 @@ def gc():   # 제거된 파일에 대하여 기존 정보를 제거
             rmm.append(f)
             classes={x:classes[x] for x in classes if classes[x][0] != f}
             for fu in functs:
-                functs[fu]=[x for x in functs if x[0] != f]
+                functs[fu]=[x for x in functs[fu] if x[0] != f]
             functs={x:functs[x] for x in functs if len(functs[x]) != 0}
     for f in rmm:
         modTimes.pop(f)
@@ -871,7 +871,10 @@ def forMod(fname):  # 수정된 파일에 대하여 기존 정보를 제거
         functs[fu]=[x for x in functs if x[0] != fname]
 
 def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대 경로. 기본 10초당 1회 호출, 어떤 음성이든 입력 시 즉시 호출 후 음성처리
-    cont=[x for x in os.scandir(top) if x.is_dir() or os.path.splitext(x.name)[1] in ext]
+    try:
+        cont=[x for x in os.scandir(top) if x.is_dir() or os.path.splitext(x.name)[1] in ext]
+    except FileNotFoundError:   # top 폴더가 삭제당함
+        return
     for c in cont:
         f=c.path
         if top==TOPDIR:
@@ -907,7 +910,7 @@ def scanTH():
         # 업데이트 완료 신호
         time.sleep(10)
 
-def scanNgc():
+def scanNgc():  # git repo인 경우, 'git diff --name-status' 명령어로 더 빠르게 우회하도록(단, 이것은 커밋만 안 하면 계속 뜨기 때문에 후보를 걸러줄 뿐임) 하는 것 고려
     if len(TOPDIR)==0:
         return
     scannerLock.acquire()
