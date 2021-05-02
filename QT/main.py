@@ -20,6 +20,8 @@ import html
 form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
 
+MODES=['명령', '탐색', '보기']
+
 class HelpWindow(QDialog):
     def __init__(self, parent):
         super(HelpWindow, self).__init__(parent)
@@ -268,6 +270,19 @@ class MyApp(QMainWindow, form_class):
         self.help_button.clicked.connect(self.help)
         self.dialog = QDialog()
 
+        self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
+        self.voice.setText('시작')  # 꺼진 상태
+
+        def setVmode(m):
+            self.vMode=m
+            return
+
+        self.kCommands={
+            '명령': lambda _: self.setVmode(0),
+            '탐색': lambda _: self.setVmode(1),
+            '보기': lambda _: self.setVmode(2),
+            }
+
         # window shape/titlebar/stayontop flag
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.open_File.setStyleSheet('''
@@ -308,6 +323,7 @@ class MyApp(QMainWindow, form_class):
         if not self.recording:
             return
         self.language_change=True
+        self.voice.setText('명령')
         self.voice.setStyleSheet(
             '''
                         background-image: url(./resources/recon_kor.png);
@@ -322,7 +338,9 @@ class MyApp(QMainWindow, form_class):
     def korOff(self, dummy):
         if not self.recording:
             return
-        self.language_change=False
+        if self.vMode != 0:
+            self.language_change=False
+            self.voice.setText(MODES[self.vMode])
         self.voice.setStyleSheet(
                 '''
                     background-image: url(./resources/recon.png);
@@ -346,7 +364,6 @@ class MyApp(QMainWindow, form_class):
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
         if self.recording:
-            # QMessageBox.about(self, "음성인식처리", "음성인식시작")
             self.voice.setStyleSheet('''
                     background-image: url(./resources/recon.png);
                     background-repeat: no-repeat;
@@ -355,11 +372,10 @@ class MyApp(QMainWindow, form_class):
                     color: White;
                     border:0px;
                     ''')
-
+            self.voice.setText(MODES[self.vMode])
             self.rec_manager.start(self.soundIn)
             
         else:
-            #QMessageBox.about(self, "음성인식처리", "음성인식종료")
             self.voice.setStyleSheet('''
         background-image: url(./resources/recoff.png);
         background-position: center;
@@ -369,7 +385,7 @@ class MyApp(QMainWindow, form_class):
         border:0px;
         ''')
             self.language_change=False
-            
+            self.voice.setText('시작')
             self.rec_manager.stop()
 
     def paintEvent(self, event):
@@ -409,7 +425,11 @@ class MyApp(QMainWindow, form_class):
                 QMessageBox.about(self, "오류", "IDE가 감지되지 않았습니다.")
                 return
         if self.language_change:    # 일반 명령어
-            pass
+            if word in self.kCommands:
+                self.kCommands[word]()
+                return
+            else:   # 유사도
+                pass
         else:   # peek or seek
             makeTree.scanNgc()
             sel1=makeTree.POOL.soundIn(word)
@@ -432,7 +452,10 @@ class MyApp(QMainWindow, form_class):
                 pass
             else:   # 파일, 클래스, 함수 중 있는 선택지 보여줌
                 pass
-            # peek 모드인지 seek 모드인지에 따라 구분 처리
+            if self.vMode==1:   # peek 모드인지 seek 모드인지에 따라 구분 처리
+                pass
+            elif self.vMode==2:
+                pass
 
     def fileopen(self): #새로운 파일 선택
         option = QFileDialog.Option()
