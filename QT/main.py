@@ -188,6 +188,57 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
+class v_dialog(QDialog):  # 음성 선택지
+    def __init__(self, content):
+        super().__init__()
+        self.vlist=content
+        self.setupUI()
+        self.fn_lst.insertItems(len(content),content)
+        self.select_fn = None
+        self.roundener=Roundener(self)
+
+    def setupUI(self):
+        self.setGeometry(1100, 200, 300, 100)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+        qr=self.frameGeometry()
+        cp=QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.setMinimumWidth(400)
+        self.move(qr.topLeft())
+
+        label1 = QLabel("이걸 찾으시나요?")
+
+        self.fn_lst = QListWidget()
+        self.pushButton1 = QPushButton("Select")
+        self.pushButton1.clicked.connect(self.pushButtonClicked)
+
+        layout = QGridLayout()
+        layout.addWidget(label1, 0, 0)
+        layout.addWidget(self.fn_lst, 0, 1)
+        layout.addWidget(self.pushButton1, 0, 2)
+
+        self.setLayout(layout)
+
+    def pushButtonClicked(self):
+        self.select_fn = self.fn_lst.currentItem()
+        self.close()
+
+    def paintEvent(self, event):
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
+
+
 class Roundener: # 상속 전용 클래스
     def __init__(self, window, brush=None, borderRadius=15):
         self.window=window
@@ -262,7 +313,8 @@ class MyApp(QMainWindow, form_class):
         self.roundener=Roundener(self)
 
         self.setupUi(self)
-        self.button_for_newtab.clicked.connect(self.peeker)
+        self.button_for_newtab.clicked.connect(self.vSelection)
+        #self.button_for_newtab.clicked.connect(self.peeker)
         self.NewWindow.clicked.connect(self.new_window)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
@@ -352,6 +404,14 @@ class MyApp(QMainWindow, form_class):
                 '''
             )
 
+    def vSelection(self):
+        dlg=v_dialog(['arrange', 'arranges', 'recognitionmanager'])
+        dlg.exec_()
+        try:
+            return dlg.select_fn.text()
+        except AttributeError:
+            return
+
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog({'wname': [['wind.py', [26, 0], [34, -1], '', 's, pname'], ['wind.py', [36, 0], [57, -1], '', 'receiver'], ['phonetic.py', [55, 0], [61, -1], '', 'inp, word']]}) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
@@ -440,7 +500,7 @@ class MyApp(QMainWindow, form_class):
             if len(sel1)==1:
                 sel2=sel1[0]
             else:
-                ch1=fn_dialog(sel1)
+                ch1=v_dialog(sel1)
                 ch1.exec_()
                 try:
                     sel2=ch1.select_fn.text()
