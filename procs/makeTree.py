@@ -910,7 +910,7 @@ def scanTH():
         # 업데이트 완료 신호
         time.sleep(10)
 
-def scanNgc():  # git repo인 경우, 'git diff --name-status' 명령어로 더 빠르게 우회하도록(단, 이것은 커밋만 안 하면 계속 뜨기 때문에 후보를 걸러줄 뿐임) 하는 것 고려
+def scanNgc():  # git repo인 경우, 'git diff --name-status' 명령어로 더 빠르게 우회하도록(단, 이것은 커밋만 안 하면 계속 뜨기 때문에 후보를 걸러줄 뿐이며 역으로 커밋을 하면 바뀌었더라도 안 뜸) 하는 것 고려
     if len(TOPDIR)==0:
         return
     scannerLock.acquire()
