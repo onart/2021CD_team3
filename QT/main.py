@@ -3,6 +3,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import sys, os, threading
+from multiprocessing.managers import BaseManager
 import ctypes
 import keyboard
 sys.path.append(os.path.abspath('..'))
@@ -13,7 +14,7 @@ from PyQt5.QtGui import *
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5 import uic
 import procs.wind as wind
-from procs.stt import start_recognition, get_recognition, RecognitionManager
+from procs.stt import RecognitionManager
 import procs.makeTree as makeTree
 import html
 
@@ -394,6 +395,12 @@ class MyApp(QMainWindow, form_class):
 
         # stt recognition manager
         self.rec_manager = RecognitionManager()
+        '''
+        BaseManager.register('RecognitionManager',RecognitionManager, MyProxy)
+        manager = BaseManager()
+        manager.start()
+        self.rec_manager = manager.RecognitionManager()
+        '''
 
     def korOn(self, dummy):
         if not self.recording:
