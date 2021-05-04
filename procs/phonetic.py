@@ -64,8 +64,8 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
     ar=[]
     basis=soundEx(inp)
     for w in words:
-        val=lcs(soundEx(w),basis)
-        val2=lcs(inp, w)
+        val=lcsThr(soundEx(w),basis)
+        val2=lcsThr(inp, w)
         if val > len(basis)/2:
             ar.append((w, val+val2/10))
     ar.sort(key=lambda x: x[1])
@@ -98,30 +98,43 @@ def soundEx(keyword):   # 일반 케이스
 def spell(inp, keyword):    # 스펠을 부른 케이스
     return (keyword.find(inp) == 0)
 
-def lcs(a, b):  # LCS에서 거리가 3 이상 되면 쳐내도록 수정 예정
-    prev = [0]*len(a)
+def lcs(a, b):  # 모든 lcs의 내용을 리스트로 리턴
+    prev = [(0, set())]*len(a)
     for i,r in enumerate(a):
-        current = []
+        current=[]
         for j,c in enumerate(b):
             if r==c:
-                e = prev[j-1]+1 if i * j > 0 else 1
+                e=prev[j-1][0]+1 if i*j>0 else 1
+                if e==1:
+                    e=(1, {r})
+                else:
+                    e=(e, {x+r for x in prev[j-1][1]})
             else:
-                e = max(prev[j] if i > 0 else 0, current[-1] if j > 0 else 0)
+                up=prev[j] if i>0 else (0, set())
+                left=current[-1] if j>0 else (0,set())
+                if up[0]>left[0]:
+                    e=up
+                elif up[0]<left[0]:
+                    e=left
+                else:
+                    e=(up[0], up[1] | left[1])
             current.append(e)
-        prev = current
-    return current[-1]
+        prev=current
+    return list(current[-1][1])
 
-def standardize(keyword):   # snake, camel/pascal 표기법 지원하여 단어 분리, 숫자 분리
-    length=len(keyword)
-    # snake (first_second_third)
-    ls=keyword.split('_')
-    if len(ls) >= 2:
-        for i in range(len(ls)):
-            ls[i]=ls[i].lower()
-        return ls
-    # camel/pascal (firstSecondThird/FirstSecondThird)
-    for i in range(length):
-        keyword('next')
+def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 길이를 리턴. b를 기준으로는 컷해야 하는데 a까지 해야 할지는 나중에 결정
+    lcsLst=lcs(a, b)
+    mx=0
+    for w in lcsLst:
+        pos=-1
+        cur=0
+        for letter in w:
+            prev=pos
+            pos=b.find(letter, pos+1)
+            cur=0 if pos-prev>=THRESHOLD else cur+1
+            if mx<cur:
+                mx=cur
+    return mx
 
 def hme(letter):    # 리턴 (초, 중, 종성)
     letter=ord(letter)-BASEORDER
