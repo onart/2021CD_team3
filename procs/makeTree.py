@@ -145,16 +145,10 @@ python_magic_func = ["__new__", "__init__", "__add__", "__doc__", "__bool__", "_
 def setTop(dname):
     global TOPDIR
     TOPDIR=dname
-    os.chdir(dname)
+    #os.chdir(dname)
 
-def pyFillTree(fname):
-    try:
-        prog=open(fname, 'r', encoding = 'UTF-8')
-        code = prog.readlines()
-    except UnicodeDecodeError:
-        prog.close()
-        prog=open(fname, 'r', encoding='cp949')
-        code = prog.readlines()
+def pyFillTree(fname, prog):
+    code = prog.readlines()
 
     class_indent_for_scope = {}
     def_indent_for_nested_function = {}
@@ -238,14 +232,8 @@ def pyFillTree(fname):
 
     prog.close()
 
-def cFillTree(fname):
-    try:
-        prog=open(fname, 'r', encoding = 'UTF-8')
-        lines = prog.readlines()
-    except UnicodeDecodeError:
-        prog.close()
-        prog=open(fname, 'r', encoding='cp949')
-        lines = prog.readlines()
+def cFillTree(fname, prog):
+    lines = prog.readlines()
 
     ign=[]  # 무시해야 할 것: 문자/문자열 리터럴 내, 주석 내. "", //, /**/ 은 먼저 나오는 쪽이 이김
     lineNo=0
@@ -510,14 +498,8 @@ def cpp_classes_renew(re_str, name_length, lines, ignore_list, fname):
         # 클래스 ('이름', 파일, 시작 위치(행/열), 끝 위치(행/열), )
         classes[name]=[fname, (row, column), (end_row, end_column)]
 
-def cppFillTree(fname):
-    try:
-        prog=open(fname, 'r', encoding='UTF8')
-        lines=prog.read()
-    except UnicodeDecodeError:
-        prog.close()
-        prog=open(fname, 'r', encoding='cp949')
-        lines.prog.read()
+def cppFillTree(fname, prog):
+    lines=prog.read()
 
     ignore_list = []
 
@@ -691,9 +673,7 @@ def cppFillTree(fname):
     
     prog.close()
 
-def javaFillTree(fname):
-
-    prog=open(fname, 'r', encoding='UTF-8')
+def javaFillTree(fname, prog):
     func_range = ['public','protected','private']
     func_form = ['void','boolean','short','int','long','float','double']
 
@@ -889,33 +869,48 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
     except FileNotFoundError:   # top 폴더가 삭제당함
         return
     for c in cont:
-        f=c.path
-        if top==TOPDIR:
-            f=c.path[len(TOPDIR)+1:]
+        fa=c.path
+        fr=fa[len(TOPDIR)+1:]
         if c.is_dir():
-            scanDir(f)
+            scanDir(fa)
         elif c.is_file:
-            fext=os.path.splitext(f)[1]
+            fext=os.path.splitext(fr)[1]
+            prog=open(fa, encoding='UTF-8')
             try:
                 mtime=c.stat().st_mtime
-                if modTimes[f][0]!=mtime:
-                    modTimes[f][0]=mtime
-                    forMod(f)
+                modTimes[fr][1]=STAMP
+                if modTimes[fr][0]!=mtime:
+                    modTimes[fr][0]=mtime
+                    forMod(fr)
                     try:
-                        ext[fext](f)
+                        ext[fext](fr, prog)
+                    except UnicodeDecodeError:
+                        prog.close()
+                        prog=open(fa, encoding='cp949')
+                        try:
+                            ext[fext](fr, prog)
+                        except:
+                            print('error',fr)
+                            traceback.print_exc()
+                            modTimes[fr]=[mtime, 0]
                     except:
-                        print('error:',f)
+                        print('error:',fr)
                         traceback.print_exc()
-                        modTimes[f]=[mtime, 0]
-                modTimes[f][1]=STAMP
+                        modTimes[fr]=[mtime, 0]
+                
             except KeyError:
-                modTimes[f]=[mtime, STAMP]
+                modTimes[fr]=[mtime, STAMP]
                 try:
-                    ext[fext](f)
+                    ext[fext](fr, prog)
+                except UnicodeDecodeError:
+                    prog.close()
+                    prog=open(fa, encoding='cp949')
+                    ext[fext](fr, prog)
                 except:
-                    print('error:',f)
+                    print('error:',fr)
                     traceback.print_exc()
-                    modTimes[f]=[mtime, 0]
+                    modTimes[fr]=[mtime, 0]
+            prog.close()
 
 def scanTH():
     while True:
