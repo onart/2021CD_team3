@@ -2,7 +2,7 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import sys, os, threading
+import sys, os, threading, queue
 from multiprocessing.managers import BaseManager
 import ctypes
 import keyboard
@@ -320,6 +320,9 @@ class Roundener: # 상속 전용 클래스
                 self.__mousePressPos = None
 
 
+class SoundSig(QObject):
+    sin=QtCore.pyqtSignal()
+
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
@@ -331,6 +334,9 @@ class MyApp(QMainWindow, form_class):
 
         self.window_1 = None    # Alt+tab-like
         self.window_2 = None    # peek
+
+        self.sin = SoundSig()
+        self.sin.sin.connect(self.soundIn)
 
         self.hIdeWnd=0          # IDE Window Handle
 
@@ -390,7 +396,8 @@ class MyApp(QMainWindow, form_class):
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
         # stt recognition manager
-        self.rec_manager = RecognitionManager()
+        self.q=queue.Queue()
+        self.rec_manager = RecognitionManager(self.q, self.sin)
         '''
         BaseManager.register('RecognitionManager',RecognitionManager, MyProxy)
         manager = BaseManager()
@@ -475,7 +482,7 @@ class MyApp(QMainWindow, form_class):
                     border:0px;
                     ''')
             self.voice.setText(MODES[self.vMode])
-            self.rec_manager.start(self.soundIn)
+            self.rec_manager.start()
             if self.vMode==0:
                 self.language_change=True
                 self.rec_manager.change_to('kor')
@@ -524,12 +531,16 @@ class MyApp(QMainWindow, form_class):
             self.window_2 = PeekerWindow(f, self)
             self.window_2.show()
 
-    def soundIn(self, word):
+    def soundIn(self):
+        word=self.q.get()
         if self.activeWindow.text() == 'others':
             if self.lib.SetForegroundWindow(self.hIdeWnd)==0:
                 #QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
                 print('IDE 없음')
                 return
+
+        # 자식 window가 있는 시점에서는 명령 무시하도록 조치
+
         if self.language_change:    # 일반 명령어
             if word in self.kCommands:
                 self.kCommands[word](0)

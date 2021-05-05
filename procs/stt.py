@@ -178,18 +178,19 @@ class ResumableMicrophoneStream:
 # 음성인식 종료시 stop()
 class RecognitionManager:
     
-    def __init__(self):
+    def __init__(self, soundIn, sin):
         BaseManager.register('RecognitionData', RecognitionData, MyProxy)
         self.base_manager = BaseManager()
         self.base_manager.start()
+        self.q=soundIn
+        self.sin=sin.sin
 
     def reset(self):
         self.data = self.base_manager.RecognitionData()
         print(self.data)
         self.stop_thread = False
 
-    def start(self, soundIn):
-        self.soundIn = soundIn
+    def start(self):
         self.reset()
 
         self.checking_thread = threading.Thread(target=check_if_added, args=(self,))
@@ -212,6 +213,10 @@ class RecognitionManager:
     def stop(self):
         self.stop_thread = True
         self.record_process.terminate()
+
+    def soundIn(self, word):
+        self.q.put(word)
+        self.sin.emit()
 
 class RecognitionData:
     
@@ -361,7 +366,7 @@ def start_recognition(rec_data, language):
             encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
             sample_rate_hertz=SAMPLE_RATE,
             language_code="en-US",
-            alternative_language_codes=["ko-KR"],
+            #alternative_language_codes=["ko-KR"],
         )
     
     streaming_config = speech.StreamingRecognitionConfig(
