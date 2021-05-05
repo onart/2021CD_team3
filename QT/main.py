@@ -168,6 +168,8 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
         self.select_fn = None
         self.roundener=Roundener(self)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.activateWindow()
 
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
@@ -221,6 +223,8 @@ class v_dialog(QDialog):  # 음성 선택지
         self.fn_lst.insertItems(len(content),content)
         self.select_fn = None
         self.roundener=Roundener(self)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.activateWindow()
 
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
@@ -535,7 +539,7 @@ class MyApp(QMainWindow, form_class):
         word=self.q.get()
         if self.activeWindow.text() == 'others':
             if self.lib.SetForegroundWindow(self.hIdeWnd)==0:
-                #QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
+                QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
                 print('IDE 없음')
                 return
 
@@ -546,15 +550,14 @@ class MyApp(QMainWindow, form_class):
                 self.kCommands[word](0)
                 return
             else:   # 유사도
-                #QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
-                print('명령어 준비안됨')
+                QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
+                return
         else:   # peek or seek
             makeTree.scanNgc()
             sel1=makeTree.POOL.soundIn(word)
             # sel1 중 하나를 선택하는 대화상자 띄우고 결과 sel2에 저장
             if len(sel1)==0:
-                print('결과없음')
-                #QMessageBox.about(self, "오류2", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
+                QMessageBox.about(self, "오류2", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
                 return
             if len(sel1)==1:
                 sel2=sel1[0]
@@ -563,14 +566,20 @@ class MyApp(QMainWindow, form_class):
                 ch1.exec_()
                 try:
                     sel2=ch1.select_fn.text()
+                    print(sel2)
                 except AttributeError:  # 선택하지 않음
                     return
             # 단 sel1의 결과가 1개라면 생략
             sel3=makeTree.POOL[sel2]
-            if sel3[0] is not list: # 결과 1개. len 6이면 함수, 4면 클래스, 1이면 파일
+            if type(sel3[0]) is not list: # 결과 1개. len 6이면 함수, 4면 클래스, 1이면 파일
                 pass
             else:   # 파일, 클래스, 함수 중 있는 선택지 보여줌
-                pass
+                ch2=fn_dialog(sel3)
+                ch2.exec_()
+                try:
+                    sel4=ch2.select_fn.text()
+                except AttributeError:
+                    return
             if self.vMode==1:   # peek 모드인지 seek 모드인지에 따라 구분 처리
                 pass
             elif self.vMode==2:
