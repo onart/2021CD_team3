@@ -382,7 +382,7 @@ def start_recognition(rec_data, language):
                 for content in audio_generator
             )
 
-            print("before response")
+            print("before response", language)
 
             responses = client.streaming_recognize(streaming_config, requests)
 

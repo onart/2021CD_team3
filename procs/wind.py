@@ -43,7 +43,10 @@ def currentWindow(receiver):    #스레드 함수
         buffer = ctypes.create_unicode_buffer(255)
         lib.GetWindowTextW(hwnd, buffer, ctypes.sizeof(buffer))
         lib.GetWindowThreadProcessId(hwnd, p_pid)
-        pname=popen('tasklist /fi "pid eq {}"'.format(pid.value)).read().split('\n')[3].split()[0]
+        try:
+            pname=popen('tasklist /fi "pid eq {}"'.format(pid.value)).read().split('\n')[3].split()[0]
+        except IndexError:
+            pname=''
         wind = wname(buffer.value, pname)
         if wind != receiver.activeWindow.text:
             receiver.activeWindow.setText(wind)

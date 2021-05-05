@@ -349,16 +349,6 @@ class MyApp(QMainWindow, form_class):
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
         self.voice.setText('시작')  # 꺼진 상태
-        
-        def setVmode(m):
-            self.vMode=m
-            if m==0:
-                if not self.language_change:
-                    self.rec_manager.change_to('kor')
-                    self.language_change=True
-            elif self.language_change:
-                self.language_change=False
-                self.rec_manager.change_to('eng')
 
         self.kCommands={
             '명령': lambda _: self.setVmode(0),
@@ -407,6 +397,18 @@ class MyApp(QMainWindow, form_class):
         manager.start()
         self.rec_manager = manager.RecognitionManager()
         '''
+    def setVmode(self, m):
+        print('mode:',m)
+        self.vMode=m
+        self.voice.setText(MODES[m])
+        if m==0:
+            if not self.language_change:
+                self.rec_manager.change_to('kor')
+                self.language_change=True
+        elif self.language_change:
+            self.language_change=False
+            self.rec_manager.change_to('eng')
+            
 
     def korOn(self, dummy):
         if not self.recording:
@@ -525,20 +527,23 @@ class MyApp(QMainWindow, form_class):
     def soundIn(self, word):
         if self.activeWindow.text() == 'others':
             if self.lib.SetForegroundWindow(self.hIdeWnd)==0:
-                QMessageBox.about(self, "오류", "IDE가 감지되지 않았습니다.")
+                #QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
+                print('IDE 없음')
                 return
         if self.language_change:    # 일반 명령어
             if word in self.kCommands:
-                self.kCommands[word]()
+                self.kCommands[word](0)
                 return
             else:   # 유사도
-                QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
+                #QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
+                print('명령어 준비안됨')
         else:   # peek or seek
             makeTree.scanNgc()
             sel1=makeTree.POOL.soundIn(word)
             # sel1 중 하나를 선택하는 대화상자 띄우고 결과 sel2에 저장
             if len(sel1)==0:
-                QMessageBox.about(self, "오류", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
+                print('결과없음')
+                #QMessageBox.about(self, "오류2", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
                 return
             if len(sel1)==1:
                 sel2=sel1[0]
