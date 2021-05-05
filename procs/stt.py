@@ -205,9 +205,9 @@ class RecognitionManager:
         self.record_process.start()
 
     # language : 'eng' or 'kor'
-    def change_to(self, language):       
+    def change_to(self, language):
         self.record_process.terminate()
-        self.start_process(language)            
+        self.start_process(language)
 
     def stop(self):
         self.stop_thread = True

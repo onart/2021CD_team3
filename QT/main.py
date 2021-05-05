@@ -352,7 +352,13 @@ class MyApp(QMainWindow, form_class):
         
         def setVmode(m):
             self.vMode=m
-            return
+            if m==0:
+                if not self.language_change:
+                    self.rec_manager.change_to('kor')
+                    self.language_change=True
+            elif self.language_change:
+                self.language_change=False
+                self.rec_manager.change_to('eng')
 
         self.kCommands={
             '명령': lambda _: self.setVmode(0),
@@ -405,7 +411,9 @@ class MyApp(QMainWindow, form_class):
     def korOn(self, dummy):
         if not self.recording:
             return
-        self.language_change=True
+        if not self.language_change:
+            self.language_change=True
+            self.rec_manager.change_to('kor')
         self.voice.setText('명령')
         self.voice.setStyleSheet(
             '''
@@ -424,6 +432,7 @@ class MyApp(QMainWindow, form_class):
         if self.vMode != 0:
             self.language_change=False
             self.voice.setText(MODES[self.vMode])
+            self.rec_manager.change_to('eng')
         self.voice.setStyleSheet(
                 '''
                     background-image: url(./resources/recon.png);
@@ -465,6 +474,9 @@ class MyApp(QMainWindow, form_class):
                     ''')
             self.voice.setText(MODES[self.vMode])
             self.rec_manager.start(self.soundIn)
+            if self.vMode==0:
+                self.language_change=True
+                self.rec_manager.change_to('kor')
             
         else:
             self.voice.setStyleSheet('''
@@ -511,7 +523,7 @@ class MyApp(QMainWindow, form_class):
             self.window_2.show()
 
     def soundIn(self, word):
-        if self.activeWindow.text == 'others':
+        if self.activeWindow.text() == 'others':
             if self.lib.SetForegroundWindow(self.hIdeWnd)==0:
                 QMessageBox.about(self, "오류", "IDE가 감지되지 않았습니다.")
                 return
@@ -520,7 +532,7 @@ class MyApp(QMainWindow, form_class):
                 self.kCommands[word]()
                 return
             else:   # 유사도
-                pass
+                QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
         else:   # peek or seek
             makeTree.scanNgc()
             sel1=makeTree.POOL.soundIn(word)
