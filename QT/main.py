@@ -48,7 +48,7 @@ class HelpWindow(QDialog):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
-class PeekerWindow(QMainWindow):
+class PeekerWindow(QDialog):
     def __init__(self, fname, sp, rp, parent): # f: 파일 이름(절대 경로), sp: 대상 시작점(행, 열), rp: 대상 끝점(행, 열), parent: 부모 창 객체
         super().__init__()
         self.setupUI(fname)

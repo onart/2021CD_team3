@@ -49,7 +49,11 @@ def currentWindow(receiver):    #스레드 함수
             pname=''
         wind = wname(buffer.value, pname)
         if wind != receiver.activeWindow.text:
-            receiver.activeWindow.setText(wind)
+            try:
+                receiver.activeWindow.setText(wind)
+            except RuntimeError:
+                print('wind Thread: runtime error')
+                return
             if wind=='others':
                 pass
             else:

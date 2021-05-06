@@ -80,6 +80,17 @@ def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words�
     ar.sort(key=lambda x: len(x))
     return ar
 
+def arrange_k(inp, words):
+    mx=0
+    basis=hme(inp)
+    for w in words:
+        w2=hme(w)
+        val=lcsThr(basis, w2)
+        if val>mx:
+            mx=val
+            ret=w
+    return ret
+
 def soundEx(keyword):   # 일반 케이스
     ret=str(ALPHA[ord(keyword[0])-smallA])
     cur='?'
@@ -136,7 +147,13 @@ def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 �
                 mx=cur
     return mx
 
-def hme(letter):    # 리턴 (초, 중, 종성)
+def hme(s):
+    ret=''
+    for c in s:
+        ret+=hmeC(c)
+    return ret
+
+def hmeC(letter):    # 리턴 (초, 중, 종성)
     letter=ord(letter)-BASEORDER
     ed=ED[letter % 28]
     letter //= 28
@@ -145,6 +162,6 @@ def hme(letter):    # 리턴 (초, 중, 종성)
     hd=HD[letter]
     if md in DM:
         md=DM[md]
-    if ED[ed] in DM:
+    if ed in DM:
         ed=DM[ed]
     return hd+md+ed
