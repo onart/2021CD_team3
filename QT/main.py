@@ -49,14 +49,41 @@ class HelpWindow(QDialog):
         super().mouseReleaseEvent(event)
 
 class PeekerWindow(QMainWindow):
-    def __init__(self, f, parent): # f: 파일 이름(절대 경로), h: 쓰던 IDE 핸들
+    def __init__(self, fname, sp, rp, parent): # f: 파일 이름(절대 경로), sp: 대상 시작점(행, 열), rp: 대상 끝점(행, 열), parent: 부모 창 객체
         super().__init__()
+        self.setupUI(fname)
         self.lib=parent.lib
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
         self.funct1=keyboard.on_press_key(key='`', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
+
+        self.DISP_NO=20 # 한 번에 보여줄 줄수
+
+        try:
+            f=open(fname, encoding='UTF-8')
+            lines=f.readlines()
+        except UnicodeDecodeError:
+            f.close()
+            f=open(fname, encoding='cp949')
+            lines=f.readlines()
+        f.close()
+        self.content=lines[sp[0]-1:rp[0]]
+        self.content[0]=self.content[0][sp[1]-1:]
+        self.content[-1]=self.content[-1][:rp[1]]
+        self.scr=0  # 스크롤, 가장 위 행 넘버
+        self.lim=len(self.content)-self.DISP_NO
+
+        self.printContent()
         self.roundener=Roundener(self)
+
+    def setupUI(self, fname):
+        layout = QtWidgets.QVBoxLayout()
+
+        self.label=QtWidgets.QLabel('content', self)
+        self.label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        layout.addWidget(QtWidgets.QLabel(fname,self), 0)
+        layout.addWidget(self.label, 1)
 
     def setToggle(self, dummy):
         keyboard.press('backspace')
@@ -79,6 +106,7 @@ class PeekerWindow(QMainWindow):
             print('already closed')
         finally:
             event.accept()
+
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
 
@@ -93,6 +121,26 @@ class PeekerWindow(QMainWindow):
     def mouseReleaseEvent(self, event):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event):
+        super().keyPressEvent(event)
+        if event.key()==QtCore.Qt.Key_Down:
+            self.oneDown()
+        elif event.key()==QtCore.Qt.Key_Up:
+            self.oneUp()
+
+    def oneUp(self):
+        if self.scr > 0:
+            self.scr -= 1
+            self.printContent()
+
+    def oneDown(self):
+        if self.scr < self.lim:
+            self.scr += 1
+            self.printContent()
+
+    def printContent(self):
+        self.label.setText(''.join(self.content[self.scr:self.scr+self.DISP_NO]))
 
 #html 사용을 위한 클래스
 class HTMLDelegate(QtWidgets.QStyledItemDelegate):
@@ -348,8 +396,7 @@ class MyApp(QMainWindow, form_class):
         self.roundener=Roundener(self)
 
         self.setupUi(self)
-        self.button_for_newtab.clicked.connect(self.vSelection)
-        #self.button_for_newtab.clicked.connect(self.peeker)
+        self.button_for_newtab.clicked.connect(self.peeker)
         self.NewWindow.clicked.connect(self.new_window)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
@@ -457,14 +504,6 @@ class MyApp(QMainWindow, form_class):
                 '''
             )
 
-    def vSelection(self):
-        dlg=v_dialog(['arrange', 'arranges', 'recognitionmanager'])
-        dlg.exec_()
-        try:
-            return dlg.select_fn.text()
-        except AttributeError:
-            return
-
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog([[['aBc', 'main.py', (8, 12), (10, 9),'test1','self, dong'], ['ABc', 'test.py', (8, 12), (10, 9),'class1.fun2','self']], [['aBc', 'main.py', (8, 12), (10, 9)], ['aBC', 'wind.py', (8, 12), (10, 9)]], ['abc.py', 'abe.cpp']]) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
@@ -531,8 +570,8 @@ class MyApp(QMainWindow, form_class):
     def peeker(self, f):   # 다른 코드 띄워놓는 것. f: 볼 파일
         if self.hIdeWnd==0:
             return
-        elif self.window_2 == None:
-            self.window_2 = PeekerWindow(f, self)
+        else:
+            self.window_2 = PeekerWindow('./main.py', [1,1],[30,-1],self)
             self.window_2.show()
 
     def soundIn(self):

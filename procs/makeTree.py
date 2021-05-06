@@ -6,6 +6,7 @@ import procs.phonetic as phonetic
 
 ext=dict()
 modTimes=dict() # 파일 이름: [기록된 수정 시각, 타임스탬프]
+rel2abs=dict()  # 파일 절대 경로 따로 저장
 
 STAMP=0
 TOPDIR=''
@@ -857,6 +858,7 @@ def gc():   # 제거된 파일에 대하여 기존 정보를 제거
             functs={x:functs[x] for x in functs if len(functs[x]) != 0}
     for f in rmm:
         modTimes.pop(f)
+        rel2abs.pop(f)
 
 def forMod(fname):  # 수정된 파일에 대하여 기존 정보를 제거
     global classes, functs
@@ -901,6 +903,7 @@ def scanDir(top):   # 입력값: 시작 시 설정한 top 디렉토리의 절대
                 
             except KeyError:
                 modTimes[fr]=[mtime, STAMP]
+                rel2abs[fr]=fa
                 try:
                     ext[fext](fr, prog)
                 except UnicodeDecodeError:
