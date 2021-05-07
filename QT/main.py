@@ -22,6 +22,7 @@ form_class = uic.loadUiType("prototype.ui")[0]
 child_class = uic.loadUiType("child.ui")[0]
 
 MODES=['명령', '탐색', '보기']
+USRLIB=ctypes.windll.LoadLibrary('user32.dll')
 
 class HelpWindow(QDialog):
     def __init__(self, parent):
@@ -51,10 +52,11 @@ class HelpWindow(QDialog):
 class PeekerWindow(QDialog):
     def __init__(self, fname, sp, rp, parent): # f: 파일 이름(절대 경로), sp: 대상 시작점(행, 열), rp: 대상 끝점(행, 열), parent: 부모 창 객체
         super().__init__()
+
         self.setupUI(fname)
-        self.lib=parent.lib
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
+        self.base=parent
         self.funct1=keyboard.on_press_key(key='`', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
 
@@ -88,7 +90,7 @@ class PeekerWindow(QDialog):
     def setToggle(self, dummy):
         keyboard.press('backspace')
         if self.isActiveWindow():
-            self.lib.SetForegroundWindow(self.hIdeWnd)
+            USRLIB.SetForegroundWindow(self.hIdeWnd)
             # 조작 모드 변경 
         else:
             self.activateWindow()
@@ -105,8 +107,8 @@ class PeekerWindow(QDialog):
         except KeyError:
             print('already closed')
         finally:
+            self.base.window_2=None
             event.accept()
-            super().close()
 
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
@@ -185,7 +187,7 @@ class HTMLDelegate(QtWidgets.QStyledItemDelegate):
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self, content):
         super().__init__()
-
+        #USRLIB.SetForegroundWindow(int(self.winId()))
         self.setupUI()
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
@@ -273,6 +275,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.select_fn = None
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
 
     def setupUI(self):
@@ -381,12 +384,11 @@ class MyApp(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
 
-        self.lib=ctypes.windll.LoadLibrary('user32.dll')
-
         QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
 
         self.window_1 = None    # Alt+tab-like
         self.window_2 = None    # peek
+        self.sub1=None
 
         self.sin = SoundSig()
         self.sin.sin.connect(self.soundIn)
@@ -451,12 +453,7 @@ class MyApp(QMainWindow, form_class):
         # stt recognition manager
         self.q=queue.Queue()
         self.rec_manager = RecognitionManager(self.q, self.sin)
-        '''
-        BaseManager.register('RecognitionManager',RecognitionManager, MyProxy)
-        manager = BaseManager()
-        manager.start()
-        self.rec_manager = manager.RecognitionManager()
-        '''
+
     def setVmode(self, m):
         print('mode:',m)
         self.vMode=m
@@ -581,12 +578,14 @@ class MyApp(QMainWindow, form_class):
     def soundIn(self):
         word=self.q.get()
         if self.activeWindow.text() == 'others':
-            if self.lib.SetForegroundWindow(self.hIdeWnd)==0:
+            if USRLIB.SetForegroundWindow(self.hIdeWnd)==0:
                 QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
                 print('IDE 없음')
                 return
 
         # 자식 window가 있는 시점에서는 명령 무시하도록 조치
+        if self.sub1 != None:
+            return
 
         if self.language_change:    # 일반 명령어
             if word in self.kCommands:
@@ -605,24 +604,28 @@ class MyApp(QMainWindow, form_class):
             if len(sel1)==1:
                 sel2=sel1[0]
             else:
-                ch1=v_dialog(sel1)
-                ch1.exec_()
+                self.sub1=v_dialog(sel1)
+                self.sub1.exec_()
                 try:
-                    sel2=ch1.select_fn.text()
+                    sel2=self.sub1.select_fn.text()
                     print(sel2)
                 except AttributeError:  # 선택하지 않음
                     return
+                finally:
+                    self.sub1=None
             # 단 sel1의 결과가 1개라면 생략
             sel3=makeTree.POOL[sel2]
             if type(sel3[0]) is not list: # 결과 1개. len 6이면 함수, 4면 클래스, 1이면 파일
                 pass
             else:   # 파일, 클래스, 함수 중 있는 선택지 보여줌
-                ch2=fn_dialog(sel3)
-                ch2.exec_()
+                self.sub1=fn_dialog(sel3)
+                self.sub1.exec_()
                 try:
-                    sel4=ch2.select_fn.text()
+                    sel4=self.sub1.select_fn.text()
                 except AttributeError:
                     return
+                finally:
+                    self.sub1=None
             if self.vMode==1:   # peek 모드인지 seek 모드인지에 따라 구분 처리
                 pass
             elif self.vMode==2:
