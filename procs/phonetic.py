@@ -15,7 +15,7 @@
 '''
 
 EXC='aehiouwy'
-ALPHA=(0,1,2,3,0,1,2,0,0,2,2,4,5,5,0,1,2,6,2,3,0,1,0,2,0,2)
+ALPHA='01230120022455012623010202'
 smallA=ord('a')
 
 BASEORDER=ord('가')
@@ -66,7 +66,7 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
     for w in words:
         val=lcsThr(soundEx(w),basis)
         val2=lcsThr(inp, w)
-        if val > len(basis)/2:
+        if val > len(basis)/3:
             ar.append((w, val+val2/10))
     ar.sort(key=lambda x: x[1])
     ar.reverse()
@@ -93,18 +93,18 @@ def arrange_k(inp, words):
 
 def soundEx(keyword):   # 일반 케이스
     ret=str(ALPHA[ord(keyword[0])-smallA])
-    cur='?'
+    begin=False
     for c in keyword[1:]:
+        if c==' ':
+            begin=True
+            continue
         i=ALPHA[ord(c)-smallA]
-        cur=i
-        if i != 0 and c != cur:
-            ret+=str(i)
-            '''
-            if len(ret)==4:
-                return ret
-                '''
+        if i=='0':
+            ret+=c
+        elif i != ret[-1] or begin:
+            ret+=i
+        begin=False
     return ret
-    #return ret.ljust(4,'0')
 
 def spell(inp, keyword):    # 스펠을 부른 케이스
     return (keyword.find(inp) == 0)
@@ -139,12 +139,25 @@ def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 �
     for w in lcsLst:
         pos=-1
         cur=0
+        mxa=0
+        mxb=0
         for letter in w:
             prev=pos
             pos=b.find(letter, pos+1)
-            cur=0 if pos-prev>=THRESHOLD else cur+1
-            if mx<cur:
-                mx=cur
+            cur=1 if pos-prev>=THRESHOLD else cur+1
+            if mxb<cur:
+                mxb=cur
+        pos=-1
+        cur=0
+        for letter in w:
+            prev=pos
+            pos=a.find(letter, pos+1)
+            cur=1 if pos-prev>=THRESHOLD else cur+1
+            if mxa<cur:
+                mxa=cur
+        
+        mx=max(mx, min(mxa, mxb))
+
     return mx
 
 def hme(s):

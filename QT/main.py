@@ -106,6 +106,7 @@ class PeekerWindow(QDialog):
             print('already closed')
         finally:
             event.accept()
+            super().close()
 
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
@@ -393,6 +394,9 @@ class MyApp(QMainWindow, form_class):
         self.hIdeWnd=0          # IDE Window Handle
 
         self.ctx=threading.Thread(target=makeTree.scanTH, daemon=True)
+        # active window
+        threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
+        
         self.roundener=Roundener(self)
 
         self.setupUi(self)
@@ -443,8 +447,6 @@ class MyApp(QMainWindow, form_class):
         self.funct2=keyboard.on_release_key(key='shift', callback=self.korOff)
 
         self.language_change = False #shift 눌려 있으면 ON
-        # active window
-        threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
 
         # stt recognition manager
         self.q=queue.Queue()
@@ -490,6 +492,7 @@ class MyApp(QMainWindow, form_class):
         if not self.recording:
             return
         if self.vMode != 0:
+            print(self.vMode)
             self.language_change=False
             self.voice.setText(MODES[self.vMode])
             self.rec_manager.change_to('eng')
@@ -565,6 +568,7 @@ class MyApp(QMainWindow, form_class):
             self.window_1.close()
         if self.window_2 is not None:
             self.window_2.close()
+        keyboard.unhook_all()
         super().close()
 
     def peeker(self, f):   # 다른 코드 띄워놓는 것. f: 볼 파일

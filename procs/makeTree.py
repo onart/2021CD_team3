@@ -76,13 +76,14 @@ class Pool:
             if ord(i)>=ord('a') and ord(i)<=ord('z'):
                 ret+=i
             elif ord(i)>=ord('A') and ord(i)<=ord('Z'):
+                ret+=' '
                 ret+=i.lower()
             elif i=='_':
-                pass
+                ret+=' '
             else:
-                pass
+                ret+=' '
 
-        return ret
+        return ' '.join(ret.split())
 
     def update(self):
         self.clear()
