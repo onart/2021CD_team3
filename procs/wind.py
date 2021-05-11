@@ -12,6 +12,11 @@ IDE_PROC={  # key: 프로세스 이름, value: [표시 이름, set(열외 타이
             'Settings',
             'Confirm Exit',
         }],
+    'pycharm.exe':['PyCharm', {
+            'Create Project',
+            'Settings',
+            'Confirm Exit',
+        }],
     'Code.exe': ['비주얼 스튜디오 코드', {
 
         }],
@@ -26,7 +31,10 @@ IDE_PROC={  # key: 프로세스 이름, value: [표시 이름, set(열외 타이
 def wname(s, pname):
     if (pname not in IDE_PROC) or (s in IDE_PROC[pname][1]):
         return 'others'
-    if pname=='pyCharm':
+    exc=IDE_PROC[pname][1]
+    if s in exc:
+        return 'others'
+    if pname=='pycharm.exe' or pname=='pycharm64.exe':
         return 'PyCharm'
     for i in range(len(IDE_LIST)):
         if s.find(IDE_LIST[i],-len(IDE_LIST[i])) != -1:
@@ -48,6 +56,7 @@ def currentWindow(receiver):    #스레드 함수
         except IndexError:
             pname=''
         wind = wname(buffer.value, pname)
+        print(wind)
         if wind != receiver.activeWindow.text:
             try:
                 receiver.activeWindow.setText(wind)
