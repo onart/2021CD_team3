@@ -187,7 +187,6 @@ class RecognitionManager:
 
     def reset(self):
         self.data = self.base_manager.RecognitionData()
-        print(self.data)
         self.stop_thread = False
 
     def start(self):
@@ -207,12 +206,21 @@ class RecognitionManager:
 
     # language : 'eng' or 'kor'
     def change_to(self, language):
+        # NoneType에 terminate 이슈
+        # shift 누르고 말했을때
+        lock.acquire()
         self.record_process.terminate()
         self.start_process(language)
+        lock.release()
 
     def stop(self):
+        lock.acquire()
         self.stop_thread = True
-        self.record_process.terminate()
+        try:
+            self.record_process.terminate()
+        except:
+            print("terminate issue occured")
+        lock.release()
 
     def soundIn(self, word):
         self.q.put(word)
@@ -318,7 +326,6 @@ def get_speech_recognition(responses, stream, rec_data):
             # 소문자 및 공백 제거
             tmp_list.append(transcript.lower().strip())
             rec_data.stt_list = tmp_list
-            print(rec_data.stt_list)
             rec_data.changed = True
 
             lock.release()
