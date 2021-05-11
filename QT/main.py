@@ -24,6 +24,67 @@ child_class = uic.loadUiType("child.ui")[0]
 MODES=['명령', '탐색', '보기']
 USRLIB=ctypes.windll.LoadLibrary('user32.dll')
 
+class MacroWindow(QDialog):
+    def __init__(self, parent):
+        super(MacroWindow, self).__init__(parent)
+        uic.loadUi("macro.ui", self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
+        self.roundener=Roundener(self)
+        
+        self.helpButton.clicked.connect(self.help)
+        self.addButton.clicked.connect(self.add)
+        self.closeButton.clicked.connect(self.close)
+        
+        self.show()
+        
+
+    def paintEvent(self, event):
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
+
+    def help(self):
+        HelpWindow(self)
+
+    def add(self):
+        MacroAddWindow(self)
+        
+
+class MacroAddWindow(QDialog):
+    def __init__(self, parent):
+        super(MacroAddWindow, self).__init__(parent)
+        uic.loadUi("macroAdd.ui", self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
+        self.roundener=Roundener(self)
+
+        self.show()
+
+    def paintEvent(self, event):
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
+        
+
 class HelpWindow(QDialog):
     def __init__(self, parent):
         super(HelpWindow, self).__init__(parent)
@@ -430,6 +491,7 @@ class MyApp(QMainWindow, form_class):
         self.termButton.clicked.connect(self.close)
         self.open_File.clicked.connect(self.fileopen)
         self.help_button.clicked.connect(self.help)
+        self.macroButton.clicked.connect(self.macro)
         self.dialog = QDialog()
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
@@ -453,6 +515,7 @@ class MyApp(QMainWindow, form_class):
             self.NewWindow,
             self.termButton,
             self.help_button,
+            self.macroButton
             )
 
         for bu in self.textButtons:
@@ -670,6 +733,9 @@ class MyApp(QMainWindow, form_class):
 
     def help(self):
         HelpWindow(self)
+
+    def macro(self):
+        MacroWindow(self)
 
     """ 임시로 만들어 놓은 dialog 추가 코드 입니다
     def help_detail(self):
