@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>270</width>
-    <height>120</height>
+    <width>269</width>
+    <height>160</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
     <string>이름</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="nameLine">
+  <widget class="QLineEdit" name="lineEdit">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -88,13 +88,13 @@
     <string>저장</string>
    </property>
   </widget>
-  <widget class="QTableView" name="tableView">
+  <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>40</y>
      <width>251</width>
-     <height>71</height>
+     <height>111</height>
     </rect>
    </property>
   </widget>

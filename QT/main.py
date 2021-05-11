@@ -16,6 +16,7 @@ from PyQt5 import uic
 import procs.wind as wind
 from procs.stt import RecognitionManager
 import procs.makeTree as makeTree
+import procs.kComm as kComm
 import html
 
 form_class = uic.loadUiType("prototype.ui")[0]
@@ -41,17 +42,19 @@ class MacroWindow(QDialog):
         self.closeButton.clicked.connect(self.close)
 
         self.tableWidget.doubleClicked.connect(self.addWithDoubleClick)
-        
         # commands for test
-        self.commands = [('test1', 5), ('test2', 2),('test1', 5), ('test2', 2),('test1', 5), ('test2', 2)]
-        self.setTableWidgetData(self.commands)
+        kComm.kCommands = {'test1': [('call', 'call something'),('stall','0.02')]}
+        self.setTableWidget()
 
-    def setTableWidgetData(self, commands):
-        self.tableWidget.setRowCount(len(commands))
+    def setTableWidget(self):
+        self.tableWidget.setRowCount(len(kComm.kCommands.keys()))
+        
         self.tableWidget.setColumnCount(2)
-        for i, tup in enumerate(commands):
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(tup[0]))
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(tup[1])))
+        self.table = []
+        for i, key in enumerate(kComm.kCommands.keys()):
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(key))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(len(kComm.kCommands[key]))))
+            self.table.append(key)
         
         column_headers = ['이름', '구성 명령어 수']
         self.tableWidget.setHorizontalHeaderLabels(column_headers)
@@ -62,6 +65,8 @@ class MacroWindow(QDialog):
 
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.tableWidget.setColumnWidth(0, int(self.width()*5/10))
         
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
@@ -88,9 +93,9 @@ class MacroWindow(QDialog):
     def addWithDoubleClick(self):
         rows = []
         for idx in self.tableWidget.selectionModel().selectedIndexes():
-            rows.append(idx.row())            
+            rows.append(idx.row())
 
-        MacroAddWindow(self, self.commands[rows[0]][0])
+        MacroAddWindow(self, self.table[rows[0]])
         
 
 class MacroAddWindow(QDialog):
@@ -100,14 +105,48 @@ class MacroAddWindow(QDialog):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
 
-        self.nameLine.setText(macroName)
+        self.setupUI(macroName)
 
+        self.show()
+
+    def setupUI(self, macroName):
         self.addButton.clicked.connect(self.add)
         self.removeButton.clicked.connect(self.remove)
         self.cancelButton.clicked.connect(self.close)
         self.saveButton.clicked.connect(self.save)
 
-        self.show()
+        self.lineEdit.setText(macroName)
+        if macroName != '':
+            self.lineEdit.setReadOnly(True)
+
+            # commands for test
+            data = kComm.kCommands[macroName]
+            self.setTableWidget(data)
+        else:
+            self.setTableWidget(list())
+      
+
+    def setTableWidget(self, data):
+        self.tableWidget.setRowCount(len(data))
+        
+        self.tableWidget.setColumnCount(3)
+        for i, tup in enumerate(data):
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(str(i + 1)))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(tup[0]))
+            self.tableWidget.setItem(i, 2, QTableWidgetItem(tup[1]))
+        
+        column_headers = ['순번', '유형', '내용']
+        self.tableWidget.setHorizontalHeaderLabels(column_headers)
+
+        self.tableWidget.verticalHeader().setDefaultSectionSize(15)
+        self.tableWidget.verticalHeader().hide()
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.tableWidget.setColumnWidth(0, 40)
+        self.tableWidget.setColumnWidth(1, 70)
 
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
