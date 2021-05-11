@@ -30,14 +30,39 @@ class MacroWindow(QDialog):
         uic.loadUi("macro.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
+
+        self.setupUI()
         
+        self.show()
+
+    def setupUI(self):
         self.helpButton.clicked.connect(self.help)
         self.addButton.clicked.connect(self.add)
         self.closeButton.clicked.connect(self.close)
-        
-        self.show()
-        
 
+        self.tableWidget.doubleClicked.connect(self.addWithDoubleClick)
+        
+        # commands for test
+        self.commands = [('test1', 5), ('test2', 2),('test1', 5), ('test2', 2),('test1', 5), ('test2', 2)]
+        self.setTableWidgetData(self.commands)
+
+    def setTableWidgetData(self, commands):
+        self.tableWidget.setRowCount(len(commands))
+        self.tableWidget.setColumnCount(2)
+        for i, tup in enumerate(commands):
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(tup[0]))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(tup[1])))
+        
+        column_headers = ['이름', '구성 명령어 수']
+        self.tableWidget.setHorizontalHeaderLabels(column_headers)
+
+        self.tableWidget.verticalHeader().setDefaultSectionSize(15)
+        self.tableWidget.verticalHeader().hide()
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
 
@@ -58,14 +83,29 @@ class MacroWindow(QDialog):
 
     def add(self):
         MacroAddWindow(self)
+            
+
+    def addWithDoubleClick(self):
+        rows = []
+        for idx in self.tableWidget.selectionModel().selectedIndexes():
+            rows.append(idx.row())            
+
+        MacroAddWindow(self, self.commands[rows[0]][0])
         
 
 class MacroAddWindow(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent,macroName=''):
         super(MacroAddWindow, self).__init__(parent)
         uic.loadUi("macroAdd.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
+
+        self.nameLine.setText(macroName)
+
+        self.addButton.clicked.connect(self.add)
+        self.removeButton.clicked.connect(self.remove)
+        self.cancelButton.clicked.connect(self.close)
+        self.saveButton.clicked.connect(self.save)
 
         self.show()
 
@@ -83,6 +123,15 @@ class MacroAddWindow(QDialog):
     def mouseReleaseEvent(self, event):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
+
+    def add(self):
+        pass
+
+    def remove(self):
+        pass
+
+    def save(self):
+        pass
         
 
 class HelpWindow(QDialog):
@@ -653,11 +702,11 @@ class MyApp(QMainWindow, form_class):
         keyboard.unhook_all()
         super().close()
 
-    def peeker(self):   # 다른 코드 띄워놓는 것. f: 볼 파일
+    def peeker(self, f):   # 다른 코드 띄워놓는 것. f: 볼 파일
         if self.hIdeWnd==0:
             return
         else:
-            self.window_2 = PeekerWindow(('QT\\main.py',),self)
+            self.window_2 = PeekerWindow('./main.py', [1,1],[30,-1],self)
             self.window_2.show()
 
     def soundIn(self):

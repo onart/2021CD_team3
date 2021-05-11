@@ -165,8 +165,8 @@ QPushButton:pressed {
    <widget class="QPushButton" name="macroButton">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>10</y>
+      <x>220</x>
+      <y>90</y>
       <width>20</width>
       <height>23</height>
      </rect>
