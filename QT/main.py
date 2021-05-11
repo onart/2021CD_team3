@@ -50,8 +50,19 @@ class HelpWindow(QDialog):
         super().mouseReleaseEvent(event)
 
 class PeekerWindow(QDialog):
-    def __init__(self, fname, sp, rp, parent): # f: 파일 이름(절대 경로), sp: 대상 시작점(행, 열), rp: 대상 끝점(행, 열), parent: 부모 창 객체
+    def __init__(self, sel, parent):
         super().__init__()
+
+        if len(sel) != 1:
+            fname=sel[1]
+            fname=makeTree.rel2abs[fname]
+            sp=sel[2]
+            rp=sel[3]
+        else:
+            fname=sel[0]
+            fname=makeTree.rel2abs[fname]
+            sp=(1,1)
+            rp=(-1,-1)
 
         self.setupUI(fname)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
@@ -187,7 +198,7 @@ class HTMLDelegate(QtWidgets.QStyledItemDelegate):
 class fn_dialog(QDialog):  #새로운 창 for new_window
     def __init__(self, content):
         super().__init__()
-        #USRLIB.SetForegroundWindow(int(self.winId()))
+        
         self.setupUI()
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
@@ -220,6 +231,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.select_fn = None
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
 
     def setupUI(self):
@@ -389,6 +401,7 @@ class MyApp(QMainWindow, form_class):
         self.window_1 = None    # Alt+tab-like
         self.window_2 = None    # peek
         self.sub1=None
+        self.sub2=None
 
         self.sin = SoundSig()
         self.sin.sin.connect(self.soundIn)
@@ -610,26 +623,31 @@ class MyApp(QMainWindow, form_class):
                     sel2=self.sub1.select_fn.text()
                     print(sel2)
                 except AttributeError:  # 선택하지 않음
+                    self.sub1=None
                     return
                 finally:
                     self.sub1=None
             # 단 sel1의 결과가 1개라면 생략
             sel3=makeTree.POOL[sel2]
             if type(sel3[0]) is not list: # 결과 1개. len 6이면 함수, 4면 클래스, 1이면 파일
-                pass
+                sel4=sel3
             else:   # 파일, 클래스, 함수 중 있는 선택지 보여줌
                 self.sub1=fn_dialog(sel3)
                 self.sub1.exec_()
                 try:
-                    sel4=self.sub1.select_fn.text()
+                    sel4=self.sub1.select_fn.text() # text 말고 sel3의 성분으로 해야 함
                 except AttributeError:
+                    self.sub1=None
                     return
                 finally:
                     self.sub1=None
-            if self.vMode==1:   # peek 모드인지 seek 모드인지에 따라 구분 처리
+            if self.vMode==1:   # seek
                 pass
-            elif self.vMode==2:
-                pass
+            elif self.vMode==2: # peek
+                if self.sub2 != None:
+                    self.sub2.close()
+                self.sub2=PeekerWindow(sel4, self)
+                self.sub2.show()
 
     def fileopen(self): #새로운 파일 선택
         option = QFileDialog.Option()

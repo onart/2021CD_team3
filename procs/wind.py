@@ -56,7 +56,6 @@ def currentWindow(receiver):    #스레드 함수
         except IndexError:
             pname=''
         wind = wname(buffer.value, pname)
-        print(wind)
         if wind != receiver.activeWindow.text:
             try:
                 receiver.activeWindow.setText(wind)
@@ -69,15 +68,3 @@ def currentWindow(receiver):    #스레드 함수
                 receiver.hIdeWnd=hwnd
             # print(cur)
         time.sleep(0.2)   # 갱신 시간 수
-
-
-class corner_case():
-    def test1(self):
-        print("dsd")
-        def test2():
-            print("sds")
-    class corner_in_corner():
-        def test3(self):
-            print("sdsds")
-            def test4():
-                print("dsdsds")
