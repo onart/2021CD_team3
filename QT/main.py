@@ -590,11 +590,11 @@ class MyApp(QMainWindow, form_class):
         keyboard.unhook_all()
         super().close()
 
-    def peeker(self, f):   # 다른 코드 띄워놓는 것. f: 볼 파일
+    def peeker(self):   # 다른 코드 띄워놓는 것. f: 볼 파일
         if self.hIdeWnd==0:
             return
         else:
-            self.window_2 = PeekerWindow('./main.py', [1,1],[30,-1],self)
+            self.window_2 = PeekerWindow(('QT\\main.py',),self)
             self.window_2.show()
 
     def soundIn(self):
