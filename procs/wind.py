@@ -20,7 +20,7 @@ IDE_PROC={  # key: 프로세스 이름, value: [표시 이름, set(열외 타이
         }],
     'eclipse.exe':['이클립스', {
 
-        }],
+        }]
     }
 
 def wname(s, pname):
