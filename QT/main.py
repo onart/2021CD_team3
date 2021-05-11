@@ -37,14 +37,21 @@ class MacroWindow(QDialog):
         self.show()
 
     def setupUI(self):
+        self.c = SaveSig()
+        self.c.sig.connect(self.setTableAndShow)
+        
         self.helpButton.clicked.connect(self.help)
         self.addButton.clicked.connect(self.add)
         self.closeButton.clicked.connect(self.close)
 
         self.tableWidget.doubleClicked.connect(self.addWithDoubleClick)
-        # commands for test
-        kComm.kCommands = {'test1': [('call', 'call something'),('stall','0.02')]}
         self.setTableWidget()
+
+    def setTableAndShow(self, tup):
+        kComm.kCommands[tup[0]] = tup[1]
+        print(kComm.kCommands)
+        self.setTableWidget()
+        self.show()
 
     def setTableWidget(self):
         self.tableWidget.setRowCount(len(kComm.kCommands.keys()))
@@ -87,7 +94,7 @@ class MacroWindow(QDialog):
         HelpWindow(self)
 
     def add(self):
-        MacroAddWindow(self)
+        MacroAddWindow(self, self.c)
             
 
     def addWithDoubleClick(self):
@@ -95,21 +102,25 @@ class MacroWindow(QDialog):
         for idx in self.tableWidget.selectionModel().selectedIndexes():
             rows.append(idx.row())
 
-        MacroAddWindow(self, self.table[rows[0]])
+        MacroAddWindow(self, self.c, self.table[rows[0]])
         
 
 class MacroAddWindow(QDialog):
-    def __init__(self, parent,macroName=''):
+    def __init__(self, parent, cc, macroName=''):
         super(MacroAddWindow, self).__init__(parent)
         uic.loadUi("macroAdd.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
 
+        self.cc = cc
         self.setupUI(macroName)
 
         self.show()
 
     def setupUI(self, macroName):
+        self.c = SaveSig()
+        self.c.sig.connect(self.setTableAndShow)
+        
         self.addButton.clicked.connect(self.add)
         self.removeButton.clicked.connect(self.remove)
         self.cancelButton.clicked.connect(self.close)
@@ -120,11 +131,31 @@ class MacroAddWindow(QDialog):
             self.lineEdit.setReadOnly(True)
 
             # commands for test
-            data = kComm.kCommands[macroName]
+            data = list(kComm.kCommands[macroName])
             self.setTableWidget(data)
+            
         else:
-            self.setTableWidget(list())
-      
+            data = list()
+            self.setTableWidget(data)
+
+    def getTableData(self):
+        print("in getTableData")
+        data = []
+        for row in range(self.tableWidget.rowCount()):
+            name = self.tableWidget.item(row, 1).text()
+            content = self.tableWidget.item(row, 2).text()
+            data.append((name, content))
+
+        print(data)
+
+        return data
+                
+
+    def setTableAndShow(self, tup):
+        data = self.getTableData()
+        data.append(tup)
+        self.setTableWidget(data)
+        self.show()     
 
     def setTableWidget(self, data):
         self.tableWidget.setRowCount(len(data))
@@ -164,13 +195,67 @@ class MacroAddWindow(QDialog):
         super().mouseReleaseEvent(event)
 
     def add(self):
-        pass
+        MacroDetailWindow(self, self.c)
 
     def remove(self):
-        pass
+        rows = []
+        for idx in self.tableWidget.selectionModel().selectedIndexes():
+            rows.append(idx.row())
+
+        if rows != []:
+            data = self.getTableData()
+            del data[rows[0]]
+            self.setTableWidget(data)
+            self.show()
 
     def save(self):
-        pass
+        name = self.lineEdit.text()
+        if name != '':
+            data = self.getTableData()
+            self.cc.sig.emit((name, data))
+            self.close()
+
+
+class SaveSig(QObject):
+    sig=QtCore.pyqtSignal(object)
+
+
+class MacroDetailWindow(QDialog):
+    def __init__(self, parent, c):
+        super(MacroDetailWindow, self).__init__(parent)
+        uic.loadUi("macroDetail.ui", self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
+        self.roundener=Roundener(self)
+
+        self.c = c
+        self.setupUI()
+
+        self.show()
+
+    def setupUI(self):
+        self.cancelButton.clicked.connect(self.close)
+        self.saveButton.clicked.connect(self.save)
+
+        self.comboBox.addItems(['명령', '팔레트', '시간 지연', '키 입력'])
+
+    def paintEvent(self, event):
+        self.roundener.paintEvent(event)
+
+    def mousePressEvent(self, event):
+        self.roundener.mousePressEvent(event)   
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self.roundener.mouseMoveEvent(event)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.roundener.mouseReleaseEvent(event)
+        super().mouseReleaseEvent(event)
+
+    def save(self):
+        self.c.sig.emit((self.comboBox.currentText(), self.lineEdit.text()))
+        self.close()
         
 
 class HelpWindow(QDialog):
@@ -197,6 +282,9 @@ class HelpWindow(QDialog):
     def mouseReleaseEvent(self, event):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
+
+    def closeEvent(self, event):
+        pass
 
 class PeekerWindow(QDialog):
     def __init__(self, sel, parent):
