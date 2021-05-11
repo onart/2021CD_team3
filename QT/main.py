@@ -268,7 +268,8 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.setLayout(layout)
 
     def pushButtonClicked(self):
-        self.select_fn = self.fn_lst.currentItem()
+        row = self.fn_lst.currentRow()
+        self.select_fn = self.fn_lst.takeItem(row, 1)
         self.close()
 
     def paintEvent(self, event):
