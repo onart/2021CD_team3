@@ -202,26 +202,31 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.setupUI()
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
+        self.fn_lst.setRowCount(len(content[0]) + len(content[1]) + len(content[2]))
 
+        self.fn_lst.setHorizontalHeaderLabels(['Item type', 'name', '들어가 있는 파일명', 'scope', 'parameter'])
         idx_for_listWidget = 0
         for id_type, type_line in enumerate(content):
             if(type_line):
                 if(id_type == 0): # 함수의 경우  [이름, 파일, 시작, 끝, 스코프, 매개변수]
                     for each_fun in type_line:
-                        self.fn_lst.insertItem(idx_for_listWidget,
-                                               '<span style="color:red">Function</span>:&nbsp;{}&nbsp;<span style="color:red">in</span>&nbsp;{}&nbsp;with&nbsp;<span style="color:red">scope</span>:&nbsp;{}&nbsp;<span style="color:red">prameter</span>:&nbsp;{}'.format(
-                                                   each_fun[0], each_fun[1], each_fun[4], each_fun[5]))
+                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('Function'))
+                        idx_for_paramer = {1:0, 2:1, 3:4, 4:5}
+                        for col_ in range(1,5):
+                            self.fn_lst.setItem(idx_for_listWidget, col_,QTableWidgetItem('<span style="color:red">{}</span>'.format(each_fun[idx_for_paramer[col_]])) )
                         idx_for_listWidget += 1
 
                 elif(id_type == 1): # 클래스의 경우 [이름 , 파일, 시작, 끝]
                     for each_class in type_line:
-                        self.fn_lst.insertItem(idx_for_listWidget,
-                                               '<span style="color:blue">Class</span>:&nbsp;{}&nbsp;<span style="color:blue">in</span>&nbsp;{}'.format(each_class[0], each_class[1]))
+                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('Class'))
+                        for col_ in range(1,3):
+                            self.fn_lst.setItem(idx_for_listWidget, col_,QTableWidgetItem('<span style="color:blue">{}</span>'.format(each_class[col_-1])) )
                         idx_for_listWidget += 1
 
                 else: # 파일의 경우 [이름]
                     for each_file in type_line:
-                        self.fn_lst.insertItem(idx_for_listWidget, '<span style="color:green">File</span>:&nbsp;{}'.format(each_file))
+                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('File'))
+                        self.fn_lst.setItem(idx_for_listWidget, 1,QTableWidgetItem('<span style="color:green">{}</span>'.format(each_file[0])) )
                         idx_for_listWidget += 1
 
 
@@ -248,7 +253,10 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
         label1 = QLabel("Select Item<br>You want<br>Function : Red<br>Class : Blue<br>File : Green")
 
-        self.fn_lst = QListWidget()
+        self.fn_lst = QTableWidget()
+        self.fn_lst.setHorizontalHeaderLabels(['Item type', 'name', '들어가 있는 파일명', 'scope', 'parameter'])
+        self.fn_lst.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.fn_lst.setColumnCount(5)
         self.pushButton1 = QPushButton("Select")
         self.pushButton1.clicked.connect(self.pushButtonClicked)
 
