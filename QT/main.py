@@ -153,9 +153,18 @@ class MacroAddWindow(QDialog):
 
     def setTableAndShow(self, tup):
         data = self.getTableData()
+        if tup[0]=='시간 지연':
+            try:
+                if tup[1]=='inf':
+                    raise ValueError
+                f=float(tup[1])
+                if not f>0:
+                    raise ValueError
+            except ValueError:
+                tup=('시간 지연', '0.02')
         data.append(tup)
         self.setTableWidget(data)
-        self.show()     
+        self.show()
 
     def setTableWidget(self, data):
         self.tableWidget.setRowCount(len(data))
@@ -194,7 +203,9 @@ class MacroAddWindow(QDialog):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
-    def add(self):
+    def add(self):  
+        # 여기에 '위치'까지 들어가도록(기준: 현재 선택된 행의 아래)
+        # 현재 기존 값 수정하려고 더블클릭하면 이 창이 안 열리고 텍스트 수정만 가능한 거 수정 필요. 위의 addwithdoubleclick처럼
         MacroDetailWindow(self, self.c)
 
     def remove(self):
@@ -210,6 +221,16 @@ class MacroAddWindow(QDialog):
 
     def save(self):
         name = self.lineEdit.text()
+        # 명령은 한글 or 띄어쓰기로만 작성 가능한 것으로 고지
+        name=' '.join(name.split())
+        for ch in name:
+            if ch == ' ':
+                continue
+            elif ch<'가' or ch>'힣':
+                name=''
+                QMessageBox.about(self,'이름 오류','한글만 입력 가능합니다.')
+                break
+        # 중복 불가능도 고지해야 함
         if name != '':
             data = self.getTableData()
             self.cc.sig.emit((name, data))
@@ -237,6 +258,24 @@ class MacroDetailWindow(QDialog):
         self.saveButton.clicked.connect(self.save)
 
         self.comboBox.addItems(['명령', '팔레트', '시간 지연', '키 입력'])
+        self.comboBox.currentTextChanged.connect(self.onTypeChange)
+
+    def onTypeChange(self, event):
+        if event=='키 입력':
+            # 입력된 키 받아서 저장, 직접 수정 불가능, 디폴트값 ctrl
+            self.lineEdit.setReadOnly(True)
+            self.lineEdit.setText('ctrl')
+            threading.Thread(target=self.readKey, daemon=True).start()
+        else:
+            # 자유 입력
+            self.lineEdit.setReadOnly(False)
+    
+    def readKey(self):
+        while self.comboBox.currentText()=='키 입력':
+            k=keyboard.read_key()
+            if self.comboBox.currentText()!='키 입력':
+                break
+            self.lineEdit.setText(k)
 
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
