@@ -869,7 +869,7 @@ class MyApp(QMainWindow, form_class):
         if self.hIdeWnd==0:
             return
         else:
-            self.window_2 = PeekerWindow('./main.py', [1,1],[30,-1],self)
+            self.window_2 = PeekerWindow(('QT\\main.py',),self)
             self.window_2.show()
 
     def soundIn(self):
@@ -884,10 +884,13 @@ class MyApp(QMainWindow, form_class):
         if self.sub1 != None:
             return
 
-        if self.language_change:    # 일반 명령어
-            if word in self.kCommands:
+        if self.language_change:    # 한국어
+            if word in self.kCommands:  # 모드 전환
                 self.kCommands[word](0)
                 return
+            elif True:                  # 일반 명령어
+                kComm.execute(word)
+                pass
             else:   # 유사도
                 QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
                 return

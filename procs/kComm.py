@@ -18,9 +18,9 @@ def stall(time):    # 시간 지연 수행
     sleep(time)
 
 
-def palette(IDE_name, COM_name):  # 팔레트 명령 수행
+def palette(COM_name):  # 팔레트 명령 수행
 
-    if IDE_name == '비주얼 스튜디오 코드':
+    if IDE == '비주얼 스튜디오 코드':
         pag.keyDown('ctrl')
         pag.keyDown('shift')
         pag.press('p')
@@ -30,7 +30,7 @@ def palette(IDE_name, COM_name):  # 팔레트 명령 수행
         pag.write(COM_name)
         pag.press('enter')
           
-    if IDE_name == '비주얼 스튜디오':
+    if IDE == '비주얼 스튜디오':
         pag.keyDown('ctrl')
         pag.keyDown('alt')
         pag.press('a')
@@ -40,7 +40,7 @@ def palette(IDE_name, COM_name):  # 팔레트 명령 수행
         pag.write(COM_name)
         pag.press('enter')
             
-    if IDE_name == '이클립스':
+    if IDE == '이클립스':
         pag.keyDown('ctrl')
         pag.keyDown('alt')
         pag.keyDown('shift')
@@ -53,7 +53,7 @@ def palette(IDE_name, COM_name):  # 팔레트 명령 수행
         pag.write(COM_name)
         pag.press('enter')
             
-    if IDE_name == 'PyCharm':
+    if IDE == 'PyCharm':
         pag.keyDown('ctrl')
         pag.keyDown('shift')
         pag.press('a')
@@ -63,8 +63,7 @@ def palette(IDE_name, COM_name):  # 팔레트 명령 수행
         pag.write(COM_name)
         pag.press('enter')
 
-
-def call(IDE_name, COM_name):     # 다른 명령어
+def opn(IDE_name, COM_name):     # 클래스/함수/파일 열기
 
 
     vscode_command = {'파일열기':['ctrl','p'],'현재파일닫기':['ctrl','f4'],'특정행이동':['ctrl','g'],'모든파일닫기':['ctrl','k','w']}
@@ -79,21 +78,21 @@ def call(IDE_name, COM_name):     # 다른 명령어
         for keyb in reversed(vscode_command[COM_name]):
             pag.keyUp(keyb)
           
-    if IDE_name == '비주얼 스튜디오':
+    elif IDE_name == '비주얼 스튜디오':
         for keyb in vs_command[COM_name]:
             pag.keyDown(keyb)
             
         for keyb in reversed(vs_command[COM_name]):
             pag.keyUp(keyb)
             
-    if IDE_name == '이클립스':
+    elif IDE_name == '이클립스':
         for keyb in eclipse_command[COM_name]:
             pag.keyDown(keyb)
             
         for keyb in reversed(eclipse_command[COM_name]):
             pag.keyUp(keyb)
             
-    if IDE_name == 'PyCharm':
+    elif IDE_name == 'PyCharm':
         for keyb in pycharm_command[COM_name]:
             pag.keyDown(keyb)
             
@@ -105,32 +104,35 @@ press_key = []
 
 IDE = 'IDE 명'
 
-def keyIn(Inputkey):    # 키 입력
-    pag.press(Inputkey)
-    press_key.append(Inputkey)
-    pass
-            
+# keyboard 모듈: 키 누르는 매크로
+# pag 모듈: 텍스트 입력용
 
-def execute(name):  
+def keyIn(Inputkey):    # 키 입력
+    pag.keyDown(Inputkey)
+    press_key.append(Inputkey)
+            
+def keyRel():   # 키 떼기
+    for k in press_key:
+        pag.keyUp(k)
+    press_key.clear()
+
+def execute(name):
     # 이름으로 명령 찾아서 수행. 명령은 kCommands 안에 있고 반복문을 이용해 기초 명령들을 호출하면 될 것 같습니다.
     # 참고로 명령, 보기, 탐색은 여기서 수행하는 것이 아니며, 메인 측에서 IDE를 활성화시킨 상태에서 이것을 호출할 것입니다.
     com=kCommands[name]
-    
 
     for comm in com:
-        if comm == '시간 지연':
-            stall(com[com.index(comm)+1])
-            
-        if comm == '팔레트':
-            palette(IDE, com[com.index(comm)+1])
-
-        if comm == '명령':
-            call(IDE, com[com.index(comm)+1])
-
-        if comm == '키 입력':
-            keyIn(com[com.index(comm)+1])
-            
-
+        if comm[0] == '키 입력':
+            keyIn(comm[1])
+        else:
+            keyRel()
+            if comm=='시간 지연':
+                stall(com[com.index(comm)+1])
+            elif comm=='팔레트':
+                palette(com[com.index(comm)+1])
+            elif comm=='명령':
+                execute(com[com.index(comm)+1])
+    keyRel()
 
 # 선별부
 import os, sys
@@ -155,6 +157,8 @@ def normalize(inp): # 공백만 제거
 
 
 kCommands.update({
+    '모두접기':[('팔레트','fold all')],
+    '파일열기':[('키 입력', 'ctrl'), ('키 입력', 'p')],
 
 })
 
