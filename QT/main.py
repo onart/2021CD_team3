@@ -344,7 +344,7 @@ class PeekerWindow(QDialog):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
         self.base=parent
-        self.funct1=keyboard.on_press_key(key='`', callback=self.setToggle)
+        self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
 
         self.DISP_NO=20 # 한 번에 보여줄 줄수
@@ -375,13 +375,10 @@ class PeekerWindow(QDialog):
         layout.addWidget(self.label, 1)
 
     def setToggle(self, dummy):
-        keyboard.press('backspace')
         if self.isActiveWindow():
             USRLIB.SetForegroundWindow(self.hIdeWnd)
-            # 조작 모드 변경 
         else:
             self.activateWindow()
-            # 조작 모드 변경
     
     def escape(self, dummy):
         self.close()
