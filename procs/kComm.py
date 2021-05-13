@@ -29,8 +29,8 @@ def palette(COM_name):  # 팔레트 명령 수행
         sleep(0.1)
         pag.write(COM_name)
         pag.press('enter')
-          
-    if IDE == '비주얼 스튜디오':
+
+    elif IDE == '비주얼 스튜디오':
         pag.keyDown('ctrl')
         pag.keyDown('alt')
         pag.press('a')
@@ -39,8 +39,8 @@ def palette(COM_name):  # 팔레트 명령 수행
         sleep(0.1)
         pag.write(COM_name)
         pag.press('enter')
-            
-    if IDE == '이클립스':
+
+    elif IDE == '이클립스':
         pag.keyDown('ctrl')
         pag.keyDown('alt')
         pag.keyDown('shift')
@@ -52,8 +52,8 @@ def palette(COM_name):  # 팔레트 명령 수행
         sleep(0.1)
         pag.write(COM_name)
         pag.press('enter')
-            
-    if IDE == 'PyCharm':
+
+    elif IDE == 'PyCharm':
         pag.keyDown('ctrl')
         pag.keyDown('shift')
         pag.press('a')
@@ -126,12 +126,13 @@ def execute(name):
             keyIn(comm[1])
         else:
             keyRel()
-            if comm=='시간 지연':
-                stall(com[com.index(comm)+1])
-            elif comm=='팔레트':
-                palette(com[com.index(comm)+1])
-            elif comm=='명령':
-                execute(com[com.index(comm)+1])
+            if comm[0]=='시간 지연':
+                stall(comm[1])
+            elif comm[0]=='팔레트':
+                palette(comm[1])
+            elif comm[0]=='명령':
+                if name != comm[1]:
+                    execute(comm[1])
     keyRel()
 
 # 선별부
@@ -157,8 +158,6 @@ def normalize(inp): # 공백만 제거
 
 
 kCommands.update({
-    '모두접기':[('팔레트','fold all')],
-    '파일열기':[('키 입력', 'ctrl'), ('키 입력', 'p')],
-
+    '이름': ((),(),(),())
 })
 

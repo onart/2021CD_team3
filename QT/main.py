@@ -230,7 +230,7 @@ class MacroAddWindow(QDialog):
                 name=''
                 QMessageBox.about(self,'이름 오류','한글만 입력 가능합니다.')
                 break
-        # 중복 불가능도 고지해야 함
+        # 중복 불가능도 고지해야 함 (빌트인이랑도)
         if name != '':
             data = self.getTableData()
             self.cc.sig.emit((name, data))
@@ -509,7 +509,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.select_fn = None
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        USRLIB.SetForegroundWindow(int(self.winId()))
+        #USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
 
     def setupUI(self):
@@ -543,6 +543,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
     def pushButtonClicked(self):
         row = self.fn_lst.currentRow()
         self.select_fn = self.fn_lst.takeItem(row, 1)
+        # [[a,b,c],[d],[e,f]] -> b=(0,2)
         self.close()
 
     def paintEvent(self, event):
@@ -569,7 +570,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.select_fn = None
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        USRLIB.SetForegroundWindow(int(self.winId()))
+        #USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
 
     def setupUI(self):
@@ -885,6 +886,7 @@ class MyApp(QMainWindow, form_class):
             return
 
         if self.language_change:    # 한국어
+            word=kComm.matchK(word)
             if word in self.kCommands:  # 모드 전환
                 self.kCommands[word](0)
                 return
@@ -951,23 +953,6 @@ class MyApp(QMainWindow, form_class):
 
     def macro(self):
         MacroWindow(self)
-
-    """ 임시로 만들어 놓은 dialog 추가 코드 입니다
-    def help_detail(self):
-        # 닫기 버튼
-        btnDialog = QPushButton("Close", self.dialog)
-        btnDialog.move(83, 330)
-        btnDialog.clicked.connect(self.dialog_close)
-
-        self.dialog.setWindowTitle('Dialog')
-        self.dialog.move(1300, 300) #dialog 시작위치
-        self.dialog.setWindowModality(Qt.ApplicationModal)
-        self.dialog.resize(250, 400)
-        self.dialog.show()
-    
-    def dialog_close(self):
-        self.dialog.close()
-    """
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
