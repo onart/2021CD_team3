@@ -482,7 +482,9 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         delegate = HTMLDelegate(self.fn_lst)
         self.fn_lst.setItemDelegate(delegate)
         self.fn_lst.setRowCount(len(content[0]) + len(content[1]) + len(content[2]))
-
+        self.fn_start  = 0
+        self.class_start = self.fn_start + len(content[0])
+        self.file_start = self.class_start + len(content[1])
         self.fn_lst.setHorizontalHeaderLabels(['유형', '이름', '파일', '스코프', '매개변수'])
         idx_for_listWidget = 0
         for id_type, type_line in enumerate(content):
@@ -512,7 +514,7 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
             else:
                 pass
 
-        self.select_fn = None
+        self.select_fn = []
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         #USRLIB.SetForegroundWindow(int(self.winId()))
@@ -546,8 +548,17 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
     def pushButtonClicked(self):
         row = self.fn_lst.currentRow()
-        self.select_fn = self.fn_lst.takeItem(row, 1)
-        # [[a,b,c],[d],[e,f]] -> b=(0,2)
+
+
+        if(0<= row <self.class_start):
+            self.select_fn = [0, row]
+
+        elif(self.class_start <= row < self.file_start):
+            self.select_fn = [1, row - self.class_start]
+
+        else:
+            self.select_fn = [2, row - self.file_start]
+
         self.close()
 
     def paintEvent(self, event):
@@ -811,8 +822,8 @@ class MyApp(QMainWindow, form_class):
         dlg = fn_dialog([[['aBc', 'main.py', (8, 12), (10, 9),'test1','self, dong'], ['ABc', 'test.py', (8, 12), (10, 9),'class1.fun2','self']], [['aBc', 'main.py', (8, 12), (10, 9)], ['aBC', 'wind.py', (8, 12), (10, 9)]], ['abc.py', 'abe.cpp']]) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
         try:
-            _fn = dlg.select_fn.text()
-            print("Selected function is {}".format(_fn))
+
+            print("Selected function is {}".format(dlg.select_fn))
         except AttributeError:
             print("Selected Nothing.")
     
