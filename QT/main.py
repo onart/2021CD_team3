@@ -347,7 +347,7 @@ class PeekerWindow(QDialog):
         self.base=parent
         self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
-        self.tid=threading.get_native_id()
+        # self.tid=threading.get_native_id()
 
         self.DISP_NO=20 # 한 번에 보여줄 줄수
 
