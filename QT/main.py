@@ -533,6 +533,8 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         label1 = QLabel("다수의 결과를 찾았습니다.")
 
         self.fn_lst = QTableWidget()
+        self.fn_lst.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.fn_lst.setSelectionMode(QAbstractItemView.SingleSelection)
         self.fn_lst.setHorizontalHeaderLabels(['유형', '이름', '파일', '스코프', '매개변수'])
         self.fn_lst.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.fn_lst.setColumnCount(5)
