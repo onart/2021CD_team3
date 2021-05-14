@@ -2,7 +2,7 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import sys, os, threading, queue
+import sys, os, threading, queue, pyautogui, time
 from multiprocessing.managers import BaseManager
 import ctypes
 import keyboard
@@ -377,16 +377,13 @@ class PeekerWindow(QDialog):
         layout.addWidget(self.label, 1)
 
     def setToggle(self, dummy):
-        if self.isActiveWindow():
-            print(USRLIB.SetForegroundWindow(self.hIdeWnd))
-            USRLIB.SetFocus(self.hIdeWnd)
-            print('set')
+        if USRLIB.GetForegroundWindow() != self.hIdeWnd:
+            USRLIB.SetForegroundWindow(self.hIdeWnd)
         else:
-            USRLIB.AttachThreadInput(self.tid, self.pIdeWnd, True)
-            USRLIB.GetFocus()
-            USRLIB.SetFocus(int(self.winId()))
-            self.activateWindow()
-            print('get')
+            cp=self.pos()
+            x, y=pyautogui.position()
+            pyautogui.click(cp.x(), cp.y())
+            pyautogui.moveTo(x, y)
             #print(USRLIB.SetForegroundWindow(int(self.winId())))
     
     def escape(self, dummy):
@@ -486,13 +483,13 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.fn_lst.setItemDelegate(delegate)
         self.fn_lst.setRowCount(len(content[0]) + len(content[1]) + len(content[2]))
 
-        self.fn_lst.setHorizontalHeaderLabels(['Item type', 'name', '들어가 있는 파일명', 'scope', 'parameter'])
+        self.fn_lst.setHorizontalHeaderLabels(['유형', '이름', '파일', '스코프', '매개변수'])
         idx_for_listWidget = 0
         for id_type, type_line in enumerate(content):
             if(type_line):
                 if(id_type == 0): # 함수의 경우  [이름, 파일, 시작, 끝, 스코프, 매개변수]
                     for each_fun in type_line:
-                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('Function'))
+                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('함수'))
                         idx_for_paramer = {1:0, 2:1, 3:4, 4:5}
                         for col_ in range(1,5):
                             self.fn_lst.setItem(idx_for_listWidget, col_,QTableWidgetItem('<span style="color:red">{}</span>'.format(each_fun[idx_for_paramer[col_]])) )
@@ -500,14 +497,14 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
                 elif(id_type == 1): # 클래스의 경우 [이름 , 파일, 시작, 끝]
                     for each_class in type_line:
-                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('Class'))
+                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('클래스'))
                         for col_ in range(1,3):
                             self.fn_lst.setItem(idx_for_listWidget, col_,QTableWidgetItem('<span style="color:blue">{}</span>'.format(each_class[col_-1])) )
                         idx_for_listWidget += 1
 
                 else: # 파일의 경우 [이름]
                     for each_file in type_line:
-                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('File'))
+                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('파일'))
                         self.fn_lst.setItem(idx_for_listWidget, 1,QTableWidgetItem('<span style="color:green">{}</span>'.format(each_file[0])) )
                         idx_for_listWidget += 1
 
@@ -531,12 +528,10 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
         self.setMinimumHeight(400)
         self.move(qr.topLeft())
 
-        self.setWindowTitle("Seleck Ur function")
-
-        label1 = QLabel("Select Item<br>You want<br>Function : Red<br>Class : Blue<br>File : Green")
+        label1 = QLabel("다수의 결과를 찾았습니다.")
 
         self.fn_lst = QTableWidget()
-        self.fn_lst.setHorizontalHeaderLabels(['Item type', 'name', '들어가 있는 파일명', 'scope', 'parameter'])
+        self.fn_lst.setHorizontalHeaderLabels(['유형', '이름', '파일', '스코프', '매개변수'])
         self.fn_lst.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.fn_lst.setColumnCount(5)
         self.pushButton1 = QPushButton("Select")
@@ -581,7 +576,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         #USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
-
+        
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -594,7 +589,7 @@ class v_dialog(QDialog):  # 음성 선택지
         label1 = QLabel("이걸 찾으시나요?")
 
         self.fn_lst = QListWidget()
-        self.pushButton1 = QPushButton("Select")
+        self.pushButton1 = QPushButton("선택")
         self.pushButton1.clicked.connect(self.pushButtonClicked)
 
         layout = QGridLayout()
@@ -700,7 +695,7 @@ class MyApp(QMainWindow, form_class):
 
         self.hIdeWnd=0          # IDE Window Handle
         self.pIdeWnd=0          # IDE Window Pid
-
+        
         self.ctx=threading.Thread(target=makeTree.scanTH, daemon=True)
         # active window
         threading.Thread(target=wind.currentWindow, args=[self],daemon=True).start()
@@ -941,7 +936,8 @@ class MyApp(QMainWindow, form_class):
                 finally:
                     self.sub1=None
             if self.vMode==1:   # seek
-                kComm.opn(sel4)
+                #kComm.opn(sel4)
+                pass
             elif self.vMode==2: # peek
                 if self.sub2 != None:
                     self.sub2.close()
