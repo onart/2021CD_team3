@@ -127,7 +127,7 @@ def execute(name):
         else:
             keyRel()
             if comm[0]=='시간 지연':
-                stall(comm[1])
+                stall(float(comm[1]))
             elif comm[0]=='팔레트':
                 palette(comm[1])
             elif comm[0]=='명령':

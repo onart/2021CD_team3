@@ -66,5 +66,6 @@ def currentWindow(receiver):    #스레드 함수
                 pass
             else:
                 receiver.hIdeWnd=hwnd
+                receiver.pIdeWnd=pid.value
             # print(cur)
         time.sleep(0.2)   # 갱신 시간 수

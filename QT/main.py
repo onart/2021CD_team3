@@ -343,9 +343,11 @@ class PeekerWindow(QDialog):
         self.setupUI(fname)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
+        self.pIdeWnd=parent.pIdeWnd
         self.base=parent
         self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
         self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
+        self.tid=threading.get_native_id()
 
         self.DISP_NO=20 # 한 번에 보여줄 줄수
 
@@ -368,7 +370,7 @@ class PeekerWindow(QDialog):
 
     def setupUI(self, fname):
         layout = QtWidgets.QVBoxLayout()
-
+        
         self.label=QtWidgets.QLabel('content', self)
         self.label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         layout.addWidget(QtWidgets.QLabel(fname,self), 0)
@@ -376,9 +378,16 @@ class PeekerWindow(QDialog):
 
     def setToggle(self, dummy):
         if self.isActiveWindow():
-            USRLIB.SetForegroundWindow(self.hIdeWnd)
+            print(USRLIB.SetForegroundWindow(self.hIdeWnd))
+            USRLIB.SetFocus(self.hIdeWnd)
+            print('set')
         else:
+            USRLIB.AttachThreadInput(self.tid, self.pIdeWnd, True)
+            USRLIB.GetFocus()
+            USRLIB.SetFocus(int(self.winId()))
             self.activateWindow()
+            print('get')
+            #print(USRLIB.SetForegroundWindow(int(self.winId())))
     
     def escape(self, dummy):
         self.close()
@@ -690,6 +699,7 @@ class MyApp(QMainWindow, form_class):
         self.sin.sin.connect(self.soundIn)
 
         self.hIdeWnd=0          # IDE Window Handle
+        self.pIdeWnd=0          # IDE Window Pid
 
         self.ctx=threading.Thread(target=makeTree.scanTH, daemon=True)
         # active window
@@ -875,15 +885,15 @@ class MyApp(QMainWindow, form_class):
 
     def soundIn(self):
         word=self.q.get()
+        self.vLabel.setText(word)
+        # 자식 window가 있는 시점에서는 명령 무시하도록 조치
+        if self.sub1 != None:
+            return
         if self.activeWindow.text() == 'others':
             if USRLIB.SetForegroundWindow(self.hIdeWnd)==0:
                 QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
                 print('IDE 없음')
                 return
-
-        # 자식 window가 있는 시점에서는 명령 무시하도록 조치
-        if self.sub1 != None:
-            return
 
         if self.language_change:    # 한국어
             word=kComm.matchK(word)
@@ -924,14 +934,14 @@ class MyApp(QMainWindow, form_class):
                 self.sub1=fn_dialog(sel3)
                 self.sub1.exec_()
                 try:
-                    sel4=self.sub1.select_fn.text() # text 말고 sel3의 성분으로 해야 함
+                    sel4=self.sub1.select_fn.text() # text 말고 sel3의 성분으로 해야 함 ##
                 except AttributeError:
                     self.sub1=None
                     return
                 finally:
                     self.sub1=None
             if self.vMode==1:   # seek
-                pass
+                kComm.opn(sel4)
             elif self.vMode==2: # peek
                 if self.sub2 != None:
                     self.sub2.close()

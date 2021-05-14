@@ -855,7 +855,7 @@ def gc():   # 제거된 파일에 대하여 기존 정보를 제거
             rmm.append(f)
             classes={x:classes[x] for x in classes if classes[x][0] != f}
             for fu in functs:
-                functs[fu]=[x for x in functs[fu] if x[0] != f]
+                functs[fu]=[x for x in functs[fu] if len(x)>0 and x[0] != f]
             functs={x:functs[x] for x in functs if len(functs[x]) != 0}
     for f in rmm:
         modTimes.pop(f)
