@@ -368,6 +368,7 @@ class PeekerWindow(QDialog):
         self.printContent()
         self.roundener=Roundener(self)
 
+
     def setupUI(self, fname):
         layout = QtWidgets.QVBoxLayout()
         
@@ -375,6 +376,7 @@ class PeekerWindow(QDialog):
         self.label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         layout.addWidget(QtWidgets.QLabel(fname,self), 0)
         layout.addWidget(self.label, 1)
+        layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.'), 2)
 
     def setToggle(self, dummy):
         if USRLIB.GetForegroundWindow() != self.hIdeWnd:
@@ -587,6 +589,8 @@ class v_dialog(QDialog):  # 음성 선택지
         self.select_fn = None
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.funct1=keyboard.on_press_key(key='up', callback=self.upDown)
+        self.funct2=keyboard.on_press_key(key='down', callback=self.upDown)
         #USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
         
@@ -611,6 +615,14 @@ class v_dialog(QDialog):  # 음성 선택지
         layout.addWidget(self.pushButton1, 0, 2)
 
         self.setLayout(layout)
+
+    def upDown(self, dummy):
+        keyboard.unhook_key(self.funct1)
+        keyboard.unhook_key(self.funct2)
+        cp=self.pos()
+        x, y=pyautogui.position()
+        pyautogui.click(cp.x()+200, cp.y()+20)
+        pyautogui.moveTo(x, y)
 
     def pushButtonClicked(self):
         self.select_fn = self.fn_lst.currentItem()
@@ -942,7 +954,9 @@ class MyApp(QMainWindow, form_class):
                 self.sub1=fn_dialog(sel3)
                 self.sub1.exec_()
                 try:
-                    sel4=self.sub1.select_fn.text() # text 말고 sel3의 성분으로 해야 함 ##
+                    sel4=self.sub1.select_fn
+                    sel4=sel3[sel4[0]][sel4[1]]
+                    print(sel4)
                 except AttributeError:
                     self.sub1=None
                     return
