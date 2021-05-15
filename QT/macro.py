@@ -19,10 +19,10 @@ class MacroWindow(QDialog):
         self.show()
 
     def setupUI(self):
-        self.c = SaveSig()
-        self.c.sig.connect(self.setTableAndShow)
+        self.signal_in = SaveSig()
+        self.signal_in.sig.connect(self.setTableAndShow)
         
-        self.helpButton.clicked.connect(self.help)
+        # self.helpButton.clicked.connect(self.help)
         self.addButton.clicked.connect(self.add)
         self.closeButton.clicked.connect(self.close)
 
@@ -31,7 +31,6 @@ class MacroWindow(QDialog):
 
     def setTableAndShow(self, tup):
         kComm.kCommands[tup[0]] = tup[1]
-        print(kComm.kCommands)
         self.setTableWidget()
         self.show()
 
@@ -72,11 +71,13 @@ class MacroWindow(QDialog):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
+    '''
     def help(self):
         HelpWindow(self)
+    '''
 
     def add(self):
-        MacroAddWindow(self, self.c)
+        MacroAddWindow(self, self.signal_in)
             
 
     def addWithDoubleClick(self):
@@ -84,29 +85,31 @@ class MacroWindow(QDialog):
         for idx in self.tableWidget.selectionModel().selectedIndexes():
             rows.append(idx.row())
 
-        MacroAddWindow(self, self.c, self.table[rows[0]])
+        MacroAddWindow(self, self.signal_in, self.table[rows[0]])
         
 
 class MacroAddWindow(QDialog):
-    def __init__(self, parent, cc, macroName=''):
+    def __init__(self, parent, signal_out, macroName=''):
         super(MacroAddWindow, self).__init__(parent)
         uic.loadUi("macroAdd.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
 
-        self.cc = cc
+        self.signal_out = signal_out
         self.setupUI(macroName)
 
         self.show()
 
     def setupUI(self, macroName):
-        self.c = SaveSig()
-        self.c.sig.connect(self.setTableAndShow)
+        self.signal_in = SaveSig()
+        self.signal_in.sig.connect(self.setTableAndShow)
         
         self.addButton.clicked.connect(self.add)
         self.removeButton.clicked.connect(self.remove)
         self.cancelButton.clicked.connect(self.close)
         self.saveButton.clicked.connect(self.save)
+
+        self.tableWidget.doubleClicked.connect(self.addWithDoubleClick)
 
         self.lineEdit.setText(macroName)
         if macroName != '':
@@ -118,33 +121,29 @@ class MacroAddWindow(QDialog):
             
         else:
             data = list()
-            self.setTableWidget(data)
-
-    def getTableData(self):
-        print("in getTableData")
-        data = []
-        for row in range(self.tableWidget.rowCount()):
-            name = self.tableWidget.item(row, 1).text()
-            content = self.tableWidget.item(row, 2).text()
-            data.append((name, content))
-
-        print(data)
-
-        return data
-                
+            self.setTableWidget(data)                
 
     def setTableAndShow(self, tup):
+        new_data, index, isModify = tup
         data = self.getTableData()
-        if tup[0]=='시간 지연':
+        if new_data[0]=='시간 지연':
             try:
-                if tup[1]=='inf':
+                if new_data[1]=='inf':
                     raise ValueError
-                f=float(tup[1])
+                f=float(new_data[1])
                 if not f>0:
                     raise ValueError
             except ValueError:
-                tup=('시간 지연', '0.02')
-        data.append(tup)
+                new_data=('시간 지연', '0.02')
+
+        if isModify:
+            data[index] = new_data
+        else:
+            if index == -1:
+                data.append(new_data)
+            else:
+                data.insert(index + 1, new_data)
+                
         self.setTableWidget(data)
         self.show()
 
@@ -170,6 +169,17 @@ class MacroAddWindow(QDialog):
         self.tableWidget.setColumnWidth(0, 40)
         self.tableWidget.setColumnWidth(1, 70)
 
+    def getTableData(self):
+        data = []
+        for row in range(self.tableWidget.rowCount()):
+            name = self.tableWidget.item(row, 1).text()
+            content = self.tableWidget.item(row, 2).text()
+            data.append((name, content))
+
+        print(data)
+
+        return data
+
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
 
@@ -188,7 +198,21 @@ class MacroAddWindow(QDialog):
     def add(self):  
         # 여기에 '위치'까지 들어가도록(기준: 현재 선택된 행의 아래)
         # 현재 기존 값 수정하려고 더블클릭하면 이 창이 안 열리고 텍스트 수정만 가능한 거 수정 필요. 위의 addwithdoubleclick처럼
-        MacroDetailWindow(self, self.c)
+        rows = []
+        for idx in self.tableWidget.selectionModel().selectedIndexes():
+            rows.append(idx.row())
+
+        if len(rows) == 0:
+            MacroDetailWindow(self, self.signal_in)
+        else:
+            MacroDetailWindow(self, self.signal_in, rows[0], False)
+
+    def addWithDoubleClick(self):
+        rows = []
+        for idx in self.tableWidget.selectionModel().selectedIndexes():
+            rows.append(idx.row())
+
+        MacroDetailWindow(self, self.signal_in, rows[0], True)
 
     def remove(self):
         rows = []
@@ -211,11 +235,17 @@ class MacroAddWindow(QDialog):
             elif ch<'가' or ch>'힣':
                 name=''
                 QMessageBox.about(self,'이름 오류','한글만 입력 가능합니다.')
-                break
+                return
+            
         # 중복 불가능도 고지해야 함 (빌트인이랑도)
+        for key in kComm.kCommands.keys():
+            if name == key:
+                QMessageBox.about(self, '이름 오류', '같은 이름의 키워드가 존재합니다.')
+                return
+            
         if name != '':
             data = self.getTableData()
-            self.cc.sig.emit((name, data))
+            self.signal_out.sig.emit((name, data))
             self.close()
 
 
@@ -224,13 +254,15 @@ class SaveSig(QObject):
 
 
 class MacroDetailWindow(QDialog):
-    def __init__(self, parent, c):
+    def __init__(self, parent, signal_out, index=-1, isModify=False):
         super(MacroDetailWindow, self).__init__(parent)
         uic.loadUi("macroDetail.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
 
-        self.c = c
+        self.signal_out = signal_out
+        self.index = index
+        self.isModify = isModify
         self.setupUI()
 
         self.show()
@@ -275,5 +307,5 @@ class MacroDetailWindow(QDialog):
         super().mouseReleaseEvent(event)
 
     def save(self):
-        self.c.sig.emit((self.comboBox.currentText(), self.lineEdit.text()))
+        self.signal_out.sig.emit(((self.comboBox.currentText(), self.lineEdit.text()), self.index, self.isModify))
         self.close()
