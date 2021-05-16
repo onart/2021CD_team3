@@ -1,3 +1,4 @@
+from typing import NamedTuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -6,6 +7,7 @@ from PyQt5 import uic
 
 from main import Roundener
 import procs.kComm as kComm
+import keyboard, threading
 
 
 class MacroWindow(QDialog):
@@ -35,11 +37,11 @@ class MacroWindow(QDialog):
         self.show()
 
     def setTableWidget(self):
-        self.tableWidget.setRowCount(len(kComm.kCommands.keys()))
+        self.tableWidget.setRowCount(len(kComm.kCommands))
         
         self.tableWidget.setColumnCount(2)
         self.table = []
-        for i, key in enumerate(kComm.kCommands.keys()):
+        for i, key in enumerate(kComm.kCommands):
             self.tableWidget.setItem(i, 0, QTableWidgetItem(key))
             self.tableWidget.setItem(i, 1, QTableWidgetItem(str(len(kComm.kCommands[key]))))
             self.table.append(key)
@@ -95,6 +97,8 @@ class MacroAddWindow(QDialog):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
         self.roundener=Roundener(self)
 
+        self.origin=macroName
+
         self.signal_out = signal_out
         self.setupUI(macroName)
 
@@ -113,7 +117,7 @@ class MacroAddWindow(QDialog):
 
         self.lineEdit.setText(macroName)
         if macroName != '':
-            self.lineEdit.setReadOnly(True)
+            #self.lineEdit.setReadOnly(True)
 
             # commands for test
             data = list(kComm.kCommands[macroName])
@@ -228,22 +232,21 @@ class MacroAddWindow(QDialog):
     def save(self):
         name = self.lineEdit.text()
         # 명령은 한글 or 띄어쓰기로만 작성 가능한 것으로 고지
-        name=' '.join(name.split())
+        name=''.join(name.split())
         for ch in name:
-            if ch == ' ':
-                continue
-            elif ch<'가' or ch>'힣':
+            if ch<'가' or ch>'힣':
                 name=''
                 QMessageBox.about(self,'이름 오류','한글만 입력 가능합니다.')
                 return
             
         # 중복 불가능도 고지해야 함 (빌트인이랑도)
-        for key in kComm.kCommands.keys():
-            if name == key:
-                QMessageBox.about(self, '이름 오류', '같은 이름의 키워드가 존재합니다.')
-                return
+        if (name != self.origin) and (name in kComm.kCommands):
+            QMessageBox.about(self, '이름 오류', '같은 명령이 존재합니다.')
+            return
             
         if name != '':
+            if self.origin and (name != self.origin):
+                kComm.kCommands.pop(self.origin)
             data = self.getTableData()
             self.signal_out.sig.emit((name, data))
             self.close()
