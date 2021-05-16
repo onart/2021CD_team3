@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="addButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>150</x>
      <y>10</y>
      <width>21</width>
      <height>21</height>
@@ -60,6 +60,19 @@
      <width>231</width>
      <height>111</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="delButton">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>10</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>-</string>
    </property>
   </widget>
  </widget>

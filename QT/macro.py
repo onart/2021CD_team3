@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import NamedTuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -26,6 +27,7 @@ class MacroWindow(QDialog):
         
         # self.helpButton.clicked.connect(self.help)
         self.addButton.clicked.connect(self.add)
+        self.delButton.clicekd.connect(self.delete)
         self.closeButton.clicked.connect(self.close)
 
         self.tableWidget.doubleClicked.connect(self.addWithDoubleClick)
@@ -81,6 +83,11 @@ class MacroWindow(QDialog):
     def add(self):
         MacroAddWindow(self, self.signal_in)
             
+    def delete(self):
+        row=self.tableWidget.currentRow()
+        name=self.tableWidget.item(row, 0).text()
+        kComm.kCommands.pop(name)
+        self.setTableWidget()
 
     def addWithDoubleClick(self):
         rows = []

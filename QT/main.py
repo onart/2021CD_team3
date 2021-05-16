@@ -406,7 +406,6 @@ class Roundener: # 상속 전용 클래스
         if self.draggable and event.button() == QtCore.Qt.LeftButton:
             self.__mousePressPos = event.globalPos()                # global
             self.__mouseMovePos = event.globalPos() - self.window.pos()    # local
-            print(self.__mousePressPos)
 
     def mouseMoveEvent(self, event):
         if self.__mousePressPos is None:
@@ -513,7 +512,6 @@ class MyApp(QMainWindow, form_class):
         self.rec_manager = RecognitionManager(self.q, self.sin)
 
     def setVmode(self, m):
-        print('mode:',m)
         self.vMode=m
         self.voice.setText(MODES[m])
         if m==0:
@@ -642,7 +640,6 @@ class MyApp(QMainWindow, form_class):
         if self.activeWindow.text() == 'others':
             if USRLIB.SetForegroundWindow(self.hIdeWnd)==0:
                 QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
-                print('IDE 없음')
                 return
 
         if self.language_change:    # 한국어
@@ -650,7 +647,7 @@ class MyApp(QMainWindow, form_class):
             if word in self.kCommands:  # 모드 전환
                 self.kCommands[word](0)
                 return
-            elif True:                  # 일반 명령어
+            elif word in kComm.kCommands:                  # 일반 명령어
                 kComm.execute(word)
                 pass
             else:   # 유사도
@@ -670,7 +667,6 @@ class MyApp(QMainWindow, form_class):
                 self.sub1.exec_()
                 try:
                     sel2=self.sub1.select_fn.text()
-                    print(sel2)
                 except AttributeError:  # 선택하지 않음
                     self.sub1=None
                     return
@@ -686,7 +682,6 @@ class MyApp(QMainWindow, form_class):
                 try:
                     sel4=self.sub1.select_fn
                     sel4=sel3[sel4[0]][sel4[1]]
-                    print(sel4)
                 except AttributeError:
                     self.sub1=None
                     return
