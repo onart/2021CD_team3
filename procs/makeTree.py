@@ -110,7 +110,7 @@ class Pool:
                 self.cl[ncl]=[cl]
     
     def soundIn(self, input):   # 인수: 구글 STT에서 받은 결과물(str, 영어), 리턴: 풀 내 후보
-        input=self.normalize(input)
+        input=''.join(input.split())
         ret=phonetic.arrange_s(input, self.candid)
         if len(ret)<3:
             ret.extend(phonetic.arrange(input, self.candid)[:3])

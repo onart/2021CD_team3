@@ -14,11 +14,15 @@
 2. 자음끼리
 '''
 
+from re import L
+
+
 EXC='aehiouwy'
 ALPHA='01230120022455012623010202'
 smallA=ord('a')
 
 BASEORDER=ord('가')
+
 HD=( 'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ',
        'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' )
 MD=('ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
@@ -62,14 +66,13 @@ def subHead(inp, word): # arrange에 사용하게 될 수 있음
 
 def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 함수/클래스 풀
     ar=[]
-    basis=soundEx(inp)
+    basis, eng=kSoundEx(inp)
     for w in words:
         val=lcsThr(soundEx(w),basis)
-        val2=lcsThr(inp, w)
-        if val > len(basis)/3:
+        val2=lcsThr(w,eng)
+        if val>0:
             ar.append((w, val+val2/10))
-    ar.sort(key=lambda x: x[1])
-    ar.reverse()
+    ar.sort(key=lambda x: (x[1], -len(x[0])), reverse=True)
     return [x[0] for x in ar]
     
 def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words는 함수/클래스 풀
@@ -100,11 +103,201 @@ def soundEx(keyword):   # 일반 케이스
             continue
         i=ALPHA[ord(c)-smallA]
         if i=='0':
-            ret+=c
+            if c=='w':
+                ret+='u'
+            else:
+                ret+=c
         elif i != ret[-1] or begin:
             ret+=i
         begin=False
     return ret
+
+def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
+    '''
+    #. 끝소리 ㄱㄴㄷㄹㅁㅂㅇ -> 외래어 표기법의 존재로 미적용
+    #-1. 연음 받침 뒤 모음 -> 결합 -> 어차피 직렬화시킬 것이므로 무관
+    2-1. 비음화 1 ㄴ,ㅁ 앞의 ㄱ계, ㄷ계, ㅂ계는 각각 ㅇ,ㄴ,ㅁ
+    2-2. 비음화 2 ㅁ,ㅇ 뒤 ㄹ은 ㄴ
+    2-3. 유음화 ㄹ 앞뒤 ㄴ은 ㄹ
+    3. 구개음화 ㄷ,ㅌ계 뒤 ㅣ -> ㅈ,ㅊ
+    4. 거센소리되기 ㅎ 앞뒤 ㅂㄷㅈㄱ -> ㅍㅌㅊㅋ
+    #. 된소리되기 ㄱㄷㅂ계 뒤 ㄱㄷㅂㅅㅈ는 된소리로 -> 어차피 soundex에서 거의 동일시됨
+    #. 사이시옷은 어근 접사 관련 법칙도 있기 때문에 생략
+    '''
+    h=hme(keyword)
+    ret=''
+    eng=''
+    i=0
+    while i<len(h):
+        c=h[i]
+        if c in HD or c in ED:
+            if i<len(h)-1:
+                nx=h[i+1]
+            else:
+                nx=''
+            if nx in HD or nx=='':  # 종성(이후 나온 초성과 함께 처리. 단 바로 다음 역시 종성의 일부일 가능성도 있음)
+                if c=='ㄱㄲㅋ':
+                    if nx in 'ㄴㅁ':    # 비음화
+                        ret+=ALPHA[ord('n')-smallA]
+                        ret+=ALPHA[ord('g')-smallA]
+                        eng+='ng'
+                    else:
+                        ret+=ALPHA[ord('k')-smallA]
+                        if nx in 'ㅎ':  # ㅎ축약
+                            i+=1
+                        elif nx in 'ㄱ':
+                            i+=1
+                elif c in 'ㄴ':
+                    if nx == 'ㄹ':  # 유음화
+                        ret+=ALPHA[ord('l')-smallA]
+                        eng+='l'
+                    else:
+                        ret+=ALPHA[ord('n')-smallA]
+                        eng+='n'
+                elif c in 'ㄷㅌ':
+                    if nx in 'ㄴㅁ':    # 비음화
+                        ret+=ALPHA[ord('n')-smallA]
+                        eng+='n'
+                    elif nx in 'ㅎ':    # ㅎ축약
+                        i+=1
+                        ret+=ALPHA[ord('d')-smallA]
+                        eng+='d'
+                    elif nx in 'ㅇ':
+                        if h[i+2] in 'ㅑㅒㅕㅖㅛㅠㅣ':  # 구개음화, 정상 입력 시 인덱스에러 없음
+                            ret+=ALPHA[ord('j')-smallA]
+                            eng+='j'
+                        else:
+                            ret+=ALPHA[ord('d')-smallA]
+                            eng+='d'
+                    elif nx in 'ㄷ':
+                        i+=1
+                        ret+=ALPHA[ord('d')-smallA]
+                        eng+='d'
+                elif c in 'ㄹ':
+                    if nx in 'ㄴㄹ':
+                        i+=1
+                    ret+=ALPHA[ord('l')-smallA]
+                    eng+='l'
+                elif c in 'ㅁ':
+                    if nx in 'ㄹ':
+                        i+=1
+                        ret+=ALPHA[ord('m')-smallA]
+                        ret+=ALPHA[ord('n')-smallA]
+                        eng+='mn'
+                    else:
+                        ret+=ALPHA[ord('m')-smallA]
+                        eng+='m'
+                elif c in 'ㅂㅍ':
+                    if nx in 'ㅇㄴㅁ':
+                        ret+=ALPHA[ord('m')-smallA]
+                        eng+='m'
+                    else:
+                        ret+=ALPHA[ord('b')-smallA]
+                        eng+='b'
+                    if nx in 'ㅎ':
+                        i+=1
+                elif c in 'ㅅㅆ':
+                    if nx in 'ㅇ':
+                        ret+=ALPHA[ord('s')-smallA]
+                        eng+='s'
+                    elif nx in 'ㄴㅁ':
+                        ret+=ALPHA[ord('n')-smallA]
+                        eng+='n'
+                    else:
+                        ret+=ALPHA[ord('d')-smallA]
+                        eng+='d'
+                elif c in 'ㅈㅊ':
+                    ret+=ALPHA[ord('j')-smallA]
+                    eng+='j'
+                elif c in 'ㅎ':
+                    if nx in 'ㄱㄷㅂㅈ':
+                        i+=1
+                        if nx=='ㄱ':
+                            ret+=ALPHA[ord('k')-smallA]
+                            eng+='k'
+                        elif nx=='ㄷ':
+                            ret+=ALPHA[ord('t')-smallA]
+                            eng+='t'
+                        elif nx=='ㅂ':
+                            ret+=ALPHA[ord('p')-smallA]
+                            eng+='p'
+                        elif nx=='ㅈ':
+                            ret+=ALPHA[ord('c')-smallA]
+                            eng+='c'
+            else:                     # 처음 or 이전이 모음인 초성(ㅇ무시 -> 고의)
+                if c in 'ㄱ':
+                    ret+=ALPHA[ord('g')-smallA]
+                    eng+='g'
+                elif c in 'ㄲㅋ':
+                    ret+=ALPHA[ord('k')-smallA]
+                    eng+='k'
+                elif c in 'ㄴ':
+                    ret+=ALPHA[ord('n')-smallA]
+                    eng+='n'
+                elif c in 'ㄷ':
+                    ret+=ALPHA[ord('d')-smallA]
+                    eng+='d'
+                elif c in 'ㄸㅌ':
+                    ret+=ALPHA[ord('t')-smallA]
+                    eng+='t'
+                elif c in 'ㄹ':
+                    ret+=ALPHA[ord('r')-smallA]
+                    eng+='r'
+                elif c in 'ㅁ':
+                    ret+=ALPHA[ord('m')-smallA]
+                    eng+='m'
+                elif c in 'ㅂ':
+                    ret+=ALPHA[ord('b')-smallA]
+                    eng+='b'
+                elif c in 'ㅃㅍ':
+                    ret+=ALPHA[ord('p')-smallA]
+                    eng+='p'
+                elif c in 'ㅅㅆ':
+                    ret+=ALPHA[ord('s')-smallA]
+                    eng+='s'
+                elif c in 'ㅈ':
+                    ret+=ALPHA[ord('j')-smallA]
+                    eng+='j'
+                elif c in 'ㅉㅊ':
+                    ret+=ALPHA[ord('c')-smallA]
+                    ret+=ALPHA[ord('h')-smallA]
+                    eng+='ch'
+                elif c in 'ㅎ':
+                    ret+=ALPHA[ord('h')-smallA]
+                    eng+='h'
+        else:                         # 중성(ㅡ무시 -> 고의)
+            if c in 'ㅏ':
+                ret+='a'
+                eng+='a'
+            elif c in 'ㅐㅔ':
+                ret+='ae'
+                eng+='ae'
+            elif c in 'ㅑ':
+                ret+='ya'
+                eng+='yq'
+            elif c in 'ㅒㅖ':
+                ret+='ye'
+                eng+='ye'
+            elif c in 'ㅓㅜ':
+                ret+='u'
+                eng+='u'
+            elif c in 'ㅕ':
+                ret+='yeo'
+                eng+='yeo'
+            elif c in 'ㅗ':
+                ret+='o'
+            elif c in 'ㅛ':
+                ret+='yo'
+                eng+='yo'
+            elif c in 'ㅠ':
+                ret+='yu'
+                eng+='yu'
+            elif c in 'ㅣ':
+                if ret=='' or ret[-1]!='i': # 모음 연속 불가능성. 추후 확장할 수도 있고 안 할 수도 있음
+                    ret+='i'
+                    eng+='i'
+        i+=1
+    return ret, eng
 
 def spell(inp, keyword):    # 스펠을 부른 케이스
     return (keyword.find(inp) == 0)

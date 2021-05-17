@@ -362,7 +362,7 @@ def start_recognition(rec_data, language):
     """start bidirectional streaming from microphone input to speech API"""
 
     client = speech.SpeechClient()
-    if language == 'kor':
+    if "language == 'kor'":
         config = speech.RecognitionConfig(
             encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
             sample_rate_hertz=SAMPLE_RATE,
