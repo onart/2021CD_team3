@@ -117,6 +117,7 @@ def lineRoutine(no):
     pag.press('enter')
 
 press_key = []
+callStack=[]
 
 IDE = -1
 
@@ -140,6 +141,11 @@ def execute(name):
     else:   # '명령' 이후 없는 명령 등장
         return
 
+    if name not in callStack:
+        callStack.append(name)
+    else:
+        return
+
     for comm in com[IDE]:
         if comm[0] == '키 입력':
             keyIn(comm[1])
@@ -150,9 +156,9 @@ def execute(name):
             elif comm[0]=='팔레트':
                 palette(comm[1])
             elif comm[0]=='명령':
-                if name != comm[1]:
-                    execute(comm[1])
+                execute(comm[1])
     keyRel()
+    callStack.pop()
 
 # 선별부
 import os, sys
