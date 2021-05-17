@@ -435,7 +435,8 @@ class MyApp(QMainWindow, form_class):
 
     def __init__(self):
         super().__init__()
-
+        self.base_h = 140
+        self.extended_h = 300
         QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
 
         self.window_1 = None    # Alt+tab-like
@@ -463,6 +464,7 @@ class MyApp(QMainWindow, form_class):
         self.open_File.clicked.connect(self.fileopen)
         self.help_button.clicked.connect(self.help)
         self.macroButton.clicked.connect(self.macro)
+        self.help_btn.clicked.connect(self.resizeWindow)
         self.dialog = QDialog()
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
@@ -486,7 +488,8 @@ class MyApp(QMainWindow, form_class):
             self.NewWindow,
             self.termButton,
             self.help_button,
-            self.macroButton
+            self.macroButton,
+            self.help_btn
             )
 
         for bu in self.textButtons:
@@ -713,6 +716,14 @@ class MyApp(QMainWindow, form_class):
 
     def macro(self):
         MacroWindow(self)
+
+    def resizeWindow(self):
+        print(self.pos())
+        pass
+
+
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
