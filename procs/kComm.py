@@ -21,27 +21,27 @@ def stall(time):    # 시간 지연 수행
 
 def palette(COM_name):  # 팔레트 명령 수행
 
-    if IDE == '비주얼 스튜디오 코드':
+    if IDE == 0:
         pag.keyDown('ctrl')
         pag.keyDown('shift')
         pag.press('p')
         pag.keyUp('shift')
         pag.keyUp('ctrl')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(COM_name)
         pag.press('enter')
 
-    elif IDE == '비주얼 스튜디오':
+    elif IDE == 1:
         pag.keyDown('ctrl')
         pag.keyDown('alt')
         pag.press('a')
         pag.keyUp('alt')
         pag.keyUp('ctrl')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(COM_name)
         pag.press('enter')
 
-    elif IDE == '이클립스':
+    elif IDE == 2:
         pag.keyDown('ctrl')
         pag.keyDown('alt')
         pag.keyDown('shift')
@@ -50,17 +50,17 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('alt')
         pag.keyUp('ctrl')
         pag.press('enter')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(COM_name)
         pag.press('enter')
 
-    elif IDE == 'PyCharm':
+    elif IDE == 3:
         pag.keyDown('ctrl')
         pag.keyDown('shift')
         pag.press('a')
         pag.keyUp('shift')
         pag.keyUp('ctrl')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(COM_name)
         pag.press('enter')
 
@@ -79,14 +79,14 @@ def openRoutine(name):
         pag.keyDown('ctrl')
         pag.press('p')
         pag.keyUp('ctrl')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(name)
         pag.press('enter')
     elif IDE==1:
         pag.keyDown('ctrl')
         pag.press('o')
         pag.keyUp('ctrl')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(rel2abs[name])
         pag.press('enter')
     elif IDE==2:
@@ -99,7 +99,7 @@ def openRoutine(name):
         pag.press('n')
         pag.keyUp('shift')
         pag.keyUp('ctrl')
-        sleep(0.1)
+        sleep(0.03)
         pag.write(name)
         pag.press('enter')
 
