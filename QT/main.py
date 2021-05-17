@@ -515,11 +515,11 @@ class MyApp(QMainWindow, form_class):
         self.voice.setText(MODES[m])
         if m==0:
             if not self.language_change:
-                self.rec_manager.change_to('kor')
+                #self.rec_manager.change_to('kor')
                 self.language_change=True
         elif self.language_change:
             self.language_change=False
-            self.rec_manager.change_to('eng')
+            #self.rec_manager.change_to('eng')
             
 
     def korOn(self, dummy):
@@ -527,7 +527,7 @@ class MyApp(QMainWindow, form_class):
             return
         if not self.language_change:
             self.language_change=True
-            self.rec_manager.change_to('kor')
+            #self.rec_manager.change_to('kor')
         self.voice.setText('명령')
         self.voice.setStyleSheet(
             '''
@@ -546,7 +546,7 @@ class MyApp(QMainWindow, form_class):
         if self.vMode != 0:
             self.language_change=False
             self.voice.setText(MODES[self.vMode])
-            self.rec_manager.change_to('eng')
+            #self.rec_manager.change_to('eng')
         self.voice.setStyleSheet(
                 '''
                     background-image: url(./resources/recon.png);
@@ -581,7 +581,7 @@ class MyApp(QMainWindow, form_class):
             self.rec_manager.start()
             if self.vMode==0:
                 self.language_change=True
-                self.rec_manager.change_to('kor')
+                #self.rec_manager.change_to('kor')
             
         else:
             self.voice.setStyleSheet('''
