@@ -122,12 +122,11 @@ class PeekerWindow(QDialog):
         self.close()
 
     def closeEvent(self, event):
-        print('ggg')
         try:
             keyboard.unhook_key(self.funct1)
             keyboard.unhook_key(self.funct2)
         except KeyError:
-            print('already closed')
+            pass
         finally:
             self.base.window_2=None
             event.accept()
@@ -545,7 +544,6 @@ class MyApp(QMainWindow, form_class):
         if not self.recording:
             return
         if self.vMode != 0:
-            print(self.vMode)
             self.language_change=False
             self.voice.setText(MODES[self.vMode])
             self.rec_manager.change_to('eng')
@@ -564,7 +562,6 @@ class MyApp(QMainWindow, form_class):
         dlg = fn_dialog([[['aBc', 'main.py', (8, 12), (10, 9),'test1','self, dong'], ['ABc', 'test.py', (8, 12), (10, 9),'class1.fun2','self']], [['aBc', 'main.py', (8, 12), (10, 9)], ['aBC', 'wind.py', (8, 12), (10, 9)]], ['abc.py', 'abe.cpp']]) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
         dlg.exec_()
         try:
-
             print("Selected function is {}".format(dlg.select_fn))
         except AttributeError:
             print("Selected Nothing.")
@@ -638,15 +635,15 @@ class MyApp(QMainWindow, form_class):
         # 자식 window가 있는 시점에서는 명령 무시하도록 조치
         if self.sub1 != None:
             return
-        if self.activateWindow.text() == 'others':
+        if self.activeWindow.text() == 'others':
             if USRLIB.SetForegroundWindow(self.hIdeWnd)==0:
                 QMessageBox.about(self, "오류", "IDE가 감지되지 않았습니다.")
                 return
             else:
                 time.sleep(0.1)
-                kComm.ideUP(self.activateWindow.text())
+                kComm.ideUP(self.activeWindow.text())
         else:
-            kComm.ideUP(self.activateWindow.text())
+            kComm.ideUP(self.activeWindow.text())
 
         if self.language_change:    # 한국어
             word=kComm.matchK(word)

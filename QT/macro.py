@@ -25,7 +25,7 @@ class MacroWindow(QDialog):
         
         # self.helpButton.clicked.connect(self.help)
         self.addButton.clicked.connect(self.add)
-        self.delButton.clicekd.connect(self.delete)
+        self.delButton.clicked.connect(self.delete)
         self.closeButton.clicked.connect(self.close)
 
         self.tableWidget.doubleClicked.connect(self.addWithDoubleClick)
