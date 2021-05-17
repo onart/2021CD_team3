@@ -1,5 +1,3 @@
-from collections import defaultdict
-from typing import NamedTuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -34,18 +32,18 @@ class MacroWindow(QDialog):
         self.setTableWidget()
 
     def setTableAndShow(self, tup):
-        kComm.kCommands[tup[0]] = tup[1]
+        kComm.customCommands[tup[0]] = tup[1]
         self.setTableWidget()
         self.show()
 
     def setTableWidget(self):
-        self.tableWidget.setRowCount(len(kComm.kCommands))
+        self.tableWidget.setRowCount(len(kComm.customCommands))
         
         self.tableWidget.setColumnCount(2)
         self.table = []
-        for i, key in enumerate(kComm.kCommands):
+        for i, key in enumerate(kComm.customCommands):
             self.tableWidget.setItem(i, 0, QTableWidgetItem(key))
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(len(kComm.kCommands[key]))))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(len(kComm.customCommands[key]))))
             self.table.append(key)
         
         column_headers = ['이름', '구성 명령어 수']
@@ -86,7 +84,7 @@ class MacroWindow(QDialog):
     def delete(self):
         row=self.tableWidget.currentRow()
         name=self.tableWidget.item(row, 0).text()
-        kComm.kCommands.pop(name)
+        kComm.customCommands.pop(name)
         self.setTableWidget()
 
     def addWithDoubleClick(self):
@@ -127,7 +125,7 @@ class MacroAddWindow(QDialog):
             #self.lineEdit.setReadOnly(True)
 
             # commands for test
-            data = list(kComm.kCommands[macroName])
+            data = list(kComm.customCommands[macroName])
             self.setTableWidget(data)
             
         else:
@@ -247,13 +245,13 @@ class MacroAddWindow(QDialog):
                 return
             
         # 중복 불가능도 고지해야 함 (빌트인이랑도)
-        if (name != self.origin) and (name in kComm.kCommands):
+        if (name != self.origin) and (name in kComm.builtInCommands or name in kComm.customCommands or name in ('명령','보기','탐색')):
             QMessageBox.about(self, '이름 오류', '같은 명령이 존재합니다.')
             return
             
         if name != '':
             if self.origin and (name != self.origin):
-                kComm.kCommands.pop(self.origin)
+                kComm.customCommands.pop(self.origin)
             data = self.getTableData()
             self.signal_out.sig.emit((name, data))
             self.close()

@@ -634,31 +634,36 @@ class MyApp(QMainWindow, form_class):
     def soundIn(self):
         word=self.q.get()
         self.vLabel.setText(word)
+
         # 자식 window가 있는 시점에서는 명령 무시하도록 조치
         if self.sub1 != None:
             return
-        if self.activeWindow.text() == 'others':
+        if self.activateWindow.text() == 'others':
             if USRLIB.SetForegroundWindow(self.hIdeWnd)==0:
-                QMessageBox.about(self, "오류1", "IDE가 감지되지 않았습니다.")
+                QMessageBox.about(self, "오류", "IDE가 감지되지 않았습니다.")
                 return
+            else:
+                time.sleep(0.1)
+                kComm.ideUP(self.activateWindow.text())
+        else:
+            kComm.ideUP(self.activateWindow.text())
 
         if self.language_change:    # 한국어
             word=kComm.matchK(word)
             if word in self.kCommands:  # 모드 전환
                 self.kCommands[word](0)
                 return
-            elif word in kComm.kCommands:                  # 일반 명령어
+            elif (word in kComm.builtInCommands) or (word in kComm.customCommands):                  # 일반 명령어
                 kComm.execute(word)
-                pass
             else:   # 유사도
-                QMessageBox.about(self, "임시 오류", "해당 명령어가 없습니다.")
+                QMessageBox.about(self, "오류", "해당 명령어가 없습니다.")
                 return
         else:   # peek or seek
             makeTree.scanNgc()
             sel1=makeTree.POOL.soundIn(word)
             # sel1 중 하나를 선택하는 대화상자 띄우고 결과 sel2에 저장
             if len(sel1)==0:
-                QMessageBox.about(self, "오류2", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
+                QMessageBox.about(self, "오류", "결과를 찾을 수 없습니다.\n정확한 발음으로 다시 시도해 주세요.")
                 return
             if len(sel1)==1:
                 sel2=sel1[0]
@@ -688,7 +693,7 @@ class MyApp(QMainWindow, form_class):
                 finally:
                     self.sub1=None
             if self.vMode==1:   # seek
-                #kComm.opn(sel4)
+                kComm.opn(sel4)
                 pass
             elif self.vMode==2: # peek
                 if self.sub2 != None:

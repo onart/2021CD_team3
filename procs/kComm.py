@@ -9,6 +9,7 @@ def loadSet():  # 유저가 구성한 매크로 불러오기 코드
     pass
 
 from time import sleep
+from procs.makeTree import rel2abs
 
 def saveSet():  # 유저가 구성한 매크로 저장 코드
     pass
@@ -63,46 +64,61 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.write(COM_name)
         pag.press('enter')
 
-def opn(COM_name):     # 클래스/함수/파일 열기
+def opn(sel4):     # 클래스/함수/파일 열기, 인수: main의 sel4
 
+    if len(sel4)==1:    # 인덱스 0에 파일 이름
+        openRoutine(sel4[0])
+        return
+    else:               # 인덱스 1에 파일 이름, 인덱스 2에 시작 위치
+        openRoutine(sel4[1])
+        lineRoutine(sel4[2][0])
 
-    vscode_command = {'파일열기':['ctrl','p'],'현재파일닫기':['ctrl','f4'],'특정행이동':['ctrl','g'],'모든파일닫기':['ctrl','k','w']}
-    vs_command = {'파일열기':['ctrl','o'],'현재파일닫기':['ctrl','f4'],'특정행이동':['ctrl','g'],'모든파일닫기':['alt','w','l']}
-    eclipse_command = {'파일열기':['ctrl','shift','r'],'현재파일닫기':['ctrl','f4'],'특정행이동':['ctrl','l'],'모든파일닫기':['ctrl','shift','f4']}
-    pycharm_command = {'파일열기':['ctrl','shift','n'],'현재파일닫기':['ctrl','f4'],'특정행이동':['ctrl','g'],'모든파일닫기':[]}
     
-    if IDE == '비주얼 스튜디오 코드':
-        for keyb in vscode_command[COM_name]:
-            pag.keyDown(keyb)
-            
-        for keyb in reversed(vscode_command[COM_name]):
-            pag.keyUp(keyb)
-          
-    elif IDE == '비주얼 스튜디오':
-        for keyb in vs_command[COM_name]:
-            pag.keyDown(keyb)
-            
-        for keyb in reversed(vs_command[COM_name]):
-            pag.keyUp(keyb)
-            
-    elif IDE == '이클립스':
-        for keyb in eclipse_command[COM_name]:
-            pag.keyDown(keyb)
-            
-        for keyb in reversed(eclipse_command[COM_name]):
-            pag.keyUp(keyb)
-            
-    elif IDE == 'PyCharm':
-        for keyb in pycharm_command[COM_name]:
-            pag.keyDown(keyb)
-            
-        for keyb in reversed(pycharm_command[COM_name]):
-            pag.keyUp(keyb)
-    
+def openRoutine(name):
+    if IDE==0:
+        pag.keyDown('ctrl')
+        pag.press('p')
+        pag.keyUp('ctrl')
+        sleep(0.1)
+        pag.write(name)
+        pag.press('enter')
+    elif IDE==1:
+        pag.keyDown('ctrl')
+        pag.press('o')
+        pag.keyUp('ctrl')
+        sleep(0.1)
+        pag.write(rel2abs[name])
+        pag.press('enter')
+    elif IDE==2:
+        palette('open file')
+        pag.write(rel2abs[name])
+        pag.press('enter')
+    elif IDE==3:
+        pag.keyDown('ctrl')
+        pag.keyDown('shift')
+        pag.press('n')
+        pag.keyUp('shift')
+        pag.keyUp('ctrl')
+        sleep(0.1)
+        pag.write(name)
+        pag.press('enter')
+
+def lineRoutine(no):
+    if IDE==2:
+        pag.keyDown('ctrl')
+        pag.press('l')
+        pag.keyUp('ctrl')
+    else:
+        pag.keyDown('ctrl')
+        pag.press('g')
+        pag.keyUp('ctrl')
+    sleep(0.03)
+    pag.write(no)
+    pag.press('enter')
 
 press_key = []
 
-IDE = 'IDE 이름'
+IDE = -1
 
 # keyboard 모듈: 키 누르는 매크로
 # pag 모듈: 텍스트 입력용
@@ -117,13 +133,14 @@ def keyRel():   # 키 떼기
     press_key.clear()
 
 def execute(name):
-    # 이름으로 명령 찾아서 수행. 명령은 kCommands 안에 있고 반복문을 이용해 기초 명령들을 호출하면 될 것 같습니다.
-    # 참고로 명령, 보기, 탐색은 여기서 수행하는 것이 아니며, 메인 측에서 IDE를 활성화시킨 상태에서 이것을 호출할 것입니다.
-    com=kCommands[name]
+    if name in builtInCommands:
+        com=builtInCommands[name]
+    elif name in customCommands:
+        com=customCommands[name]
+    else:   # '명령' 이후 없는 명령 등장
+        return
 
-    IDE_check = {'비주얼 스튜디오 코드':0,'비주얼 스튜디오':1,'이클립스':2,'PyCharm':3}
-
-    for comm in com[IDE_check[IDE]]:
+    for comm in com[IDE]:
         if comm[0] == '키 입력':
             keyIn(comm[1])
         else:
@@ -143,23 +160,7 @@ import pyautogui as pag
 sys.path.append(os.path.abspath('..'))
 import procs.phonetic as ph
 
-kCommands=dict()
-
-def matchK(inp):
-    inp=normalize(inp)
-    key=list(kCommands.keys())
-    key2=['명령', '보기', '탐색']
-    key.extend(key2)
-    ret=ph.arrange_k(inp, key)
-    return ret
-
-
-def normalize(inp): # 공백만 제거
-    return ''.join(inp.split())
-
-
-
-kCommands.update({
+builtInCommands={
     '코드 위로 이동':((('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up'))),
     '코드 아래로 이동':((('키 입력','alt'),('키 입력','down')),(('키 입력','alt'),('키 입력','down')),(('키 입력','alt'),('키 입력','down')),(('키 입력','alt'),('키 입력','down'))),
     '중단점':((('키 입력','f9')),(('키 입력','f9')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','b')),(('키 입력','ctrl'),('키 입력','f8'))),
@@ -174,18 +175,40 @@ kCommands.update({
     '창 이동':((('키 입력','ctrl'),('키 입력','pageup')),(()),(('키 입력','ctrl'),('키 입력','f6')),(('키 입력','ctrl'),('키 입력','tab'))),
     '닫은 것 열기':((('키 입력','ctrl'),('키 입력','shift'),('키 입력','t')),(()),(('키 입력','alt'),('키 입력','left')),(())),
     '모든 참조':((('키 입력','shift'),('키 입력','f12')),(('키 입력','shift'),('키 입력','f12')),(('키 입력','ctrl'),('키 입력','alt'),('키 입력','h')),(('키 입력','alt'),('키 입력','f7'))),
-    '리팩터링':((()),(('키 입력','alt'),('키 입력','enter')),(('키 입력','alt'),('키 입력','shift'),('키 입력','t')),(('키 입력','shift'),('키 입력','f6'))),
+    '리팩터링':((('키 입력', 'ctrl'), ('키 입력','r')),(('키 입력','alt'),('키 입력','enter')),(('키 입력','alt'),('키 입력','shift'),('키 입력','t')),(('키 입력','shift'),('키 입력','f6'))),
     '모두 접기':((('키 입력','ctrl'),('키 입력','k'),('키 입력','0')),(('키 입력','ctrl'),('키 입력','m'),('키 입력','o')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','/')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','-'))),
     '모두 펴기':((('키 입력','ctrl'),('키 입력','k'),('키 입력','j')),(('키 입력','ctrl'),('키 입력','m'),('키 입력','l')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','*')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','+'))),
     '자동 정렬':((()),(('키 입력','ctrl'),('키 입력','k'),('키 입력','f')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','f')),(('키 입력','ctrl'),('키 입력','alt'),('키 입력','i'))),
-    '대문자':((()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
-    '소문자':((()),(('키 입력','ctrl'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
+    '대문자':((('팔레트', 'transform to up')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
+    '소문자':((('팔레트', 'transform to lo')),(('키 입력','ctrl'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
     '파일 이동':((()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','t')),(()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','n'))),
     '새 파일':((('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','alt'),('키 입력','insert'))),
-    '라인 삭제':((()),(()),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y')))
+    '라인 삭제':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력', 'k')),(('키 입력', 'ctrl'),('키 입력', 'l')),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y')))
 
     #'':((('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력',''))),
     #'이름': ((vscode),(vs),(eclipse),(pycharm))
-})
+}
+
+customCommands=dict()
+
+def matchK(inp):
+    inp=normalize(inp)
+    key=list(builtInCommands.keys())
+    key2=['명령', '보기', '탐색']
+    key.extend(key2)
+    ret=ph.arrange_k(inp, key)
+    return ret
+
+
+def normalize(inp): # 공백만 제거
+    return ''.join(inp.split())
+
+def ideUP(name):
+    global IDE
+    try:
+        IDE=('비주얼 스튜디오 코드','비주얼 스튜디오','이클립스','PyCharm').index(name)
+    except ValueError:
+        pass
+
 
 
