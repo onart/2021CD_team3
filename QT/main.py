@@ -355,8 +355,11 @@ class v_dialog(QDialog):  # 음성 선택지
         self.setLayout(layout)
 
     def upDown(self, dummy):
-        keyboard.unhook_key(self.funct1)
-        keyboard.unhook_key(self.funct2)
+        try:
+            keyboard.unhook_key(self.funct1)
+            keyboard.unhook_key(self.funct2)
+        except KeyError:
+            pass
         self.funct1=None
         self.funct2=None
         cp=self.pos()
@@ -389,8 +392,14 @@ class v_dialog(QDialog):  # 음성 선택지
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         #keyboard.unhook_key(self.funct3)
         if self.funct1!=None:
-            keyboard.unhook_key(self.funct2)
-            keyboard.unhook_key(self.funct1)
+            try:
+                keyboard.unhook_key(self.funct2)
+            except KeyError:
+                pass
+            try:
+                keyboard.unhook_key(self.funct1)
+            except KeyError:
+                pass
         return super().closeEvent(a0)
 
 
