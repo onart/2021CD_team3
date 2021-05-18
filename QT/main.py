@@ -253,12 +253,12 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
 
     def setupUI(self):
         self.setGeometry(1100, 200, 300, 100)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-        qr=self.frameGeometry()
-        cp=QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
         self.setMinimumWidth(800)
         self.setMinimumHeight(400)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
         self.move(qr.topLeft())
 
         label1 = QLabel("다수의 결과를 찾았습니다.")
