@@ -617,6 +617,7 @@ class MyApp(QMainWindow, form_class):
         border:0px;
         ''')
             self.language_change=False
+            self.blue=False
             self.voice.setText('시작')
             self.rec_manager.stop()
 
