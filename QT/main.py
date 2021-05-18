@@ -457,6 +457,8 @@ class MyApp(QMainWindow, form_class):
         self.sub1=None
         self.sub2=None
 
+        self.blue=False
+
         self.sin = SoundSig()
         self.sin.sin.connect(self.soundIn)
 
@@ -528,6 +530,8 @@ class MyApp(QMainWindow, form_class):
 
     def setVmode(self, m):
         self.vMode=m
+        if self.blue:
+            return
         self.voice.setText(MODES[m])
         if m==0:
             if not self.language_change:
@@ -539,6 +543,9 @@ class MyApp(QMainWindow, form_class):
             
 
     def korOn(self, dummy):
+        if self.blue:
+            return
+        self.blue=True
         if not self.recording:
             return
         if not self.language_change:
@@ -573,6 +580,7 @@ class MyApp(QMainWindow, form_class):
                     border:0px;
                 '''
             )
+        self.blue=False
 
     def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
         dlg = fn_dialog([[['aBc', 'main.py', (8, 12), (10, 9),'test1','self, dong'], ['ABc', 'test.py', (8, 12), (10, 9),'class1.fun2','self']], [['aBc', 'main.py', (8, 12), (10, 9)], ['aBC', 'wind.py', (8, 12), (10, 9)]], ['abc.py', 'abe.cpp']]) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..

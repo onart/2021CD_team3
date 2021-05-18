@@ -70,7 +70,7 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
     basis, eng=kSoundEx(inp)
     linp=len(eng)
     for w in words:
-        if len(w)>=linp*1.8:
+        if len(w)>=linp*2:
             continue
         val=lcsThr(soundEx(w),basis)
         val2=lcsThr(w,eng)
@@ -93,6 +93,7 @@ def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words�
 def arrange_k(inp, words):
     mx=0
     basis=hme(inp)
+    ret='명령'
     for w in words:
         w2=hme(w)
         val=lcsThr(basis, w2)
