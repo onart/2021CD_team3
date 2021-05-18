@@ -25,7 +25,9 @@ child_class = uic.loadUiType("child.ui")[0]
 
 MODES=['명령', '탐색', '보기']
 USRLIB=ctypes.windll.LoadLibrary('user32.dll')
-        
+
+center_x = 0
+center_y = 0
 
 class HelpWindow(QDialog):
     def __init__(self, parent):
@@ -108,6 +110,12 @@ class PeekerWindow(QDialog):
         layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.'), 2)
         self.setMinimumWidth(600)
         self.setMinimumHeight(350)
+        monitor_x = QDesktopWidget().availableGeometry().width()
+        monitor_y = QDesktopWidget().availableGeometry().height()
+        if(center_y + 160 + 350)> monitor_y:
+            self.move(center_x - 175, center_y - 400)
+        else:
+            self.move(center_x - 175, center_y + 160)
 
 
 
@@ -450,7 +458,10 @@ class SoundSig(QObject):
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
+        global center_x
+        global center_y
         super().__init__()
+
         self.base_h = 140
         self.extended_h = 300
         QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
@@ -461,6 +472,7 @@ class MyApp(QMainWindow, form_class):
         self.sub2=None
 
         self.blue=False
+
 
         self.sin = SoundSig()
         self.sin.sin.connect(self.soundIn)
@@ -475,14 +487,15 @@ class MyApp(QMainWindow, form_class):
         self.roundener=Roundener(self)
 
         self.setupUi(self)
+
         self.button_for_newtab.clicked.connect(self.peeker)
-        self.NewWindow.clicked.connect(self.new_window)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
         self.open_File.clicked.connect(self.fileopen)
         self.help_button.clicked.connect(self.help)
         self.macroButton.clicked.connect(self.macro)
         self.help_btn.clicked.connect(self.resizeWindow)
+
         self.dialog = QDialog()
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
@@ -530,6 +543,14 @@ class MyApp(QMainWindow, form_class):
         # stt recognition manager
         self.q=queue.Queue()
         self.rec_manager = RecognitionManager(self.q, self.sin)
+
+
+    def moveEvent(self,e):
+        global center_x
+        global center_y
+        center_x = self.pos().x()
+        center_y = self.pos().y()
+        super(QMainWindow, self).moveEvent(e)
 
     def setVmode(self, m):
         self.vMode=m
@@ -728,6 +749,10 @@ class MyApp(QMainWindow, form_class):
                 self.sub2.show()
 
     def fileopen(self): #새로운 파일 선택
+        global center_x
+        global center_y
+        center_x = self.pos().x()
+        center_y = self.pos().y()
         option = QFileDialog.Option()
         option |= QFileDialog.ShowDirsOnly
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
@@ -746,6 +771,7 @@ class MyApp(QMainWindow, form_class):
     def resizeWindow(self):
         print(self.pos())
         pass
+
 
 
 
