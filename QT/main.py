@@ -101,12 +101,15 @@ class PeekerWindow(QDialog):
 
     def setupUI(self, fname):
         layout = QtWidgets.QVBoxLayout()
-        
         self.label=QtWidgets.QLabel('content', self)
         self.label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         layout.addWidget(QtWidgets.QLabel(fname,self), 0)
         layout.addWidget(self.label, 1)
         layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.'), 2)
+        self.setMinimumWidth(600)
+        self.setMinimumHeight(350)
+
+
 
     def setToggle(self, dummy):
         if USRLIB.GetForegroundWindow() != self.hIdeWnd:
