@@ -54,9 +54,6 @@ class HelpWindow(QDialog):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
 
-    def closeEvent(self, event):
-        pass
-
 class PeekerWindow(QDialog):
     def __init__(self, sel, parent):
         super().__init__()

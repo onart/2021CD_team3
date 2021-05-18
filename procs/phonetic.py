@@ -65,8 +65,9 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
     
 def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words는 함수/클래스 풀
     ar=[]
+    jnp=''.join(inp.split())
     for w in words:
-        if spell(inp, w):
+        if spell(jnp, w):
             ar.append(w)
     ar.sort(key=lambda x: len(x))
     return ar
@@ -98,7 +99,9 @@ def soundEx(keyword):   # 일반 케이스
             continue
         i=ALPHA[ord(c)-smallA]
         if i=='0':
-            if c=='w':
+            if c == ret[-1] and begin:
+                continue
+            elif c=='w':
                 ret+='u'
             else:
                 ret+=c
@@ -257,10 +260,10 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                     eng+='j'
                 elif c in 'ㅉㅊ':
                     ret+=ALPHA[ord('c')-smallA]
-                    ret+=ALPHA[ord('h')-smallA]
+                    ret+='h'
                     eng+='ch'
                 elif c in 'ㅎ':
-                    ret+=ALPHA[ord('h')-smallA]
+                    ret+='h'
                     eng+='h'
         elif c in MD:                         # 중성(ㅡ무시 -> 고의)
             if c in 'ㅏ':
@@ -309,7 +312,8 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
     return ret, eng
 
 def spell(inp, keyword):    # 스펠을 부른 케이스
-    return (keyword.find(inp) == 0)
+    keyw=''.join(keyword.split())
+    return (keyw.find(inp) == 0)
 
 def lcs(a, b):  # 모든 lcs의 내용을 리스트로 리턴
     prev = [(0, set())]*len(a)
