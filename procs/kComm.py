@@ -1,15 +1,9 @@
-'''
-IDE에 내릴 명령은 여기에 작성해 주세요.
-IDE 종류와 명령 이름만 주면 명령을 찾아서 수행할 수 있게 작성해 주시기 바랍니다.
-매크로 명령도 마찬가지입니다. ADT를 미리 적어두겠습니다. execute 빼고 매개변수는 자유롭게 구성하시면 됩니다.
-'''
+from time import sleep
+from procs.makeTree import rel2abs
 
 # 수행부
 def loadSet():  # 유저가 구성한 매크로 불러오기 코드
     pass
-
-from time import sleep
-from procs.makeTree import rel2abs
 
 def saveSet():  # 유저가 구성한 매크로 저장 코드
     pass

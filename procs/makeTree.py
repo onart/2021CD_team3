@@ -55,7 +55,7 @@ class Pool:
                 itm+=1
                 recent=ts
         if index in self.fi:
-            kfi=self.fi[index]
+            kfi=[[x] for x in self.fi[index]]
             itm+=len(self.fi[index])
             if itm==1:
                 recent=[self.fi[index][0]]

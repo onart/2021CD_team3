@@ -1,22 +1,3 @@
-'''
-단어 풀 연결 관련 함수들
-
-0. 이슈: 숫자가 들어간 클래스/함수명은?
-0.1. 숫자를 중심으로 끊을 것.
-0.1.1. 끊어진 숫자가 '123'이라고 하면 one two three, 백이십삼, 일이삼, one hundred twenty three를 인정
-
-영어
-1. soundex LCS
-2. lcs
-
-한국어
-1. 모음끼리
-2. 자음끼리
-'''
-
-from re import L
-
-
 EXC='aehiouwy'
 ALPHA='01230120022455012623010202'
 REALNUMBER=')!@#$%^&*('
@@ -79,7 +60,7 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
         if val>0:
             ar.append((w, val+val2/10))
     ar.sort(key=lambda x: (x[1], -len(x[0])), reverse=True)
-    print(ar)
+    #print(ar)
     return [x[0] for x in ar]
     
 def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words는 함수/클래스 풀

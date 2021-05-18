@@ -320,7 +320,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.funct1=keyboard.on_press_key(key='up', callback=self.upDown)
         self.funct2=keyboard.on_press_key(key='down', callback=self.upDown)
-        self.funct3=keyboard.on_press_key(key='escape', callback=self.escape)
+        #self.funct3=keyboard.on_press_key(key='Escape', callback=self.escape)
         #USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
         
@@ -375,11 +375,11 @@ class v_dialog(QDialog):  # 음성 선택지
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
     
-    def escape(self, dummy):
-        self.close()
+    '''def escape(self, dummy):
+        self.close()'''
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        keyboard.unhook_key(self.funct3)
+        #keyboard.unhook_key(self.funct3)
         if self.funct1!=None:
             keyboard.unhook_key(self.funct2)
             keyboard.unhook_key(self.funct1)
@@ -709,7 +709,7 @@ class MyApp(QMainWindow, form_class):
                 try:
                     sel4=self.sub1.select_fn
                     sel4=sel3[sel4[0]][sel4[1]]
-                except AttributeError:
+                except IndexError:
                     self.sub1=None
                     return
                 finally:
