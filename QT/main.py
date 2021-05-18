@@ -73,7 +73,7 @@ class PeekerWindow(QDialog):
             rp=(-1,-1)
 
         self.setupUI(fname)
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
         self.pIdeWnd=parent.pIdeWnd
         self.base=parent
@@ -102,12 +102,12 @@ class PeekerWindow(QDialog):
 
 
     def setupUI(self, fname):
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout(self)
         self.label=QtWidgets.QLabel('content', self)
         self.label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        layout.addWidget(QtWidgets.QLabel(fname,self), 0)
-        layout.addWidget(self.label, 1)
-        layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.'), 2)
+        layout.addWidget(QtWidgets.QLabel(fname,self))
+        layout.addWidget(self.label)
+        layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.', self))
         self.setMinimumWidth(600)
         self.setMinimumHeight(350)
         monitor_x = QDesktopWidget().availableGeometry().width()
@@ -125,7 +125,7 @@ class PeekerWindow(QDialog):
         else:
             cp=self.pos()
             x, y=pyautogui.position()
-            pyautogui.click(cp.x(), cp.y())
+            pyautogui.click(cp.x()+30, cp.y()+30)
             pyautogui.moveTo(x, y)
             #print(USRLIB.SetForegroundWindow(int(self.winId())))
     
@@ -139,7 +139,7 @@ class PeekerWindow(QDialog):
         except KeyError:
             pass
         finally:
-            self.base.window_2=None
+            self.base.sub2=None
             event.accept()
 
     def paintEvent(self, event):
@@ -466,8 +466,6 @@ class MyApp(QMainWindow, form_class):
         self.extended_h = 300
         QtGui.QFontDatabase.addApplicationFont('./resources/TmoneyRoundWindRegular.ttf')
 
-        self.window_1 = None    # Alt+tab-like
-        self.window_2 = None    # peek
         self.sub1=None
         self.sub2=None
 
@@ -488,7 +486,6 @@ class MyApp(QMainWindow, form_class):
 
         self.setupUi(self)
 
-        self.button_for_newtab.clicked.connect(self.peeker)
         self.voice.clicked.connect(self.record)
         self.termButton.clicked.connect(self.close)
         self.open_File.clicked.connect(self.fileopen)
@@ -516,7 +513,6 @@ class MyApp(QMainWindow, form_class):
         ''')
         # button qss
         self.textButtons=(
-            self.NewWindow,
             self.termButton,
             self.help_button,
             self.macroButton,
@@ -605,14 +601,6 @@ class MyApp(QMainWindow, form_class):
                 '''
             )
         self.blue=False
-
-    def new_window(self):  #알탭처럼 새로운 자식 창 열어주는 함수
-        dlg = fn_dialog([[['aBc', 'main.py', (8, 12), (10, 9),'test1','self, dong'], ['ABc', 'test.py', (8, 12), (10, 9),'class1.fun2','self']], [['aBc', 'main.py', (8, 12), (10, 9)], ['aBC', 'wind.py', (8, 12), (10, 9)]], ['abc.py', 'abe.cpp']]) # just example , 나중에 여기에 함수랑 클래스 파일 이름 겹치는 것 들어올 것..
-        dlg.exec_()
-        try:
-            print("Selected function is {}".format(dlg.select_fn))
-        except AttributeError:
-            print("Selected Nothing.")
     
     def record(self): # 음성인식 함수
         self.recording = not(self.recording)
@@ -663,19 +651,12 @@ class MyApp(QMainWindow, form_class):
     def closeEvent(self, event):
         # close all children
         # 여기에서 해결이 필요함
-        if self.window_1 is not None:
-            self.window_1.close()
-        if self.window_2 is not None:
-            self.window_2.close()
+        if self.sub1 is not None:
+            self.sub1.close()
+        if self.sub2 is not None:
+            self.sub2.close()
         keyboard.unhook_all()
         super().close()
-
-    def peeker(self, f):   # 다른 코드 띄워놓는 것. f: 볼 파일
-        if self.hIdeWnd==0:
-            return
-        else:
-            self.window_2 = PeekerWindow(('QT\\main.py',),self)
-            self.window_2.show()
 
     def soundIn(self):
         word=self.q.get()
