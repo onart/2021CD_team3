@@ -68,12 +68,18 @@ def subHead(inp, word): # arrange에 사용하게 될 수 있음
 def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 함수/클래스 풀
     ar=[]
     basis, eng=kSoundEx(inp)
+    linp=len(eng)
     for w in words:
+        if len(w)>=linp*1.8:
+            continue
         val=lcsThr(soundEx(w),basis)
         val2=lcsThr(w,eng)
+        if eng[0]==w[0]:
+            val2+=1
         if val>0:
             ar.append((w, val+val2/10))
     ar.sort(key=lambda x: (x[1], -len(x[0])), reverse=True)
+    print(ar)
     return [x[0] for x in ar]
     
 def arrange_s(inp, words):   #spell 기준. keyword는 입력된 음성, words는 함수/클래스 풀
@@ -97,6 +103,8 @@ def arrange_k(inp, words):
 
 def soundEx(keyword):   # 일반 케이스
     ret=str(ALPHA[ord(keyword[0])-smallA])
+    if ret=='0':
+        ret=keyword[0]
     begin=False
     for c in keyword[1:]:
         if c==' ':
@@ -293,6 +301,7 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                 eng+='yeo'
             elif c in 'ㅗ':
                 ret+='o'
+                eng+='o'
             elif c in 'ㅛ':
                 ret+='yo'
                 eng+='yo'
@@ -344,7 +353,7 @@ def lcs(a, b):  # 모든 lcs의 내용을 리스트로 리턴
         prev=current
     return list(current[-1][1])
 
-def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 길이를 리턴. b를 기준으로는 컷해야 하는데 a까지 해야 할지는 나중에 결정
+def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 길이를 리턴. b 기준:4, a 기준:3
     lcsLst=lcs(a, b)
     mx=0
     for w in lcsLst:
@@ -355,7 +364,7 @@ def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 �
         for letter in w:
             prev=pos
             pos=b.find(letter, pos+1)
-            cur=1 if pos-prev>=THRESHOLD else cur+1
+            cur=1 if pos-prev>=THRESHOLD+1 else cur+1
             if mxb<cur:
                 mxb=cur
         pos=-1

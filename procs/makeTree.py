@@ -80,6 +80,8 @@ class Pool:
                 ret+=i.lower()
             elif i=='_':
                 ret+=' '
+            elif i.isnumeric():
+                ret+=i
             else:
                 ret+=' '
 

@@ -320,6 +320,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.funct1=keyboard.on_press_key(key='up', callback=self.upDown)
         self.funct2=keyboard.on_press_key(key='down', callback=self.upDown)
+        self.funct3=keyboard.on_press_key(key='escape', callback=self.escape)
         #USRLIB.SetForegroundWindow(int(self.winId()))
         self.activateWindow()
         
@@ -348,6 +349,8 @@ class v_dialog(QDialog):  # 음성 선택지
     def upDown(self, dummy):
         keyboard.unhook_key(self.funct1)
         keyboard.unhook_key(self.funct2)
+        self.funct1=None
+        self.funct2=None
         cp=self.pos()
         x, y=pyautogui.position()
         pyautogui.click(cp.x()+200, cp.y()+20)
@@ -371,6 +374,16 @@ class v_dialog(QDialog):  # 음성 선택지
     def mouseReleaseEvent(self, event):
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
+    
+    def escape(self, dummy):
+        self.close()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        keyboard.unhook_key(self.funct3)
+        if self.funct1!=None:
+            keyboard.unhook_key(self.funct2)
+            keyboard.unhook_key(self.funct1)
+        return super().closeEvent(a0)
 
 
 class Roundener: # 상속 전용 클래스
@@ -682,6 +695,7 @@ class MyApp(QMainWindow, form_class):
             if type(sel3[0]) is not list: # 결과 1개. len 6이면 함수, 4면 클래스, 1이면 파일
                 sel4=sel3
             else:   # 파일, 클래스, 함수 중 있는 선택지 보여줌
+                # 간혹 선택지 하나일 때 이 지점에 와서 오류가 발생하기도 함, 해결 필요
                 self.sub1=fn_dialog(sel3)
                 self.sub1.exec_()
                 try:
