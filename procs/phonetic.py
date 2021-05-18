@@ -19,6 +19,7 @@ from re import L
 
 EXC='aehiouwy'
 ALPHA='01230120022455012623010202'
+REALNUMBER=')!@#$%^&*('
 smallA=ord('a')
 
 BASEORDER=ord('가')
@@ -100,6 +101,10 @@ def soundEx(keyword):   # 일반 케이스
     for c in keyword[1:]:
         if c==' ':
             begin=True
+            continue
+        elif c.isnumeric():
+            begin=False
+            ret+=REALNUMBER[int(c)]
             continue
         i=ALPHA[ord(c)-smallA]
         if i=='0':
@@ -267,7 +272,7 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                 elif c in 'ㅎ':
                     ret+=ALPHA[ord('h')-smallA]
                     eng+='h'
-        else:                         # 중성(ㅡ무시 -> 고의)
+        elif c in MD:                         # 중성(ㅡ무시 -> 고의)
             if c in 'ㅏ':
                 ret+='a'
                 eng+='a'
@@ -298,6 +303,17 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                 if ret=='' or ret[-1]!='i': # 모음 연속 불가능성. 추후 확장할 수도 있고 안 할 수도 있음
                     ret+='i'
                     eng+='i'
+        else:
+            if c.isalpha():
+                eng+=c
+                c2=ALPHA[ord(c)-smallA]
+                if c == 0:
+                    ret+=c
+                else:
+                    ret+=c2
+            elif c.isnumeric():
+                eng+=c
+                ret+=REALNUMBER[int(c)]
         i+=1
     return ret, eng
 
@@ -358,7 +374,10 @@ def lcsThr(a, b, THRESHOLD=3): # LCS, 즉 Longest Common Subpronounciation의 �
 def hme(s):
     ret=''
     for c in s:
-        ret+=hmeC(c)
+        try:
+            ret+=hmeC(c)
+        except IndexError:
+            ret+=c
     return ret
 
 def hmeC(letter):    # 리턴 (초, 중, 종성)
