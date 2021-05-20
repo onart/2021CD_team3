@@ -1,5 +1,5 @@
 from time import sleep
-from procs.makeTree import rel2abs
+from makeTree import rel2abs
 
 # 수행부
 def loadSet():  # 유저가 구성한 매크로 불러오기 코드
@@ -12,6 +12,39 @@ def stall(time):    # 시간 지연 수행
 
     sleep(time)
 
+def check_hanguel_code(com):
+    pag.hotkey('ctrl','a')
+    pag.hotkey('ctrl','c')
+    sleep(0.1)
+    a = pyperclip.paste()
+    if a == '>'+com:
+        return 0
+    else:
+        return 1
+
+def check_hanguel_vs(com):
+    pag.keyDown('shift')
+    for i in range(len(com)):
+        pag.press('left')
+    pag.keyUp('shift')
+    pag.hotkey('ctrl','c')
+    pag.press('right')
+    sleep(0.1)
+    a = pyperclip.paste()
+    if a == com:
+        return 0
+    else:
+        return 1
+
+def check_hanguel_pycharm(com):
+    pag.hotkey('ctrl','a')
+    pag.hotkey('ctrl','c')
+    sleep(0.1)
+    a = pyperclip.paste()
+    if a == com:
+        return 0
+    else:
+        return 1
 
 def palette(COM_name):  # 팔레트 명령 수행
 
@@ -22,8 +55,17 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('shift')
         pag.keyUp('ctrl')
         sleep(0.03)
-        pag.write(COM_name)
+        pag.typewrite(COM_name)
+        if check_hanguel(COM_name) == 0:
+            pass
+        else:
+            pag.hotkey('ctrl','a')
+            pag.press('backspace')
+            pag.hotkey('hanguel')
+            pag.write('>'+COM_name)
+        sleep(0.1)
         pag.press('enter')
+        
 
     elif IDE == 1:
         pag.keyDown('ctrl')
@@ -33,17 +75,24 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('ctrl')
         sleep(0.03)
         pag.write(COM_name)
+        if check_hanguel_vs(COM_name) == 0:
+            pass
+        else:
+            for i in range(len(COM_name)):
+                pag.press('backspace')
+            pag.hotkey('hanguel')
+            pag.write(COM_name)
+            
+        sleep(0.1)
         pag.press('enter')
+
 
     elif IDE == 2:
         pag.keyDown('ctrl')
-        pag.keyDown('alt')
         pag.keyDown('shift')
-        pag.press('t')
+        pag.press('l')
         pag.keyUp('shift')
-        pag.keyUp('alt')
         pag.keyUp('ctrl')
-        pag.press('enter')
         sleep(0.03)
         pag.write(COM_name)
         pag.press('enter')
@@ -56,6 +105,16 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('ctrl')
         sleep(0.03)
         pag.write(COM_name)
+        if check_hanguel_pycharm(COM_name) == 0:
+            pass
+        
+        else:
+            pag.hotkey('ctrl','a')
+            pag.press('backspace')
+            pag.hotkey('hanguel')
+            pag.write(COM_name)
+            
+        sleep(0.1)
         pag.press('enter')
 
 def opn(sel4):     # 클래스/함수/파일 열기, 인수: main의 sel4
@@ -159,6 +218,7 @@ import os, sys
 import pyautogui as pag
 sys.path.append(os.path.abspath('..'))
 import procs.phonetic as ph
+import pyperclip
 
 builtInCommands={
     '코드위로이동':((('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up'))),
@@ -183,8 +243,13 @@ builtInCommands={
     '소문자':((('팔레트', 'transform to lo')),(('키 입력','ctrl'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
     '파일이동':((()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','t')),(()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','n'))),
     '새파일':((('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','alt'),('키 입력','insert'))),
-    '라인삭제':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력', 'k')),(('키 입력', 'ctrl'),('키 입력', 'l')),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y')))
-
+    '라인삭제':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력', 'k')),(('키 입력', 'ctrl'),('키 입력', 'l')),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y'))),
+    '심볼이름':((('키 입력','f2')),(('키 입력','ctrl'),('키 입력','r')),(('키 입력','alt'),('키 입력','shift'),('키 입력','r')),(())),
+    '정의부이동':((('키 입력','f12')),(('키 입력','f12')),(('키 입력','f3')),(())),
+    '정의부보기':((('키 입력','alt'),('키 입력','f12')),(('키 입력','alt'),('키 입력','f12')),(('키 입력','f3')),(())),
+    '문제출력':((('키 입력','ctrl'),('키 입력','shift'),('키 입력','m')),(()),(()),(()))
+    
+    
     #'':((('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력',''))),
     #'이름': ((vscode),(vs),(eclipse),(pycharm))
 }
@@ -213,6 +278,5 @@ def ideUP(name):
         IDE=('비주얼 스튜디오 코드','비주얼 스튜디오','이클립스','PyCharm').index(name)
     except ValueError:
         pass
-
 
 
