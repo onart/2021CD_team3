@@ -13,47 +13,33 @@ def stall(time):    # 시간 지연 수행
     sleep(time)
 
 def palette(COM_name):  # 팔레트 명령 수행
+    temp=pyperclip.paste()
     pyperclip.copy(COM_name)
     if IDE == 0:
-        pag.keyDown('ctrl')
-        pag.press('p')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl', 'p')
         sleep(0.05)
         pag.write('>')
-        pyperclip.paste()
+        pag.hotkey('ctrl','v')
         pag.press('enter')
 
     elif IDE == 1:
-        pag.keyDown('ctrl')
-        pag.keyDown('alt')
-        pag.press('a')
-        pag.keyUp('alt')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','alt','a')
         sleep(0.05)
-        pyperclip.paste()
+        pag.hotkey('ctrl','v')
         pag.press('enter')
 
     elif IDE == 2:
-        pag.keyDown('ctrl')
-        pag.keyDown('shift')
-        pag.press('l')
-        pag.keyUp('shift')
-        pag.keyUp('ctrl')
-        pag.press('enter')
+        pag.hotkey('ctrl','3')
         sleep(0.05)
-        pyperclip.paste()
+        pag.hotkey('ctrl','v')
         pag.press('enter')
 
     elif IDE == 3:
-        pag.keyDown('ctrl')
-        pag.keyDown('shift')
-        pag.press('a')
-        pag.keyUp('shift')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','shift','a')
         sleep(0.05)
-        pyperclip.paste()
+        pag.hotkey('ctrl','v')
         pag.press('enter')
-    # 클립보드 복구할 방법 강구할 것. 어려운 일 아닐 거라 확신함
+    pyperclip.copy(temp)
 
 def opn(sel4):     # 클래스/함수/파일 열기, 인수: main의 sel4
 
@@ -67,42 +53,35 @@ def opn(sel4):     # 클래스/함수/파일 열기, 인수: main의 sel4
     
 def openRoutine(name):
     if IDE==0:
-        pag.keyDown('ctrl')
-        pag.press('p')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','p')
+        pyperclip.copy(name)
         sleep(0.05)
-        pag.write(name)
+        pag.hotkey('ctrl','v')
         pag.press('enter')
     elif IDE==1:
-        pag.keyDown('ctrl')
-        pag.press('o')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','o')
+        pyperclip.copy(rel2abs[name])
         sleep(0.05)
-        pag.write(rel2abs[name])
+        pag.hotkey('ctrl','v')
         pag.press('enter')
     elif IDE==2:
         palette('open file')
-        pag.write(rel2abs[name])
+        sleep(0.05)
+        pyperclip.copy(rel2abs[name])
+        pag.hotkey('ctrl','v')
         pag.press('enter')
     elif IDE==3:
-        pag.keyDown('ctrl')
-        pag.keyDown('shift')
-        pag.press('n')
-        pag.keyUp('shift')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','shift','n')
+        pyperclip.copy(name)
         sleep(0.05)
-        pag.write(name)
+        pag.hotkey('ctrl','v')
         pag.press('enter')
 
 def lineRoutine(no):
     if IDE==2:
-        pag.keyDown('ctrl')
-        pag.press('l')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','l')
     else:
-        pag.keyDown('ctrl')
-        pag.press('g')
-        pag.keyUp('ctrl')
+        pag.hotkey('ctrl','g')
     sleep(0.05)
     pag.write(str(no))
     pag.press('enter')
