@@ -682,12 +682,17 @@ class MyApp(QMainWindow, form_class):
             kComm.ideUP(self.activeWindow.text())
 
         if self.language_change:    # 한국어
-            word=kComm.matchK(word)
-            if word in self.kCommands:  # 모드 전환
-                self.kCommands[word](0)
+            word2=kComm.matchK(word)
+            self.vLabel.setText(word+'->'+word2)
+            if word2 in self.kCommands:  # 모드 전환
+                self.kCommands[word2](0)
                 return
-            elif (word in kComm.builtInCommands) or (word in kComm.customCommands):                  # 일반 명령어
-                kComm.execute(word)
+            elif (word2 in kComm.builtInCommands) or (word2 in kComm.customCommands):     # 일반 명령어
+                kComm.execute(word2)
+                '''
+                guide=kComm.execute(word2)
+                self.vLabel.setText(word2+guide)
+                '''
             else:   # 유사도
                 QMessageBox.about(self, "오류", "해당 명령어가 없습니다.")
                 return

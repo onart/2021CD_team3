@@ -1,4 +1,5 @@
 from time import sleep
+from xml.etree.ElementTree import Comment
 from procs.makeTree import rel2abs
 
 # 수행부
@@ -14,15 +15,13 @@ def stall(time):    # 시간 지연 수행
 
 
 def palette(COM_name):  # 팔레트 명령 수행
-
+    print('palette:',COM_name)
     if IDE == 0:
         pag.keyDown('ctrl')
-        pag.keyDown('shift')
         pag.press('p')
-        pag.keyUp('shift')
         pag.keyUp('ctrl')
-        sleep(0.03)
-        pag.write(COM_name)
+        sleep(0.05)
+        pag.write('>'+COM_name)
         pag.press('enter')
 
     elif IDE == 1:
@@ -31,7 +30,7 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.press('a')
         pag.keyUp('alt')
         pag.keyUp('ctrl')
-        sleep(0.03)
+        sleep(0.05)
         pag.write(COM_name)
         pag.press('enter')
 
@@ -44,7 +43,7 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('alt')
         pag.keyUp('ctrl')
         pag.press('enter')
-        sleep(0.03)
+        sleep(0.05)
         pag.write(COM_name)
         pag.press('enter')
 
@@ -54,7 +53,7 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.press('a')
         pag.keyUp('shift')
         pag.keyUp('ctrl')
-        sleep(0.03)
+        sleep(0.05)
         pag.write(COM_name)
         pag.press('enter')
 
@@ -73,14 +72,14 @@ def openRoutine(name):
         pag.keyDown('ctrl')
         pag.press('p')
         pag.keyUp('ctrl')
-        sleep(0.03)
+        sleep(0.05)
         pag.write(name)
         pag.press('enter')
     elif IDE==1:
         pag.keyDown('ctrl')
         pag.press('o')
         pag.keyUp('ctrl')
-        sleep(0.03)
+        sleep(0.05)
         pag.write(rel2abs[name])
         pag.press('enter')
     elif IDE==2:
@@ -93,7 +92,7 @@ def openRoutine(name):
         pag.press('n')
         pag.keyUp('shift')
         pag.keyUp('ctrl')
-        sleep(0.03)
+        sleep(0.05)
         pag.write(name)
         pag.press('enter')
 
@@ -106,7 +105,7 @@ def lineRoutine(no):
         pag.keyDown('ctrl')
         pag.press('g')
         pag.keyUp('ctrl')
-    sleep(0.03)
+    sleep(0.05)
     pag.write(str(no))
     pag.press('enter')
 
@@ -129,7 +128,7 @@ def keyRel():   # 키 떼기
 
 def execute(name):
     if name in builtInCommands:
-        com=builtInCommands[name]
+        com=builtInCommands[name][IDE]
     elif name in customCommands:
         com=customCommands[name]
     else:   # '명령' 이후 없는 명령 등장
@@ -140,7 +139,7 @@ def execute(name):
     else:
         return
 
-    for comm in com[IDE]:
+    for comm in com:
         if comm[0] == '키 입력':
             keyIn(comm[1])
         else:
@@ -175,12 +174,12 @@ builtInCommands={
     '창이동':((('키 입력','ctrl'),('키 입력','pageup')),(()),(('키 입력','ctrl'),('키 입력','f6')),(('키 입력','ctrl'),('키 입력','tab'))),
     '닫은것열기':((('키 입력','ctrl'),('키 입력','shift'),('키 입력','t')),(()),(('키 입력','alt'),('키 입력','left')),(())),
     '모든참조':((('키 입력','shift'),('키 입력','f12')),(('키 입력','shift'),('키 입력','f12')),(('키 입력','ctrl'),('키 입력','alt'),('키 입력','h')),(('키 입력','alt'),('키 입력','f7'))),
-    '리팩터링':((('키 입력', 'ctrl'), ('키 입력','r')),(('키 입력','alt'),('키 입력','enter')),(('키 입력','alt'),('키 입력','shift'),('키 입력','t')),(('키 입력','shift'),('키 입력','f6'))),
+    '리팩터링':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력','r')),(('키 입력','alt'),('키 입력','enter')),(('키 입력','alt'),('키 입력','shift'),('키 입력','t')),(('키 입력','shift'),('키 입력','f6'))),
     '모두접기':((('키 입력','ctrl'),('키 입력','k'),('키 입력','0')),(('키 입력','ctrl'),('키 입력','m'),('키 입력','o')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','/')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','-'))),
     '모두펴기':((('키 입력','ctrl'),('키 입력','k'),('키 입력','j')),(('키 입력','ctrl'),('키 입력','m'),('키 입력','l')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','*')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','+'))),
     '자동정렬':((()),(('키 입력','ctrl'),('키 입력','k'),('키 입력','f')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','f')),(('키 입력','ctrl'),('키 입력','alt'),('키 입력','i'))),
-    '대문자':((('팔레트', 'transform to up')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
-    '소문자':((('팔레트', 'transform to lo')),(('키 입력','ctrl'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
+    '대문자':((('팔레트', 'transform to up'),),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
+    '소문자':((('팔레트', 'transform to lo'),),(('키 입력','ctrl'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
     '파일이동':((()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','t')),(()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','n'))),
     '새파일':((('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','alt'),('키 입력','insert'))),
     '라인삭제':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력', 'k')),(('키 입력', 'ctrl'),('키 입력', 'l')),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y')))
@@ -199,7 +198,8 @@ def matchK(inp):
     key.extend(key2)
     key.extend(key3)
     key=[normalize(x) for x in key]
-    key=[x for x in key if len(x)==len(inp)]    # 음절 수 동일한 것 우선. 단 나머지를 아예 제외시키진 않을 예정
+    key.sort(key=lambda x: len(x))
+    key.sort(key=lambda x: len(x)!=len(inp))
     ret=ph.arrange_k(inp, key)
     return ret
 

@@ -274,7 +274,7 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                 eng+='ae'
             elif c in 'ㅑ':
                 ret+='ya'
-                eng+='yq'
+                eng+='ya'
             elif c in 'ㅒㅖ':
                 ret+='ye'
                 eng+='ye'
