@@ -1,5 +1,4 @@
 from time import sleep
-from xml.etree.ElementTree import Comment
 from procs.makeTree import rel2abs
 
 # 수행부
@@ -13,15 +12,15 @@ def stall(time):    # 시간 지연 수행
 
     sleep(time)
 
-
 def palette(COM_name):  # 팔레트 명령 수행
-    print('palette:',COM_name)
+    pyperclip.copy(COM_name)
     if IDE == 0:
         pag.keyDown('ctrl')
         pag.press('p')
         pag.keyUp('ctrl')
         sleep(0.05)
-        pag.write('>'+COM_name)
+        pag.write('>')
+        pyperclip.paste()
         pag.press('enter')
 
     elif IDE == 1:
@@ -31,20 +30,18 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('alt')
         pag.keyUp('ctrl')
         sleep(0.05)
-        pag.write(COM_name)
+        pyperclip.paste()
         pag.press('enter')
 
     elif IDE == 2:
         pag.keyDown('ctrl')
-        pag.keyDown('alt')
         pag.keyDown('shift')
-        pag.press('t')
+        pag.press('l')
         pag.keyUp('shift')
-        pag.keyUp('alt')
         pag.keyUp('ctrl')
         pag.press('enter')
         sleep(0.05)
-        pag.write(COM_name)
+        pyperclip.paste()
         pag.press('enter')
 
     elif IDE == 3:
@@ -54,8 +51,9 @@ def palette(COM_name):  # 팔레트 명령 수행
         pag.keyUp('shift')
         pag.keyUp('ctrl')
         sleep(0.05)
-        pag.write(COM_name)
+        pyperclip.paste()
         pag.press('enter')
+    # 클립보드 복구할 방법 강구할 것. 어려운 일 아닐 거라 확신함
 
 def opn(sel4):     # 클래스/함수/파일 열기, 인수: main의 sel4
 
@@ -158,6 +156,7 @@ import os, sys
 import pyautogui as pag
 sys.path.append(os.path.abspath('..'))
 import procs.phonetic as ph
+import pyperclip
 
 builtInCommands={
     '코드위로이동':((('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up')),(('키 입력','alt'),('키 입력','up'))),
@@ -182,8 +181,13 @@ builtInCommands={
     '소문자':((('팔레트', 'transform to lo'),),(('키 입력','ctrl'),('키 입력','u')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','x')),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','u'))),
     '파일이동':((()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','t')),(()),(('키 입력','ctrl'),('키 입력','shift'),('키 입력','n'))),
     '새파일':((('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','ctrl'),('키 입력','n')),(('키 입력','alt'),('키 입력','insert'))),
-    '라인삭제':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력', 'k')),(('키 입력', 'ctrl'),('키 입력', 'l')),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y')))
-
+    '라인삭제':((('키 입력', 'ctrl'), ('키 입력', 'shift'),('키 입력', 'k')),(('키 입력', 'ctrl'),('키 입력', 'l')),(('키 입력','ctrl'),('키 입력','d')),(('키 입력','ctrl'),('키 입력','y'))),
+    '이름변경':((('키 입력','f2')),(('키 입력','ctrl'),('키 입력','r')),(('키 입력','alt'),('키 입력','shift'),('키 입력','r')),(())),
+    '정의로이동':((('키 입력','f12')),(('키 입력','f12')),(('키 입력','f3')),(())),
+    '정의보기':((('키 입력','alt'),('키 입력','f12')),(('키 입력','alt'),('키 입력','f12')),(('키 입력','f3')),(())),
+    '문제출력':((('키 입력','ctrl'),('키 입력','shift'),('키 입력','m')),(()),(()),(()))
+    
+    
     #'':((('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력','')),(('키 입력',''),('키 입력',''))),
     #'이름': ((vscode),(vs),(eclipse),(pycharm))
 }
@@ -213,6 +217,5 @@ def ideUP(name):
         IDE=('비주얼 스튜디오 코드','비주얼 스튜디오','이클립스','PyCharm').index(name)
     except ValueError:
         pass
-
 
 
