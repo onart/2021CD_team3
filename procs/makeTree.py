@@ -677,6 +677,7 @@ def cppFillTree(fname, prog):
             functs[name].append((fname, (row, column), (end_row, end_column), scope, args))            
     
     prog.close()
+    
 
 def javaFillTree(fname, prog):
     func_range = ['public','protected','private']
@@ -743,7 +744,7 @@ def javaFillTree(fname, prog):
                         func_info.append(i[i.index(j)+2].split('(')[0])
                         func_start_locate1.append([num_i,0])
 
-            if j == 'void':
+            if j in func_form:
                 if i[i.index(j)+1].split('(')[0][-1] != ';':
                     func_info.append(i[i.index(j)+1].split('(')[0])
                     func_start_locate1.append([num_i,0])
@@ -944,5 +945,4 @@ ext.update({
     '.java': javaFillTree,
     '.h': cppFillTree,
 })
-
 
