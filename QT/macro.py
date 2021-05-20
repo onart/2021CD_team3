@@ -254,6 +254,7 @@ class MacroAddWindow(QDialog):
                 kComm.customCommands.pop(self.origin)
             data = self.getTableData()
             self.signal_out.sig.emit((name, data))
+            kComm.saveSet()
             self.close()
 
 

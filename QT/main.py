@@ -545,6 +545,7 @@ class MyApp(QMainWindow, form_class):
         # stt recognition manager
         self.q=queue.Queue()
         self.rec_manager = RecognitionManager(self.q, self.sin)
+        kComm.loadSet()
 
 
     def moveEvent(self,e):
@@ -764,11 +765,6 @@ class MyApp(QMainWindow, form_class):
         print(self.pos())
         pass
 
-
-
-
-
-
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -777,4 +773,3 @@ if __name__ == '__main__':
     app.exec_()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
-
