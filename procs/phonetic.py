@@ -123,7 +123,6 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
     #. 사이시옷은 어근 접사 관련 법칙도 있기 때문에 생략
     '''
     # 스펠링을 또박또박 부르면 로마자 알파벳이 들어오는 것으로 확인, 전체가 로마자일 때는 arrange_s 사용, 이외에는 그대로 반영
-    # 확인된 문제: 여기서 아직 숫자 인식 x, 한영키 한글 설정 시 팔레트에 한글로 입력되어 파일이 안 열림
     h=hme(keyword)
     ret=''
     eng=''
@@ -274,9 +273,12 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
             if c in 'ㅏ':
                 ret+='a'
                 eng+='a'
-            elif c in 'ㅐㅔ':
+            elif c in 'ㅐ':
                 ret+='ae'
-                eng+='ae'
+                eng+='e'
+            elif c in 'ㅔ':
+                ret+='e'
+                eng+='e'
             elif c in 'ㅑ':
                 ret+='ya'
                 eng+='ya'
