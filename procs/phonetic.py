@@ -136,13 +136,14 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
             else:
                 nx=''
             if nx in HD or nx=='':  # 종성(이후 나온 초성과 함께 처리. 단 바로 다음 역시 종성의 일부일 가능성도 있음)
-                if c=='ㄱㄲㅋ':
+                if c in 'ㄱㄲㅋ':
                     if nx in 'ㄴㅁ':    # 비음화
                         ret+=ALPHA[ord('n')-smallA]
                         ret+=ALPHA[ord('g')-smallA]
                         eng+='ng'
                     else:
                         ret+=ALPHA[ord('k')-smallA]
+                        eng+='k'
                         if nx in 'ㅎ':  # ㅎ축약
                             i+=1
                         elif nx in 'ㄱ':
@@ -224,6 +225,10 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                         elif nx=='ㅈ':
                             ret+=ALPHA[ord('c')-smallA]
                             eng+='c'
+                elif c in 'ㅇ':
+                    ret+=ALPHA[ord('n')-smallA]
+                    ret+=ALPHA[ord('g')-smallA]
+                    eng+='ng'
             else:                     # 처음 or 이전이 모음인 초성(ㅇ무시 -> 고의)
                 if c in 'ㄱ':
                     ret+=ALPHA[ord('g')-smallA]
