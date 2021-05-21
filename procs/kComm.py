@@ -3,9 +3,44 @@ from procs.makeTree import rel2abs
 
 # 수행부
 def loadSet():  # 유저가 구성한 매크로 불러오기 코드
+    f = open("macro.txt", 'r')
+    lines = f.readlines()
+    for line in lines:
+        spite_line = line.split()
+        list_make = []
+        for i in range(len(spite_line)):
+            if i == 0:
+                keyv = spite_line[0]
+            elif spite_line[i] == '키':
+                if spite_line[i+1] == '입력':
+                    list_make.append(['키 입력',spite_line[i+2]])
+
+            elif spite_line[i] == '시간':
+                if spite_line[i+1] == '지연':
+                    list_make.append(['시간 지연',spite_line[i+2]])
+
+            elif spite_line[i] == '팔레트':
+                list_make.append(['팔레트',spite_line[i+1]])
+
+            elif spite_line[i] == '명령':
+                list_make.append(['명령',spite_line[i+1]])
+
+        customCommands[keyv] = list_make
+
+
+                    
+    f.close()
     pass
 
 def saveSet():  # 유저가 구성한 매크로 저장 코드
+    f = open("macro.txt", 'w')
+    for i in customCommands.keys():
+        f.write(i+" ")
+        for j in customCommands.get(i):
+            f.write(j[0]+" "+j[1]+" ")
+        f.write("\n")
+
+    f.close()
     pass
 
 def stall(time):    # 시간 지연 수행
@@ -129,6 +164,13 @@ def execute(name):
                 execute(comm[1])
     keyRel()
     callStack.pop()
+    
+    string_macro = ''
+    if name in builtInCommands: 
+        for j in builtInCommands[name][IDE]:
+                string_macro = string_macro + j[1] + "+"
+        return string_macro[:-1]
+        
 
 # 선별부
 import os, sys
@@ -187,5 +229,4 @@ def ideUP(name):
         IDE=('비주얼 스튜디오 코드','비주얼 스튜디오','이클립스','PyCharm').index(name)
     except ValueError:
         pass
-
 
