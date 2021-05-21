@@ -3,37 +3,40 @@ from procs.makeTree import rel2abs
 
 # 수행부
 def loadSet():  # 유저가 구성한 매크로 불러오기 코드
-    f = open("macro.txt", 'r')
-    lines = f.readlines()
-    for line in lines:
-        spite_line = line.split()
-        list_make = []
-        for i in range(len(spite_line)):
-            if i == 0:
-                keyv = spite_line[0]
-            elif spite_line[i] == '키':
-                if spite_line[i+1] == '입력':
-                    list_make.append(['키 입력',spite_line[i+2]])
+    try:
+        f = open("macro.brn", 'r')
+    except FileNotFoundError:
+        return
+    try:
+        lines = f.readlines()
+        for line in lines:
+            spite_line = line.split()
+            list_make = []
+            for i in range(len(spite_line)):
+                if i == 0:
+                    keyv = spite_line[0]
+                elif spite_line[i] == '키':
+                    if spite_line[i+1] == '입력':
+                        list_make.append(['키 입력',spite_line[i+2]])
 
-            elif spite_line[i] == '시간':
-                if spite_line[i+1] == '지연':
-                    list_make.append(['시간 지연',spite_line[i+2]])
+                elif spite_line[i] == '시간':
+                    if spite_line[i+1] == '지연':
+                        list_make.append(['시간 지연',spite_line[i+2]])
 
-            elif spite_line[i] == '팔레트':
-                list_make.append(['팔레트',spite_line[i+1]])
+                elif spite_line[i] == '팔레트':
+                    list_make.append(['팔레트',spite_line[i+1]])
 
-            elif spite_line[i] == '명령':
-                list_make.append(['명령',spite_line[i+1]])
+                elif spite_line[i] == '명령':
+                    list_make.append(['명령',spite_line[i+1]])
 
-        customCommands[keyv] = list_make
+            customCommands[keyv] = list_make
+    except:
+        pass
 
-
-                    
     f.close()
-    pass
 
 def saveSet():  # 유저가 구성한 매크로 저장 코드
-    f = open("macro.txt", 'w')
+    f = open("macro.brn", 'w')
     for i in customCommands.keys():
         f.write(i+" ")
         for j in customCommands.get(i):
@@ -41,7 +44,6 @@ def saveSet():  # 유저가 구성한 매크로 저장 코드
         f.write("\n")
 
     f.close()
-    pass
 
 def stall(time):    # 시간 지연 수행
 

@@ -85,6 +85,7 @@ class MacroWindow(QDialog):
         row=self.tableWidget.currentRow()
         name=self.tableWidget.item(row, 0).text()
         kComm.customCommands.pop(name)
+        kComm.saveSet()
         self.setTableWidget()
 
     def addWithDoubleClick(self):
