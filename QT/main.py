@@ -75,7 +75,6 @@ class PeekerWindow(QDialog):
         self.pIdeWnd=parent.pIdeWnd
         self.base=parent
         self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
-        self.funct2=keyboard.on_press_key(key='Escape', callback=self.escape)
         # self.tid=threading.get_native_id()
 
         self.DISP_NO=20 # 한 번에 보여줄 줄수
@@ -125,14 +124,10 @@ class PeekerWindow(QDialog):
             pyautogui.click(cp.x()+30, cp.y()+30)
             pyautogui.moveTo(x, y)
             #print(USRLIB.SetForegroundWindow(int(self.winId())))
-    
-    def escape(self, dummy):
-        self.close()
 
     def closeEvent(self, event):
         try:
             keyboard.unhook_key(self.funct1)
-            keyboard.unhook_key(self.funct2)
         except KeyError:
             pass
         finally:
