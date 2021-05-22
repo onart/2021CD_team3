@@ -328,7 +328,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.activateWindow()
         
     def setupUI(self):
-        self.setGeometry(1100, 200, 300, 100)
+        self.setGeometry(1100, 200, 300, 120)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         qr=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()

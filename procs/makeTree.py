@@ -115,7 +115,7 @@ class Pool:
         input=''.join(input.split())
         ret=phonetic.arrange_s(input, self.candid)
         if len(ret)<3:
-            ret.extend(phonetic.arrange(input, self.candid)[:3])
+            ret.extend(phonetic.arrange(input, self.candid)[:4])
         elif len(ret)>10:
             # 너무 많아서 잘렸다고 안내
             ret=ret[:10]
