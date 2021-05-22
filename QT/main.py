@@ -783,9 +783,16 @@ class MyApp(QMainWindow, form_class):
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
             self.roundener=Roundener(self)
             self.dat=''
-            for k in kComm.builtInCommands:
-                self.dat += (k+'\t')
+            for  k in kComm.builtInCommands:
+                self.dat += ('\t' + k + '\t\t\n')
+
             self.dat=self.dat[:-1]
+            layout = QtWidgets.QVBoxLayout(self)
+            self.label = QtWidgets.QLabel('content', self)
+            layout.addWidget(self.label)
+            self.label.setText(''.join(self.dat))
+
+
 
         def paintEvent(self, a0):
             self.roundener.paintEvent(a0)
