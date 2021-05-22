@@ -442,6 +442,7 @@ class Roundener: # 상속 전용 클래스
                 diff = globalPos - self.__mouseMovePos
                 self.window.move(diff)
                 self.__mouseMovePos = globalPos - self.window.pos()
+                return diff
 
     def mouseReleaseEvent(self, event):
         if self.__mousePressPos is not None:
@@ -645,7 +646,9 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        self.roundener.mouseMoveEvent(event)
+        diff=self.roundener.mouseMoveEvent(event)
+        if diff and not self.help_flag:
+            self.help_dialog.move(diff)
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
@@ -659,6 +662,8 @@ class MyApp(QMainWindow, form_class):
             self.sub1.close()
         if self.sub2 is not None:
             self.sub2.close()
+        if not self.help_flag:
+            self.help_dialog.close()
         keyboard.unhook_all()
         super().close()
 
@@ -758,30 +763,40 @@ class MyApp(QMainWindow, form_class):
     def macro(self):
         MacroWindow(self)
 
+    class ComList(QDialog):
+        def __init__(self, cx, cy):
+            super().__init__()
+            self.setMinimumSize(160,350)
+            monitor_y=QDesktopWidget().availableGeometry().height()
+            center_x = self.pos().x()
+            center_y = self.pos().y()
+            if (center_y + 160 + 350) > monitor_y:
+                self.move(cx - 175, cy - 400)
+            else:
+                self.move(cx - 175, cy + 160)
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            self.roundener=Roundener(self)
+            self.dat=''
+            for k in kComm.builtInCommands:
+                self.dat += (k+'\t')
+            self.dat=self.dat[:-1]
+
+        def paintEvent(self, a0):
+            self.roundener.paintEvent(a0)
+
     def resizeWindow(self):
         if(self.help_flag == True):
             self.help_btn.setText('↑')
             self.help_flag = False
-            self.help_dialog = QDialog()
+            pos=self.pos()
+            self.help_dialog = self.ComList(pos.x(), pos.y())
             self.help_dialog.setWindowTitle('Help word')
-            self.help_dialog.setMinimumWidth(600)
-            self.help_dialog.setMinimumHeight(350)
-            monitor_x = QDesktopWidget().availableGeometry().width()
-            monitor_y = QDesktopWidget().availableGeometry().height()
-            center_x = self.pos().x()
-            center_y = self.pos().y()
-            if (center_y + 160 + 350) > monitor_y:
-                self.help_dialog.move(center_x - 175, center_y - 400)
-            else:
-                self.help_dialog.move(center_x - 175, center_y + 160)
-            self.help_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
             self.help_dialog.show()
 
         else:
             self.help_btn.setText('↓')
             self.help_flag = True
             self.help_dialog.close()
-        pass
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
