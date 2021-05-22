@@ -70,13 +70,13 @@ class PeekerWindow(QDialog):
             rp=(-1,-1)
 
         self.setupUI(fname)
+
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
         self.pIdeWnd=parent.pIdeWnd
         self.base=parent
         self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
         # self.tid=threading.get_native_id()
-
         self.DISP_NO=20 # 한 번에 보여줄 줄수
 
         try:
@@ -456,6 +456,8 @@ class Roundener: # 상속 전용 클래스
 class SoundSig(QObject):
     sin=QtCore.pyqtSignal()
 
+
+
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
@@ -493,7 +495,7 @@ class MyApp(QMainWindow, form_class):
         self.help_button.clicked.connect(self.help)
         self.macroButton.clicked.connect(self.macro)
         self.help_btn.clicked.connect(self.resizeWindow)
-
+        self.help_flag = True
         self.dialog = QDialog()
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
@@ -757,7 +759,28 @@ class MyApp(QMainWindow, form_class):
         MacroWindow(self)
 
     def resizeWindow(self):
-        print(self.pos())
+        if(self.help_flag == True):
+            self.help_btn.setText('↑')
+            self.help_flag = False
+            self.help_dialog = QDialog()
+            self.help_dialog.setWindowTitle('Help word')
+            self.help_dialog.setMinimumWidth(600)
+            self.help_dialog.setMinimumHeight(350)
+            monitor_x = QDesktopWidget().availableGeometry().width()
+            monitor_y = QDesktopWidget().availableGeometry().height()
+            center_x = self.pos().x()
+            center_y = self.pos().y()
+            if (center_y + 160 + 350) > monitor_y:
+                self.help_dialog.move(center_x - 175, center_y - 400)
+            else:
+                self.help_dialog.move(center_x - 175, center_y + 160)
+            self.help_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            self.help_dialog.show()
+
+        else:
+            self.help_btn.setText('↓')
+            self.help_flag = True
+            self.help_dialog.close()
         pass
 
 # Press the green button in the gutter to run the script.
