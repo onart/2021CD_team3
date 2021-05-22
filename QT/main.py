@@ -766,21 +766,21 @@ class MyApp(QMainWindow, form_class):
     class ComList(QDialog):
         def __init__(self, cx, cy):
             super().__init__()
-            self.setMinimumSize(160,350)
+            self.setMaximumSize(250,350)
             monitor_y=QDesktopWidget().availableGeometry().height()
             center_x = self.pos().x()
             center_y = self.pos().y()
-            if (center_y + 160 + 350) > monitor_y:
-                self.move(cx - 175, cy - 400)
+            if (center_y + 225 + 350) > monitor_y:
+                self.move(cx, cy - 400)
             else:
-                self.move(cx - 175, cy + 160)
+                self.move(cx, cy + 160)
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
             self.roundener=Roundener(self)
             self.dat=''
             for k in kComm.builtInCommands:
                 self.dat += (k+'\t')
             self.dat=self.dat[:-1]
-
+            print(self.dat)
         def paintEvent(self, a0):
             self.roundener.paintEvent(a0)
 
@@ -791,6 +791,7 @@ class MyApp(QMainWindow, form_class):
             pos=self.pos()
             self.help_dialog = self.ComList(pos.x(), pos.y())
             self.help_dialog.setWindowTitle('Help word')
+            self.help_dialog.setMaximumSize(250, 350)
             self.help_dialog.show()
 
         else:
