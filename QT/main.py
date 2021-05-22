@@ -646,9 +646,15 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
+
         diff=self.roundener.mouseMoveEvent(event)
         if diff and not self.help_flag:
-            self.help_dialog.move(diff)
+            monitor_y = QDesktopWidget().availableGeometry().height()
+            if (center_y + 225 + 350) > monitor_y:
+                self.help_dialog.move(center_x, center_y - 400)
+            else:
+                self.help_dialog.move(center_x, center_y + 160)
+
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
@@ -764,12 +770,12 @@ class MyApp(QMainWindow, form_class):
         MacroWindow(self)
 
     class ComList(QDialog):
+        global center_x
+        global center_y
         def __init__(self, cx, cy):
             super().__init__()
             self.setMaximumSize(250,350)
             monitor_y=QDesktopWidget().availableGeometry().height()
-            center_x = self.pos().x()
-            center_y = self.pos().y()
             if (center_y + 225 + 350) > monitor_y:
                 self.move(cx, cy - 400)
             else:
@@ -780,15 +786,19 @@ class MyApp(QMainWindow, form_class):
             for k in kComm.builtInCommands:
                 self.dat += (k+'\t')
             self.dat=self.dat[:-1]
-            print(self.dat)
+
         def paintEvent(self, a0):
             self.roundener.paintEvent(a0)
 
     def resizeWindow(self):
+        global center_x
+        global center_y
         if(self.help_flag == True):
             self.help_btn.setText('↑')
             self.help_flag = False
             pos=self.pos()
+            center_x = self.pos().x()
+            center_y = self.pos().y()
             self.help_dialog = self.ComList(pos.x(), pos.y())
             self.help_dialog.setWindowTitle('Help word')
             self.help_dialog.setMaximumSize(250, 350)
