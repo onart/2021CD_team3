@@ -293,7 +293,7 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                 elif c=='w':
                     c='u'
                 c2=ALPHA[ord(c)-smallA]
-                if c == 0:
+                if c2 == 0:
                     ret+=c
                 else:
                     ret+=c2
