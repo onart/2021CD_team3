@@ -347,6 +347,9 @@ class v_dialog(QDialog):  # 음성 선택지
     def upDown(self, dummy):
         try:
             keyboard.unhook_key(self.funct1)
+        except KeyError:
+            pass
+        try:
             keyboard.unhook_key(self.funct2)
         except KeyError:
             pass
