@@ -26,9 +26,6 @@ child_class = uic.loadUiType("child.ui")[0]
 MODES=['명령', '탐색', '보기']
 USRLIB=ctypes.windll.LoadLibrary('user32.dll')
 
-center_x = 0
-center_y = 0
-
 class HelpWindow(QDialog):
     def __init__(self, parent):
         super(HelpWindow, self).__init__(parent)
@@ -78,6 +75,10 @@ class PeekerWindow(QDialog):
         self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
         # self.tid=threading.get_native_id()
         self.DISP_NO=20 # 한 번에 보여줄 줄수
+        if (parent.y()+160+350) > QDesktopWidget().availableGeometry().height():
+            self.move(parent.x()-175, parent.y()-400)
+        else:
+            self.move(parent.x()-175, parent.y()+160)
 
         try:
             f=open(fname, encoding='UTF-8')
@@ -106,12 +107,6 @@ class PeekerWindow(QDialog):
         layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.', self))
         self.setMinimumWidth(600)
         self.setMinimumHeight(350)
-        monitor_x = QDesktopWidget().availableGeometry().width()
-        monitor_y = QDesktopWidget().availableGeometry().height()
-        if(center_y + 160 + 350)> monitor_y:
-            self.move(center_x - 175, center_y - 400)
-        else:
-            self.move(center_x - 175, center_y + 160)
 
 
 
@@ -462,8 +457,6 @@ class SoundSig(QObject):
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
-        global center_x
-        global center_y
         super().__init__()
 
         self.base_h = 140
@@ -544,14 +537,6 @@ class MyApp(QMainWindow, form_class):
         self.q=queue.Queue()
         self.rec_manager = RecognitionManager(self.q, self.sin)
         kComm.loadSet()
-
-
-    def moveEvent(self,e):
-        global center_x
-        global center_y
-        center_x = self.pos().x()
-        center_y = self.pos().y()
-        super(QMainWindow, self).moveEvent(e)
 
     def setVmode(self, m):
         self.vMode=m
@@ -650,10 +635,10 @@ class MyApp(QMainWindow, form_class):
         diff=self.roundener.mouseMoveEvent(event)
         if diff and not self.help_flag:
             monitor_y = QDesktopWidget().availableGeometry().height()
-            if (center_y + 225 + 350) > monitor_y:
-                self.help_dialog.move(center_x, center_y - 400)
+            if (self.y() + 225 + 350) > monitor_y:
+                self.help_dialog.move(self.x(), self.y() - 400)
             else:
-                self.help_dialog.move(center_x, center_y + 160)
+                self.help_dialog.move(self.x(), self.y() + 160)
 
         super().mouseMoveEvent(event)
 
@@ -750,10 +735,6 @@ class MyApp(QMainWindow, form_class):
                 self.sub2.show()
 
     def fileopen(self): #새로운 파일 선택
-        global center_x
-        global center_y
-        center_x = self.pos().x()
-        center_y = self.pos().y()
         option = QFileDialog.Option()
         option |= QFileDialog.ShowDirsOnly
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
@@ -770,27 +751,25 @@ class MyApp(QMainWindow, form_class):
         MacroWindow(self)
 
     class ComList(QDialog):
-        global center_x
-        global center_y
         def __init__(self, cx, cy):
             super().__init__()
+            self.setMinimumWidth(250)
             self.setMaximumSize(250,350)
             monitor_y=QDesktopWidget().availableGeometry().height()
-            if (center_y + 225 + 350) > monitor_y:
+            if (cy + 225 + 350) > monitor_y:
                 self.move(cx, cy - 400)
             else:
                 self.move(cx, cy + 160)
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
             self.roundener=Roundener(self)
-            self.dat=''
-            for  k in kComm.builtInCommands:
-                self.dat += ('\t' + k + '\t\t\n')
+            bic=list(kComm.builtInCommands)
+            half=len(bic)//2
+            col1='\n'.join(bic[:half])
+            col2='\n'.join(bic[half:])
+            layout = QtWidgets.QHBoxLayout(self)
+            layout.addWidget(QtWidgets.QLabel(col1, self))
+            layout.addWidget(QtWidgets.QLabel(col2, self))
 
-            self.dat=self.dat[:-1]
-            layout = QtWidgets.QVBoxLayout(self)
-            self.label = QtWidgets.QLabel('content', self)
-            layout.addWidget(self.label)
-            self.label.setText(''.join(self.dat))
 
 
 
@@ -798,15 +777,10 @@ class MyApp(QMainWindow, form_class):
             self.roundener.paintEvent(a0)
 
     def resizeWindow(self):
-        global center_x
-        global center_y
-        if(self.help_flag == True):
+        if self.help_flag:
             self.help_btn.setText('↑')
             self.help_flag = False
-            pos=self.pos()
-            center_x = self.pos().x()
-            center_y = self.pos().y()
-            self.help_dialog = self.ComList(pos.x(), pos.y())
+            self.help_dialog = self.ComList(self.x(), self.y())
             self.help_dialog.setWindowTitle('Help word')
             self.help_dialog.setMaximumSize(250, 350)
             self.help_dialog.show()
