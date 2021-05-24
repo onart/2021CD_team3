@@ -384,15 +384,14 @@ class v_dialog(QDialog):  # 음성 선택지
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         #keyboard.unhook_key(self.funct3)
-        if self.funct1!=None:
-            try:
-                keyboard.unhook_key(self.funct2)
-            except KeyError:
-                pass
-            try:
-                keyboard.unhook_key(self.funct1)
-            except KeyError:
-                pass
+        try:
+            keyboard.unhook_key(self.funct2)
+        except KeyError:
+            pass
+        try:
+            keyboard.unhook_key(self.funct1)
+        except KeyError:
+            pass
         return super().closeEvent(a0)
 
 
@@ -685,11 +684,9 @@ class MyApp(QMainWindow, form_class):
                 self.kCommands[word2](0)
                 return
             elif (word2 in kComm.builtInCommands) or (word2 in kComm.customCommands):     # 일반 명령어
-                kComm.execute(word2)
-                '''
                 guide=kComm.execute(word2)
                 self.vLabel.setText(word2+guide)
-                '''
+
             else:   # 유사도
                 QMessageBox.about(self, "오류", "해당 명령어가 없습니다.")
                 return

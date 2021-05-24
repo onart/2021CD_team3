@@ -169,9 +169,10 @@ def execute(name):
     
     string_macro = ''
     if name in builtInCommands: 
-        for j in builtInCommands[name][IDE]:
-                string_macro = string_macro + j[1] + "+"
-        return string_macro[:-1]
+        string_macro="+".join([x[1] for x in builtInCommands[name][IDE]])
+        string_macro=' "'+string_macro+'"'
+        
+        return string_macro
         
 
 # 선별부
