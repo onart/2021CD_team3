@@ -19,7 +19,7 @@ for index, tup in enumerate(word_list):
         count += 1
         print(f'{tup[0]} ranked at : UnKnown')
         
-    if rank > 4:
+    if rank >= 4:
         print(f'{tup[0]} ranked at : {rank + 1}')
         count += 1
 
