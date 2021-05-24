@@ -23,6 +23,7 @@ DM={
     'ㅚ': 'ㅗㅔ',
     'ㅛ': 'ㅣㅗ',
     'ㅝ': 'ㅜㅓ',
+    'ㅞ': 'ㅜㅔ',
     'ㅟ': 'ㅜㅣ',
     'ㅠ': 'ㅣㅜ',
     'ㅢ': 'ㅡㅣ',
@@ -133,10 +134,10 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
             if i<len(h)-1:
                 nx=h[i+1]
             else:
-                nx=''
-            if nx in HD or nx=='':  # 종성(이후 나온 초성과 함께 처리. 단 바로 다음 역시 종성의 일부일 가능성도 있음)
+                nx='?'
+            if nx in HD or nx=='?':  # 종성(이후 나온 초성과 함께 처리. 단 바로 다음 역시 종성의 일부일 가능성도 있음)
                 if c in 'ㄱㄲㅋ':
-                    if nx in 'ㄴㅁ' and nx != '':    # 비음화
+                    if nx in 'ㄴㅁ':    # 비음화
                         ret+=ALPHA[ord('n')-smallA]
                         ret+=ALPHA[ord('g')-smallA]
                         eng+='ng'
