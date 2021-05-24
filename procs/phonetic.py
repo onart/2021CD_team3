@@ -53,7 +53,7 @@ def arrange(inp, words): #일반 기준. keyword는 입력된 음성, words는 �
     for w in words:
         if len(w)>=linp*2:
             continue
-        val=lcsThr(soundEx(w),basis)
+        val=max(lcsThr(soundEx(w),basis),lcsThr(soundEx(w),'a'.join(basis.split('ei'))))
         val2=lcsThr(w,eng)
         if eng[0]==w[0]:
             val2+=1
@@ -88,26 +88,26 @@ def soundEx(keyword):   # 일반 케이스
     ret=str(ALPHA[ord(keyword[0])-smallA])
     if ret=='0':
         ret=keyword[0]
-    begin=False
+    prev=''
     for c in keyword[1:]:
-        if c==' ':
-            begin=True
-            continue
-        elif c.isnumeric():
-            begin=False
+        if c.isnumeric():
             ret+=REALNUMBER[int(c)]
-            continue
-        i=ALPHA[ord(c)-smallA]
-        if i=='0':
-            if c == ret[-1] and begin:
-                continue
-            elif c=='w':
-                ret+='u'
-            else:
-                ret+=c
-        elif i != ret[-1] or begin:
-            ret+=i
-        begin=False
+        elif c==' ':
+            pass
+        else:
+            i=ALPHA[ord(c)-smallA]
+            if i=='0':
+                if c == prev:
+                    continue
+                elif c=='w':
+                    ret+='u'
+                elif c=='y':
+                    ret+='i'
+                else:
+                    ret+=c
+            elif c != prev:
+                ret+=i
+        prev=c
     return ret
 
 def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
@@ -136,7 +136,7 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                 nx=''
             if nx in HD or nx=='':  # 종성(이후 나온 초성과 함께 처리. 단 바로 다음 역시 종성의 일부일 가능성도 있음)
                 if c in 'ㄱㄲㅋ':
-                    if nx in 'ㄴㅁ':    # 비음화
+                    if nx in 'ㄴㅁ' and nx != '':    # 비음화
                         ret+=ALPHA[ord('n')-smallA]
                         ret+=ALPHA[ord('g')-smallA]
                         eng+='ng'
@@ -270,48 +270,34 @@ def kSoundEx(keyword):  # 한국어에 SoundEx를 적용해볼 것
                     ret+='h'
                     eng+='h'
         elif c in MD:                         # 중성(ㅡ무시 -> 고의)
-            if c in 'ㅏ':
+            if c in 'ㅏㅐ':
                 ret+='a'
                 eng+='a'
-            elif c in 'ㅐ':
-                ret+='ae'
-                eng+='e'
             elif c in 'ㅔ':
                 ret+='e'
                 eng+='e'
-            elif c in 'ㅑ':
-                ret+='ya'
-                eng+='ya'
-            elif c in 'ㅒㅖ':
-                ret+='ye'
-                eng+='ye'
             elif c in 'ㅓㅜ':
                 ret+='u'
                 eng+='u'
-            elif c in 'ㅕ':
-                ret+='yeo'
-                eng+='yeo'
             elif c in 'ㅗ':
                 ret+='o'
                 eng+='o'
-            elif c in 'ㅛ':
-                ret+='yo'
-                eng+='yo'
-            elif c in 'ㅠ':
-                ret+='yu'
-                eng+='yu'
             elif c in 'ㅣ':
                 if ret=='' or ret[-1]!='i': # 모음 연속 불가능성. 추후 확장할 수도 있고 안 할 수도 있음
                     ret+='i'
                     eng+='i'
         else:
             if c.isalpha():
-                eng+=c
+                if c=='y':
+                    c='i'
+                elif c=='w':
+                    c='u'
                 c2=ALPHA[ord(c)-smallA]
-                if c == 0:
+                if c2 == 0:
                     ret+=c
                 else:
                     ret+=c2
+                eng+=c
             elif c.isnumeric():
                 eng+=c
                 ret+=REALNUMBER[int(c)]

@@ -83,9 +83,10 @@ class MacroWindow(QDialog):
             
     def delete(self):
         row=self.tableWidget.currentRow()
-        name=self.tableWidget.item(row, 0).text()
-        kComm.customCommands.pop(name)
-        kComm.saveSet()
+        name=self.tableWidget.item(row, 0)
+        if name != None:
+            kComm.customCommands.pop(name.text())
+            kComm.saveSet()
         self.setTableWidget()
 
     def addWithDoubleClick(self):
@@ -215,14 +216,12 @@ class MacroAddWindow(QDialog):
         if len(rows) == 0:
             MacroDetailWindow(self, self.signal_in)
         else:
-            MacroDetailWindow(self, self.signal_in, rows[0], False)
+            MacroDetailWindow(self, self.signal_in, rows[0])
 
     def addWithDoubleClick(self):
-        rows = []
-        for idx in self.tableWidget.selectionModel().selectedIndexes():
-            rows.append(idx.row())
+        row=self.tableWidget.currentRow()
 
-        MacroDetailWindow(self, self.signal_in, rows[0], True)
+        MacroDetailWindow(self, self.signal_in, row, (self.tableWidget.item(row,1).text(), self.tableWidget.item(row,2).text()))
 
     def remove(self):
         rows = []
@@ -264,7 +263,7 @@ class SaveSig(QObject):
 
 
 class MacroDetailWindow(QDialog):
-    def __init__(self, parent, signal_out, index=-1, isModify=False):
+    def __init__(self, parent, signal_out, index=-1, isModify=None):
         super(MacroDetailWindow, self).__init__(parent)
         uic.loadUi("macroDetail.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Dialog)
@@ -272,8 +271,17 @@ class MacroDetailWindow(QDialog):
 
         self.signal_out = signal_out
         self.index = index
-        self.isModify = isModify
+        if isModify:
+            self.isModify = True
+        else:
+            self.isModify = False
         self.setupUI()
+        if isModify is not None and isModify[0] in ('명령', '팔레트', '시간 지연', '키 입력'):
+            self.comboBox.setCurrentText(isModify[0])
+            self.lineEdit.setText(isModify[1])
+            if isModify[0]=='키 입력':
+                self.lineEdit.setReadOnly(True)
+        self.comboBox.currentTextChanged.connect(self.onTypeChange)
 
         self.show()
 
@@ -282,7 +290,7 @@ class MacroDetailWindow(QDialog):
         self.saveButton.clicked.connect(self.save)
 
         self.comboBox.addItems(['명령', '팔레트', '시간 지연', '키 입력'])
-        self.comboBox.currentTextChanged.connect(self.onTypeChange)
+
 
     def onTypeChange(self, event):
         if event=='키 입력':

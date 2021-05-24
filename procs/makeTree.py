@@ -115,7 +115,7 @@ class Pool:
         input=''.join(input.split())
         ret=phonetic.arrange_s(input, self.candid)
         if len(ret)<3:
-            ret.extend(phonetic.arrange(input, self.candid)[:3])
+            ret.extend(phonetic.arrange(input, self.candid)[:4])
         elif len(ret)>10:
             # 너무 많아서 잘렸다고 안내
             ret=ret[:10]
@@ -735,19 +735,22 @@ def javaFillTree(fname, prog):
             if j == 'class':
                 class_info.append(i[i.index(j)+1].split('{')[0])
                 class_start_locate1.append([num_i,0])
+                break
                 
                                                
-            if j in func_range:
+            elif j in func_range:
                 if i[i.index(j)+1] in func_form:
 
-                    if i[i.index(j)+2].split('(')[0][-1] != ';':
+                    if i[-1][-1] != ';':
                         func_info.append(i[i.index(j)+2].split('(')[0])
                         func_start_locate1.append([num_i,0])
+                        break
 
-            if j in func_form:
-                if i[i.index(j)+1].split('(')[0][-1] != ';':
+            elif j in func_form:
+                if i[-1][-1] != ';':
                     func_info.append(i[i.index(j)+1].split('(')[0])
                     func_start_locate1.append([num_i,0])
+                    break
 
             # function (), function( ), function() 고려해서 이름, 시작 행 가공
                     

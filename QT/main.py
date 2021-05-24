@@ -26,9 +26,6 @@ child_class = uic.loadUiType("child.ui")[0]
 MODES=['명령', '탐색', '보기']
 USRLIB=ctypes.windll.LoadLibrary('user32.dll')
 
-center_x = 0
-center_y = 0
-
 class HelpWindow(QDialog):
     def __init__(self, parent):
         super(HelpWindow, self).__init__(parent)
@@ -70,14 +67,18 @@ class PeekerWindow(QDialog):
             rp=(-1,-1)
 
         self.setupUI(fname)
+
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.hIdeWnd=parent.hIdeWnd
         self.pIdeWnd=parent.pIdeWnd
         self.base=parent
         self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
         # self.tid=threading.get_native_id()
-
         self.DISP_NO=20 # 한 번에 보여줄 줄수
+        if (parent.y()+160+350) > QDesktopWidget().availableGeometry().height():
+            self.move(parent.x()-175, parent.y()-400)
+        else:
+            self.move(parent.x()-175, parent.y()+160)
 
         try:
             f=open(fname, encoding='UTF-8')
@@ -106,12 +107,6 @@ class PeekerWindow(QDialog):
         layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.', self))
         self.setMinimumWidth(600)
         self.setMinimumHeight(350)
-        monitor_x = QDesktopWidget().availableGeometry().width()
-        monitor_y = QDesktopWidget().availableGeometry().height()
-        if(center_y + 160 + 350)> monitor_y:
-            self.move(center_x - 175, center_y - 400)
-        else:
-            self.move(center_x - 175, center_y + 160)
 
 
 
@@ -328,7 +323,7 @@ class v_dialog(QDialog):  # 음성 선택지
         self.activateWindow()
         
     def setupUI(self):
-        self.setGeometry(1100, 200, 300, 100)
+        self.setGeometry(1100, 200, 300, 120)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         qr=self.frameGeometry()
         cp=QDesktopWidget().availableGeometry().center()
@@ -352,6 +347,9 @@ class v_dialog(QDialog):  # 음성 선택지
     def upDown(self, dummy):
         try:
             keyboard.unhook_key(self.funct1)
+        except KeyError:
+            pass
+        try:
             keyboard.unhook_key(self.funct2)
         except KeyError:
             pass
@@ -442,6 +440,7 @@ class Roundener: # 상속 전용 클래스
                 diff = globalPos - self.__mouseMovePos
                 self.window.move(diff)
                 self.__mouseMovePos = globalPos - self.window.pos()
+                return diff
 
     def mouseReleaseEvent(self, event):
         if self.__mousePressPos is not None:
@@ -456,11 +455,11 @@ class Roundener: # 상속 전용 클래스
 class SoundSig(QObject):
     sin=QtCore.pyqtSignal()
 
+
+
 class MyApp(QMainWindow, form_class):
 
     def __init__(self):
-        global center_x
-        global center_y
         super().__init__()
 
         self.base_h = 140
@@ -493,7 +492,7 @@ class MyApp(QMainWindow, form_class):
         self.help_button.clicked.connect(self.help)
         self.macroButton.clicked.connect(self.macro)
         self.help_btn.clicked.connect(self.resizeWindow)
-
+        self.help_flag = True
         self.dialog = QDialog()
 
         self.vMode=0            # 0: basic(명령 모드, 한국어 인식), 1: seek(탐색 모드, 영어 인식), 2: peek(보기 모드, 영어 인식)
@@ -541,14 +540,6 @@ class MyApp(QMainWindow, form_class):
         self.q=queue.Queue()
         self.rec_manager = RecognitionManager(self.q, self.sin)
         kComm.loadSet()
-
-
-    def moveEvent(self,e):
-        global center_x
-        global center_y
-        center_x = self.pos().x()
-        center_y = self.pos().y()
-        super(QMainWindow, self).moveEvent(e)
 
     def setVmode(self, m):
         self.vMode=m
@@ -643,7 +634,15 @@ class MyApp(QMainWindow, form_class):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        self.roundener.mouseMoveEvent(event)
+
+        diff=self.roundener.mouseMoveEvent(event)
+        if diff and not self.help_flag:
+            monitor_y = QDesktopWidget().availableGeometry().height()
+            if (self.y() + 225 + 350) > monitor_y:
+                self.help_dialog.move(self.x(), self.y() - 400)
+            else:
+                self.help_dialog.move(self.x(), self.y() + 160)
+
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
@@ -657,6 +656,8 @@ class MyApp(QMainWindow, form_class):
             self.sub1.close()
         if self.sub2 is not None:
             self.sub2.close()
+        if not self.help_flag:
+            self.help_dialog.close()
         keyboard.unhook_all()
         super().close()
 
@@ -737,10 +738,6 @@ class MyApp(QMainWindow, form_class):
                 self.sub2.show()
 
     def fileopen(self): #새로운 파일 선택
-        global center_x
-        global center_y
-        center_x = self.pos().x()
-        center_y = self.pos().y()
         option = QFileDialog.Option()
         option |= QFileDialog.ShowDirsOnly
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
@@ -756,9 +753,45 @@ class MyApp(QMainWindow, form_class):
     def macro(self):
         MacroWindow(self)
 
+    class ComList(QDialog):
+        def __init__(self, cx, cy):
+            super().__init__()
+            self.setMinimumWidth(250)
+            self.setMaximumSize(250,350)
+            monitor_y=QDesktopWidget().availableGeometry().height()
+            if (cy + 225 + 350) > monitor_y:
+                self.move(cx, cy - 400)
+            else:
+                self.move(cx, cy + 160)
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            self.roundener=Roundener(self)
+            bic=list(kComm.builtInCommands)
+            half=len(bic)//2
+            col1='\n'.join(bic[:half])
+            col2='\n'.join(bic[half:])
+            layout = QtWidgets.QHBoxLayout(self)
+            layout.addWidget(QtWidgets.QLabel(col1, self))
+            layout.addWidget(QtWidgets.QLabel(col2, self))
+
+
+
+
+        def paintEvent(self, a0):
+            self.roundener.paintEvent(a0)
+
     def resizeWindow(self):
-        print(self.pos())
-        pass
+        if self.help_flag:
+            self.help_btn.setText('↑')
+            self.help_flag = False
+            self.help_dialog = self.ComList(self.x(), self.y())
+            self.help_dialog.setWindowTitle('Help word')
+            self.help_dialog.setMaximumSize(250, 350)
+            self.help_dialog.show()
+
+        else:
+            self.help_btn.setText('↓')
+            self.help_flag = True
+            self.help_dialog.close()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
