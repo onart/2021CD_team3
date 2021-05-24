@@ -89,6 +89,10 @@ def soundEx(keyword):   # 일반 케이스
     ret=str(ALPHA[ord(keyword[0])-smallA])
     if ret=='0':
         ret=keyword[0]
+        if ret=='w':
+            ret='u'
+        elif ret=='y':
+            ret='i'
     prev=''
     for c in keyword[1:]:
         if c.isnumeric():
