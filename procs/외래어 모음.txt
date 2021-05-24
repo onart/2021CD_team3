@@ -174,7 +174,6 @@
 콘테스트,contest
 코스,course
 플러그,plug
-클리닝,cleaning
 복싱,boxing
 텍스트,text
 튤립,tulip
@@ -199,3 +198,4 @@
 포즈,pose
 패스,pass
 플루트,flute
+기어,gear
