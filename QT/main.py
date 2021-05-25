@@ -683,10 +683,11 @@ class MyApp(QMainWindow, form_class):
             if word2 in self.kCommands:  # 모드 전환
                 self.kCommands[word2](0)
                 return
-            elif (word2 in kComm.builtInCommands) or (word2 in kComm.customCommands):     # 일반 명령어
+            elif word2 in kComm.builtInCommands:     # 일반 명령어
                 guide=kComm.execute(word2)
                 self.vLabel.setText(word2+guide)
-
+            elif word2 in kComm.builtInCommands:
+                kComm.execute(word2)
             else:   # 유사도
                 QMessageBox.about(self, "오류", "해당 명령어가 없습니다.")
                 return
