@@ -72,7 +72,7 @@ class PeekerWindow(QDialog):
         self.hIdeWnd=parent.hIdeWnd
         self.pIdeWnd=parent.pIdeWnd
         self.base=parent
-        self.funct1=keyboard.on_press_key(key='num lock', callback=self.setToggle)
+        self.funct1=keyboard.add_hotkey('home+end', callback=self.setToggle)
         # self.tid=threading.get_native_id()
         self.DISP_NO=20 # 한 번에 보여줄 줄수
         if (parent.y()+160+350) > QDesktopWidget().availableGeometry().height():
@@ -104,13 +104,13 @@ class PeekerWindow(QDialog):
         self.label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         layout.addWidget(QtWidgets.QLabel(fname,self))
         layout.addWidget(self.label)
-        layout.addWidget(QtWidgets.QLabel('Num Lock으로 IDE와 주목을 이동할 수 있습니다.', self))
+        layout.addWidget(QtWidgets.QLabel('Home+End로 IDE와 주목을 이동할 수 있습니다.', self))
         self.setMinimumWidth(600)
         self.setMinimumHeight(350)
 
 
 
-    def setToggle(self, dummy):
+    def setToggle(self, dummy=None):
         if USRLIB.GetForegroundWindow() != self.hIdeWnd:
             USRLIB.SetForegroundWindow(self.hIdeWnd)
         else:
@@ -121,13 +121,9 @@ class PeekerWindow(QDialog):
             #print(USRLIB.SetForegroundWindow(int(self.winId())))
 
     def closeEvent(self, event):
-        try:
-            keyboard.unhook_key(self.funct1)
-        except KeyError:
-            pass
-        finally:
-            self.base.sub2=None
-            event.accept()
+        keyboard.unregister_hotkey(self.funct1)
+        self.base.sub2=None
+        event.accept()
 
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
@@ -150,6 +146,8 @@ class PeekerWindow(QDialog):
             self.oneDown()
         elif event.key()==QtCore.Qt.Key_Up:
             self.oneUp()
+        elif event.key()==QtCore.Qt.Key_Escape:
+            self.close()
 
     def oneUp(self):
         if self.scr > 0:
