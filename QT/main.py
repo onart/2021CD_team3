@@ -218,29 +218,42 @@ class fn_dialog(QDialog):  #새로운 창 for new_window
             if(type_line):
                 if(id_type == 0): # 함수의 경우  [이름, 파일, 시작, 끝, 스코프, 매개변수]
                     for each_fun in type_line:
-                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('함수'))
+                        item = QTableWidgetItem('함수')
+                        item.setFlags(QtCore.Qt.ItemIsEnabled)
+                        self.fn_lst.setItem(idx_for_listWidget, 0, item)
                         idx_for_paramer = {1:0, 2:1, 3:4, 4:5}
                         for col_ in range(1,5):
-                            self.fn_lst.setItem(idx_for_listWidget, col_,QTableWidgetItem('<span style="color:red">{}</span>'.format(each_fun[idx_for_paramer[col_]])) )
+                            item = QTableWidgetItem('<span style="color:red">{}</span>'.format(each_fun[idx_for_paramer[col_]]))
+                            item.setFlags(QtCore.Qt.ItemIsEnabled)
+                            self.fn_lst.setItem(idx_for_listWidget, col_, item )
                         idx_for_listWidget += 1
 
                 elif(id_type == 1): # 클래스의 경우 [이름 , 파일, 시작, 끝]
                     for each_class in type_line:
-                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('클래스'))
+                        item = QTableWidgetItem('클래스')
+                        item.setFlags(QtCore.Qt.ItemIsEnabled)
+                        self.fn_lst.setItem(idx_for_listWidget, 0, item)
                         for col_ in range(1,3):
-                            self.fn_lst.setItem(idx_for_listWidget, col_,QTableWidgetItem('<span style="color:blue">{}</span>'.format(each_class[col_-1])) )
+                            item = QTableWidgetItem('<span style="color:blue">{}</span>'.format(each_class[col_-1]))
+                            item.setFlags(QtCore.Qt.ItemIsEnabled)
+                            self.fn_lst.setItem(idx_for_listWidget, col_, item)
                         idx_for_listWidget += 1
 
                 else: # 파일의 경우 [이름]
                     for each_file in type_line:
-                        self.fn_lst.setItem(idx_for_listWidget, 0, QTableWidgetItem('파일'))
-                        self.fn_lst.setItem(idx_for_listWidget, 1,QTableWidgetItem('<span style="color:green">{}</span>'.format(each_file[0])) )
+                        item = QTableWidgetItem('파일')
+                        item.setFlags(QtCore.Qt.ItemIsEnabled)
+                        self.fn_lst.setItem(idx_for_listWidget, 0, item)
+                        item = QTableWidgetItem('<span style="color:green">{}</span>'.format(each_file[0]))
+                        item.setFlags(QtCore.Qt.ItemIsEnabled)
+                        self.fn_lst.setItem(idx_for_listWidget, 1,item )
                         idx_for_listWidget += 1
 
 
             else:
                 pass
-
+        self.fn_lst.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.fn_lst.setSelectionMode(QAbstractItemView.SingleSelection)
         self.select_fn = []
         self.roundener=Roundener(self)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
