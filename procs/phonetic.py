@@ -109,7 +109,8 @@ def soundEx(keyword):   # 일반 케이스
                 elif c=='y':
                     ret+='i'
                 else:
-                    ret+=c
+                    if ret[-1:]!=c:
+                        ret+=c
             elif c != prev:
                 ret+=i
         prev=c
