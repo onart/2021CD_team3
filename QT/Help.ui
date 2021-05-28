@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
+    <width>600</width>
     <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>300</width>
+    <width>500</width>
     <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>300</width>
+    <width>600</width>
     <height>400</height>
    </size>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>256</width>
+     <width>551</width>
      <height>331</height>
     </rect>
    </property>
@@ -41,7 +41,7 @@
    </column>
    <item>
     <property name="text">
-     <string>대분류1</string>
+     <string>디렉토리 선택</string>
     </property>
     <property name="font">
      <font>
@@ -50,7 +50,22 @@
     </property>
     <item>
      <property name="text">
-      <string>소분류1</string>
+      <string>파일 탐색을 할 디렉토리를 설정합니다. </string>
+     </property>
+    </item>
+   </item>
+   <item>
+    <property name="text">
+     <string>음성버튼</string>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <item>
+     <property name="text">
+      <string>시작</string>
      </property>
      <property name="font">
       <font>
@@ -59,13 +74,13 @@
      </property>
      <item>
       <property name="text">
-       <string>설명</string>
+       <string>버튼을 눌러 음성명령을 활성화 시킵니다. 활성화 - 빨강, 비활성화 - 검정</string>
       </property>
      </item>
     </item>
     <item>
      <property name="text">
-      <string>소분류2</string>
+      <string>명령</string>
      </property>
      <property name="font">
       <font>
@@ -74,29 +89,49 @@
      </property>
      <item>
       <property name="text">
-       <string>설명</string>
+       <string>보기</string>
       </property>
+      <item>
+       <property name="text">
+        <string>입력된 객체의 코드를 보여줍니다. 위/아래 방향키를 통해 코드를 스크롤 할 수 있습니다.</string>
+       </property>
+      </item>
+     </item>
+     <item>
+      <property name="text">
+       <string>탐색</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>활성화 된  IDE에서 입력받은 객체 위치로 이동합니다.</string>
+       </property>
+      </item>
+     </item>
+     <item>
+      <property name="text">
+       <string>명령</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>내장된 명령들과 개인이 추가한 명령을 음성으로 실행시킵니다. </string>
+       </property>
+      </item>
      </item>
     </item>
     <item>
      <property name="text">
-      <string>소분류3</string>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
+      <string>명령 후 선택</string>
      </property>
      <item>
       <property name="text">
-       <string>설명</string>
+       <string>객체 이름을 부른 뒤, 방향키와 엔터 그리고 마우스를 이용해서 제시된 단어들 중 선택할 수 있습니다.</string>
       </property>
      </item>
     </item>
    </item>
    <item>
     <property name="text">
-     <string>대분류2</string>
+     <string>화살표</string>
     </property>
     <property name="font">
      <font>
@@ -105,110 +140,70 @@
     </property>
     <item>
      <property name="text">
-      <string>소분류1</string>
+      <string>실행 가능한 기본 명령어들을 보여줍니다.</string>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
+    </item>
+   </item>
+   <item>
+    <property name="text">
+     <string>M 버튼</string>
+    </property>
+    <item>
+     <property name="text">
+      <string>매크로를 추가/삭제/수정 합니다. </string>
      </property>
-     <item>
-      <property name="text">
-       <string>설명</string>
-      </property>
-     </item>
     </item>
     <item>
      <property name="text">
-      <string>소분류2</string>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
+      <string>명령 개별 동작 유형</string>
      </property>
      <item>
       <property name="text">
-       <string>설명</string>
+       <string>팔레트</string>
       </property>
+      <item>
+       <property name="text">
+        <string>인수로 주어진 다른 명령어를 호출합니다. </string>
+       </property>
+      </item>
      </item>
-    </item>
-    <item>
-     <property name="text">
-      <string>소분류3</string>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
      <item>
       <property name="text">
-       <string>설명</string>
+       <string>키 입력</string>
       </property>
+      <item>
+       <property name="text">
+        <string>인수로 주어진 키를 자동으로 누릅니다.</string>
+       </property>
+      </item>
+     </item>
+     <item>
+      <property name="text">
+       <string>시간 지연</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>명령이 겹치는 것을 방지하기 위해, 대기 시킬 수 있습니다. </string>
+       </property>
+      </item>
      </item>
     </item>
    </item>
    <item>
     <property name="text">
-     <string>대분류3</string>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
+     <string>좌측 하단</string>
     </property>
     <item>
      <property name="text">
-      <string>소분류1</string>
+      <string>현재 활성화된 IDE를 보여줍니다. </string>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <item>
-      <property name="text">
-       <string>설명</string>
-      </property>
-     </item>
-    </item>
-    <item>
-     <property name="text">
-      <string>소분류2</string>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <item>
-      <property name="text">
-       <string>설명</string>
-      </property>
-     </item>
-    </item>
-    <item>
-     <property name="text">
-      <string>소분류3</string>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <item>
-      <property name="text">
-       <string>설명</string>
-      </property>
-     </item>
     </item>
    </item>
   </widget>
   <widget class="QPushButton" name="termButton">
    <property name="geometry">
     <rect>
-     <x>107</x>
+     <x>270</x>
      <y>360</y>
      <width>75</width>
      <height>23</height>
