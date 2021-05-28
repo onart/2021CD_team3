@@ -365,6 +365,11 @@ class v_dialog(QDialog):  # 음성 선택지
     def paintEvent(self, event):
         self.roundener.paintEvent(event)
 
+    def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
+        super().keyPressEvent(a0)
+        if a0.key()==Qt.Key_Escape:
+            self.close()
+
     def mousePressEvent(self, event):
         self.roundener.mousePressEvent(event)   
         super().mousePressEvent(event)
@@ -377,8 +382,8 @@ class v_dialog(QDialog):  # 음성 선택지
         self.roundener.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event)
     
-    '''def escape(self, dummy):
-        self.close()'''
+    def escape(self, dummy):
+        self.close()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         #keyboard.unhook_key(self.funct3)
