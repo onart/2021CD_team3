@@ -743,6 +743,7 @@ class MyApp(QMainWindow, form_class):
         option |= QFileDialog.ShowDirsOnly
         filename = QFileDialog.getExistingDirectory(self,"select Directory")
         if len(filename)>0:
+            filename='\\'.join(filename.split('/'))
             self.topDirectory.setText(filename)
             makeTree.setTop(filename)
             if not self.ctx.is_alive():
